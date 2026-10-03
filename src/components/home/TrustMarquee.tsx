@@ -3,6 +3,7 @@
 import { ShieldCheck } from "lucide-react";
 import { Reveal } from "@/components/motion";
 import { trustBadges } from "@/lib/data";
+import { cn } from "@/lib/utils";
 
 const partners = [
   "NPCI",
@@ -16,22 +17,35 @@ const partners = [
   "UIDAI"
 ];
 
+// Cycle each trust badge through the premium theme palette.
+const badgeTones = [
+  "text-royal-600 group-hover:text-royal-700",
+  "text-brand-600 group-hover:text-brand-700",
+  "text-accent-600 group-hover:text-accent-700",
+  "text-coral-500 group-hover:text-coral-600"
+];
+
 export function TrustMarquee() {
   return (
     <Reveal direction="up" amount={0.3}>
-      <section className="border-y border-ink-100 bg-ink-50/60 py-8">
+      <section className="relative overflow-hidden border-y border-ink-100 bg-gradient-to-r from-royal-50/60 via-white to-accent-50/50 py-8">
         <div className="container-x">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-500">
-              Trusted by 38M+ Indian businesses
+              Trusted across <span className="gradient-text">38M+ Indian businesses</span>
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-              {trustBadges.map((b) => (
+              {trustBadges.map((b, i) => (
                 <div
                   key={b.label}
-                  className="group inline-flex items-center gap-1.5 text-xs font-medium text-ink-600 transition-colors duration-300 hover:text-brand-700"
+                  className="group inline-flex items-center gap-1.5 text-xs font-medium text-ink-600 transition-colors duration-300"
                 >
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 transition-transform duration-300 group-hover:scale-110" />
+                  <ShieldCheck
+                    className={cn(
+                      "h-4 w-4 transition-transform duration-300 group-hover:scale-110",
+                      badgeTones[i % badgeTones.length]
+                    )}
+                  />
                   {b.label}
                 </div>
               ))}
@@ -43,7 +57,7 @@ export function TrustMarquee() {
               {[...partners, ...partners].map((p, i) => (
                 <span
                   key={`${p}-${i}`}
-                  className="font-display text-lg font-semibold text-ink-400 transition-colors duration-300 hover:text-brand-700"
+                  className="font-display text-lg font-semibold text-ink-400 transition-colors duration-300 hover:text-royal-600"
                 >
                   {p}
                 </span>

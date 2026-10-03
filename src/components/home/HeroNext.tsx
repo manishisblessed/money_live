@@ -26,30 +26,30 @@ const easeOut = [0.22, 1, 0.36, 1] as const;
 export function HeroNext() {
   return (
     <section className="relative overflow-hidden">
-      {/* Animated background */}
+      {/* Animated premium background — purple → blue → green → coral */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 grid-bg mask-fade-y opacity-50" />
-        <div className="conic-glow absolute -left-40 top-10 h-[420px] w-[420px] rounded-full" />
-        <div className="conic-glow absolute -right-40 top-40 h-[480px] w-[480px] rounded-full" />
-        <div className="absolute inset-x-0 top-0 h-[600px] bg-gradient-to-b from-white/40 to-transparent" />
+        <div className="aurora-glow absolute -left-40 top-6 h-[440px] w-[440px] rounded-full" />
+        <div className="aurora-glow absolute -right-44 top-40 h-[500px] w-[500px] rounded-full [animation-direction:reverse]" />
+        <div className="absolute inset-x-0 top-0 h-[600px] bg-gradient-to-b from-white/50 to-transparent" />
       </div>
 
       <div className="container-x grid gap-12 py-16 md:py-24 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-7">
           <span className="eyebrow animate-fade-up">
             <Sparkles className="h-3.5 w-3.5" />
-            India&apos;s most loved fintech OS
+            The operating system for Digital Bharat
           </span>
 
           <h1 className="heading-xl mt-5 animate-fade-up [animation-delay:80ms]">
-            One platform for{" "}
+            Turn any shop into a{" "}
             <span className="relative inline-block">
               <span className="gradient-text bg-[length:200%_auto] animate-gradient-x">
-                every shop
+                full bank branch
               </span>
               <svg
                 viewBox="0 0 220 12"
-                className="absolute -bottom-2 left-0 h-3 w-full text-accent-400"
+                className="absolute -bottom-2 left-0 h-3 w-full text-royal-400"
                 fill="none"
               >
                 <path
@@ -60,33 +60,35 @@ export function HeroNext() {
                 />
               </svg>
             </span>
-            ,<br />
-            every distributor, every bank.
+            <br />
+            in under five minutes.
           </h1>
 
           <p className="lead mt-6 max-w-2xl animate-fade-up [animation-delay:160ms]">
-            eMoney is the operating system for India&apos;s digital banking economy. 60+ services,
-            4 personas, real-time settlements, 99.97% uptime — built for the next 100 million retailers.
+            Cash withdrawal, money transfer, bills, recharges and travel — eMoney puts
+            60+ RBI-grade banking services behind a single login. Instant settlements,
+            the highest commissions in Bharat, and zero paperwork to start earning.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3 animate-fade-up [animation-delay:240ms]">
             <Link href="/register">
               <Button size="lg">
-                Start free — onboard in 5 min
+                Start earning today — it&apos;s free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="#tour">
               <Button size="lg" variant="outline">
-                Watch product tour
+                Watch the 60-second tour
               </Button>
             </Link>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-ink-600 animate-fade-up [animation-delay:320ms]">
-            <Trusty icon={ShieldCheck} text="RBI-licensed nodal banks" />
-            <Trusty icon={ShieldCheck} text="ISO 27001 + PCI-DSS L1" />
-            <Trusty icon={ShieldCheck} text="SOC 2 Type II" />
+          <div className="mt-10 flex flex-wrap items-center gap-2.5 animate-fade-up [animation-delay:320ms]">
+            <ComplianceChip text="RBI Authorised" tone="brand" />
+            <ComplianceChip text="NPCI Certified" tone="royal" />
+            <ComplianceChip text="PCI-DSS v4.0" tone="accent" />
+            <ComplianceChip text="ISO 27001" tone="coral" />
           </div>
 
           <dl className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4 animate-fade-up [animation-delay:400ms]">
@@ -94,6 +96,8 @@ export function HeroNext() {
               <Counter key={s.label} value={s.value} label={s.label} />
             ))}
           </dl>
+
+          <LiveTicker />
         </div>
 
         <div className="lg:col-span-5">
@@ -104,14 +108,57 @@ export function HeroNext() {
   );
 }
 
-function Trusty({ icon: Icon, text }: { icon: typeof ShieldCheck; text: string }) {
+function ComplianceChip({
+  text,
+  tone
+}: {
+  text: string;
+  tone: keyof typeof toneMap;
+}) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-emerald-600" />
-      <span>{text}</span>
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-200/80 bg-white/70 px-3 py-1.5 text-xs font-semibold text-ink-700 shadow-sm backdrop-blur transition-colors hover:border-ink-300">
+      <ShieldCheck className={cn("h-3.5 w-3.5", toneMap[tone])} />
+      {text}
+    </span>
+  );
+}
+
+function LiveTicker() {
+  const items = [
+    "₹8.42 Cr settled today",
+    "74 transactions in the last minute",
+    "AePS ₹2,000 · settled in 1.4s",
+    "DMT IMPS · 286 ms avg",
+    "₹2,184 commission earned today",
+    "1,200+ billers live",
+    "99.98% switch uptime"
+  ];
+  return (
+    <div className="mt-10 flex items-center gap-3 rounded-2xl border border-ink-100 bg-white/60 p-2 pl-3 shadow-sm backdrop-blur animate-fade-up [animation-delay:480ms]">
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-accent-700">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-500" />
+        Live
+      </span>
+      <div className="mask-fade-x relative overflow-hidden">
+        <div className="flex w-max animate-marquee gap-6 whitespace-nowrap">
+          {[...items, ...items].map((t, i) => (
+            <span key={i} className="flex items-center gap-6 text-xs font-medium text-ink-600">
+              {t}
+              <span className="h-1 w-1 rounded-full bg-ink-300" />
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+
+const toneMap = {
+  brand: "text-brand-600",
+  accent: "text-accent-600",
+  royal: "text-royal-600",
+  coral: "text-coral-500"
+} as const;
 
 function Counter({ value, label }: { value: string; label: string }) {
   // animate the numeric portion in
@@ -164,10 +211,10 @@ function Hero3DCard() {
         animate={
           reduce
             ? undefined
-            : { scale: [1, 1.06, 1], opacity: [0.55, 0.75, 0.55] }
+            : { scale: [1, 1.06, 1], opacity: [0.55, 0.78, 0.55] }
         }
         transition={{ duration: 8, ease: "easeInOut", repeat: Infinity }}
-        className="absolute -inset-10 -z-10 rounded-[44px] bg-gradient-to-br from-brand-300/40 via-violet-200/40 to-accent-300/40 blur-3xl"
+        className="absolute -inset-10 -z-10 rounded-[44px] bg-gradient-to-br from-royal-400/40 via-brand-300/40 to-coral-300/40 blur-3xl"
       />
 
       <TiltCard intensity="normal" glare={false} className="relative">
@@ -184,8 +231,8 @@ function Hero3DCard() {
                 ₹ 28,450.00
               </p>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent-100 px-2.5 py-1 text-xs font-medium text-accent-700">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-500" />
               Active
             </span>
           </div>
@@ -194,7 +241,7 @@ function Hero3DCard() {
             {[
               { label: "AePS", color: "from-brand-500 to-brand-700", val: "₹3,420" },
               { label: "DMT", color: "from-accent-500 to-accent-700", val: "₹1,840" },
-              { label: "Recharge", color: "from-emerald-500 to-emerald-700", val: "₹2,180" }
+              { label: "Recharge", color: "from-coral-400 to-coral-600", val: "₹2,180" }
             ].map((t, i) => (
               <div
                 key={t.label}
@@ -215,7 +262,7 @@ function Hero3DCard() {
             {[Fingerprint, Send, QrCode, Smartphone, Receipt, Plane, Wallet, TrendingUp].map((I, i) => (
               <span
                 key={i}
-                className="grid h-12 w-full place-items-center rounded-xl bg-ink-50 text-ink-700 transition hover:bg-brand-600 hover:text-white"
+                className="grid h-12 w-full place-items-center rounded-xl bg-ink-50 text-ink-700 transition hover:bg-royal-600 hover:text-white"
                 style={{ transform: `translateZ(${10}px)` }}
               >
                 <I className="h-4 w-4" />
@@ -223,7 +270,7 @@ function Hero3DCard() {
             ))}
           </div>
 
-          <div className="mt-5 rounded-xl bg-gradient-to-r from-brand-600 to-accent-500 p-3 text-center text-xs text-white shadow-soft">
+          <div className="mt-5 rounded-xl bg-gradient-to-r from-royal-600 via-brand-600 to-accent-500 p-3 text-center text-xs text-white shadow-soft">
             <span className="font-semibold">+₹ 2,184</span> earned today as commission
           </div>
         </div>
@@ -236,7 +283,7 @@ function Hero3DCard() {
           range={10}
         >
           <div className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-emerald-700">✓</span>
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-accent-100 text-accent-700">✓</span>
             <div>
               <p className="text-xs font-semibold text-ink-900">AePS · ₹2,000</p>
               <p className="text-[10px] text-ink-500">Settled in 1.4s</p>
@@ -251,7 +298,7 @@ function Hero3DCard() {
           range={8}
         >
           <div className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-100 text-brand-700">₹</span>
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-royal-100 text-royal-700">₹</span>
             <div>
               <p className="text-xs font-semibold text-ink-900">Wallet credited</p>
               <p className="text-[10px] text-ink-500">+₹ 2,500.00</p>
@@ -260,7 +307,7 @@ function Hero3DCard() {
         </FloatBadge>
 
         <FloatBadge
-          className="absolute -left-4 -bottom-4 hidden rounded-2xl border border-white/70 bg-gradient-to-br from-brand-600 to-violet-600 px-3 py-2 text-white shadow-glow md:block"
+          className="absolute -left-4 -bottom-4 hidden rounded-2xl border border-white/70 bg-gradient-to-br from-royal-600 to-coral-500 px-3 py-2 text-white shadow-glow md:block"
           translateZ={90}
           delay={0.6}
           range={12}

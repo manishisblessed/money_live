@@ -13,7 +13,7 @@ const items = [
 
 export function ImpactStats() {
   return (
-    <section className="section relative overflow-hidden bg-gradient-to-br from-brand-700 via-brand-800 to-ink-950 text-white">
+    <section className="section relative overflow-hidden bg-gradient-to-br from-royal-800 via-brand-800 to-ink-950 text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="conic-glow absolute -left-40 top-0 h-[420px] w-[420px] rounded-full opacity-30" />
         <div className="conic-glow absolute -right-40 bottom-0 h-[480px] w-[480px] rounded-full opacity-30" />
@@ -26,7 +26,7 @@ export function ImpactStats() {
           </span>
           <h2 className="mt-4 font-display text-3xl font-bold leading-tight md:text-5xl">
             Powering Bharat&apos;s next{" "}
-            <span className="bg-gradient-to-r from-accent-300 to-rose-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-accent-300 via-brand-300 to-coral-300 bg-clip-text text-transparent">
               100 million
             </span>{" "}
             transactions.

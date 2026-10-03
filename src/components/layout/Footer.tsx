@@ -45,7 +45,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-10">
           {/* Brand + newsletter */}
           <div className="md:col-span-2 lg:col-span-4">
-            <Logo variant="light" />
+            <Logo variant="light" size="lg" />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-400">
               eMoney simplifies high-end fintech so anyone — from a village
               kirana to an urban distributor — can offer 60+ digital services
@@ -169,8 +169,7 @@ export function Footer() {
               reserved.
             </p>
             <p className="mt-1">
-              CIN: {company.cin} · GSTIN: {company.gstin} · Incorporated{" "}
-              {company.incorporated}, {company.jurisdiction}.
+              Incorporated {company.incorporated}, {company.jurisdiction}.
             </p>
           </div>
 

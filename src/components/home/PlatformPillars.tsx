@@ -15,25 +15,25 @@ const pillars = [
     icon: Zap,
     title: "Instant settlement",
     body: "T+0 commissions. T+1 nodal settlement. IMPS 24×7. UPI sub-second. Built on direct integrations with NPCI, NETC, BBPS.",
-    color: "from-brand-500 to-violet-600"
+    color: "from-brand-500 to-brand-700"
   },
   {
     icon: ShieldCheck,
     title: "Bank-grade security",
-    body: "ISO 27001 + PCI-DSS L1 + SOC 2 Type II. mTLS-only APIs. End-to-end encryption. WORM-archived audit logs.",
-    color: "from-emerald-500 to-brand-600"
+    body: "ISO 27001:2022 + PCI-DSS v4.0 L1 + CERT-In VAPT. mTLS-only APIs. End-to-end encryption. WORM-archived audit logs.",
+    color: "from-royal-500 to-royal-700"
   },
   {
     icon: Layers,
     title: "Composable platform",
     body: "60+ services as REST APIs. Webhook-everything. Plug into your ERP, POS, neobank, or super-app in days, not months.",
-    color: "from-accent-500 to-rose-500"
+    color: "from-accent-500 to-accent-700"
   },
   {
     icon: Globe2,
     title: "Pan-India, Bharat-first",
     body: "Live in 28 states · 9 languages · 1,200+ billers · 38M businesses onboarded across tier-1 to tier-6 towns.",
-    color: "from-amber-500 to-accent-600"
+    color: "from-coral-400 to-coral-600"
   }
 ];
 
@@ -48,7 +48,7 @@ export function PlatformPillars() {
             </span>
             <h2 className="mt-4 font-display text-3xl font-bold leading-tight md:text-5xl">
               Built like a bank. <br />
-              <span className="bg-gradient-to-r from-brand-300 via-violet-300 to-accent-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-royal-300 via-brand-300 to-accent-300 bg-clip-text text-transparent">
                 Felt like an app.
               </span>
             </h2>

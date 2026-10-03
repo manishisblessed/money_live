@@ -11,7 +11,7 @@ export function StackedCTA() {
     <section className="section">
       <div className="container-x">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-ink-950 via-brand-900 to-brand-700 p-10 text-white md:p-16">
+          <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-ink-950 via-royal-900 to-brand-700 p-10 text-white md:p-16">
             <div className="pointer-events-none absolute inset-0">
               <div className="conic-glow absolute -left-32 top-0 h-[400px] w-[400px] rounded-full animate-float-slow" />
               <div className="conic-glow absolute -right-24 bottom-0 h-[460px] w-[460px] rounded-full animate-float-slow [animation-delay:3s]" />
@@ -26,7 +26,7 @@ export function StackedCTA() {
                 </span>
                 <h2 className="mt-5 font-display text-3xl font-bold leading-tight md:text-5xl">
                   Build the next great fintech business — <br />
-                  <span className="bg-gradient-to-r from-accent-300 to-rose-300 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-accent-300 via-brand-300 to-coral-300 bg-clip-text text-transparent">
                     on eMoney rails.
                   </span>
                 </h2>

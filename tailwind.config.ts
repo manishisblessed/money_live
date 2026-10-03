@@ -46,6 +46,34 @@ const config: Config = {
           900: "#14532d",
           950: "#052e16"
         },
+        // Royal = premium purple (innovation / white-label personas)
+        royal: {
+          50: "#f5f3ff",
+          100: "#ede9fe",
+          200: "#ddd6fe",
+          300: "#c4b5fd",
+          400: "#a78bfa",
+          500: "#8b5cf6",
+          600: "#7c3aed",
+          700: "#6d28d9",
+          800: "#5b21b6",
+          900: "#4c1d95",
+          950: "#2e1065"
+        },
+        // Coral = warm light-red (energy / highlights / alerts)
+        coral: {
+          50: "#fff1f2",
+          100: "#ffe4e6",
+          200: "#fecdd3",
+          300: "#fda4af",
+          400: "#fb7185",
+          500: "#f43f5e",
+          600: "#e11d48",
+          700: "#be123c",
+          800: "#9f1239",
+          900: "#881337",
+          950: "#4c0519"
+        },
         ink: {
           50: "#f5f7fa",
           100: "#eaeef4",
@@ -78,17 +106,22 @@ const config: Config = {
         ]
       },
       backgroundImage: {
-        // eMoney hero: blue top-left → green bottom-right
+        // eMoney premium mesh: purple → blue → green → coral
         "hero-radial":
-          "radial-gradient(60% 80% at 50% 0%, rgba(37,99,235,0.18) 0%, rgba(37,99,235,0) 60%), radial-gradient(40% 60% at 100% 100%, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0) 60%)",
+          "radial-gradient(42% 55% at 18% 12%, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0) 60%), radial-gradient(40% 50% at 82% 20%, rgba(37,99,235,0.18) 0%, rgba(37,99,235,0) 60%), radial-gradient(45% 55% at 25% 100%, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0) 60%), radial-gradient(40% 50% at 90% 95%, rgba(251,113,133,0.14) 0%, rgba(251,113,133,0) 60%)",
         "grid-pattern":
           "linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px)",
+        // Primary premium gradient: purple → blue → green → coral
         "brand-gradient":
-          "linear-gradient(135deg, #1E88E5 0%, #1DA7B0 55%, #22C55E 100%)"
+          "linear-gradient(120deg, #7c3aed 0%, #2563eb 38%, #22c55e 72%, #fb7185 100%)",
+        "aurora-gradient":
+          "conic-gradient(from 140deg at 50% 50%, #7c3aed 0deg, #2563eb 95deg, #22c55e 205deg, #fb7185 300deg, #7c3aed 360deg)"
       },
       boxShadow: {
         soft: "0 10px 30px -12px rgba(15,23,42,0.18)",
-        glow: "0 20px 50px -12px rgba(37,99,235,0.45)"
+        glow: "0 20px 50px -12px rgba(124,58,237,0.40)",
+        "glow-brand": "0 20px 50px -12px rgba(37,99,235,0.45)",
+        "glow-coral": "0 20px 50px -12px rgba(244,63,94,0.40)"
       },
       keyframes: {
         "fade-up": {

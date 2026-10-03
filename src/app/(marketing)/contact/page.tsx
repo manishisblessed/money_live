@@ -124,9 +124,6 @@ export default function ContactPage() {
                       <p className="font-semibold text-ink-900">
                         {company.legalName}
                       </p>
-                      <p className="text-xs text-ink-500">
-                        CIN: {company.cin}
-                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">

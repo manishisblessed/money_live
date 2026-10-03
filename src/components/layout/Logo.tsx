@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * eMoney brand mark — compact gradient circular "e" with speed lines.
+ * Used only for icon-only contexts (e.g. collapsed sidebar). Everywhere else
+ * we render the full official logo artwork via <Logo />.
  * Uses `currentColor` where possible so dark/light variants work out of the box.
  */
 export function LogoMark({
@@ -36,9 +38,9 @@ export function LogoMark({
           y2="44"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#1E88E5" />
-          <stop offset="55%" stopColor="#1DA7B0" />
-          <stop offset="100%" stopColor="#22C55E" />
+          <stop offset="0%" stopColor="#7c3aed" />
+          <stop offset="50%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#22c55e" />
         </linearGradient>
       </defs>
       <circle cx="24" cy="24" r="22" fill="url(#emoney-mark-grad-cmp)" />
@@ -54,38 +56,47 @@ export function LogoMark({
   );
 }
 
+/** Brand tagline shown beside the logo. Change here to update it everywhere. */
+export const LOGO_TAGLINE = "Every Shop's Fintech OS";
+
+const sizeMap = {
+  sm: "h-8",
+  md: "h-10",
+  lg: "h-12"
+} as const;
+
 /**
- * Full eMoney logo lockup — the gradient mark + "eMoney" wordmark.
- * When used in a dark footer, pass variant="light" so the wordmark goes white.
- * Pass `useImage` to render the full PNG artwork instead of the SVG lockup
- * (handy for landing pages that want the official bitmap artwork).
+ * Full eMoney logo lockup — renders the official brand artwork
+ * (`/emoney-logo.svg`: the gradient "e" + "eMoney" wordmark + rising arrow).
+ *
+ * - On light surfaces (navbar, auth, sidebar) the full-colour logo is used.
+ * - On dark surfaces pass `variant="light"` to render a crisp white
+ *   monochrome version of the same artwork.
+ * - Pass `iconOnly` to render just the circular "e" mark (collapsed sidebar).
+ * - Pass `tagline` to show the theme-gradient tagline beside the mark.
+ * - Use `size` to scale the lockup ("sm" | "md" | "lg").
  */
 export function Logo({
   className,
   variant = "dark",
   iconOnly = false,
-  useImage = false
+  tagline = false,
+  size = "md"
 }: {
   className?: string;
   variant?: "dark" | "light";
   iconOnly?: boolean;
-  useImage?: boolean;
+  tagline?: boolean;
+  size?: keyof typeof sizeMap;
 }) {
-  if (useImage && !iconOnly) {
+  if (iconOnly) {
     return (
       <Link
         href="/"
         className={cn("group inline-flex items-center", className)}
         aria-label="eMoney home"
       >
-        <Image
-          src="/eMoney_logo.png"
-          alt="eMoney"
-          width={160}
-          height={44}
-          priority
-          className="h-9 w-auto"
-        />
+        <LogoMark size={34} />
       </Link>
     );
   }
@@ -93,18 +104,34 @@ export function Logo({
   return (
     <Link
       href="/"
-      className={cn("group inline-flex items-center gap-2.5", className)}
+      className={cn("group inline-flex items-center gap-3", className)}
       aria-label="eMoney home"
     >
-      <LogoMark size={iconOnly ? 32 : 36} />
-      {!iconOnly && (
+      <Image
+        src="/emoney-logo.svg"
+        alt="eMoney"
+        width={1694}
+        height={699}
+        priority
+        unoptimized
+        className={cn(
+          "w-auto transition-transform duration-300 group-hover:scale-[1.03]",
+          sizeMap[size],
+          // Render the dark-text artwork as clean white on dark surfaces
+          variant === "light" && "brightness-0 invert"
+        )}
+      />
+
+      {tagline && (
         <span
           className={cn(
-            "font-display text-[22px] font-extrabold tracking-tight leading-none",
-            variant === "light" ? "text-white" : "text-ink-900"
+            "hidden items-center self-stretch border-l pl-3 sm:inline-flex",
+            variant === "light" ? "border-white/25" : "border-ink-200"
           )}
         >
-          eMoney
+          <span className="gradient-text whitespace-nowrap bg-[length:200%_auto] text-[11px] font-bold uppercase leading-tight tracking-[0.14em]">
+            {LOGO_TAGLINE}
+          </span>
         </span>
       )}
     </Link>

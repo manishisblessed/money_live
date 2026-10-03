@@ -9,7 +9,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-accent-50">
       <div className="container-x flex h-16 items-center justify-between md:h-20">
-        <Logo />
+        <Logo size="lg" tagline />
         <Link
           href="/"
           className="text-sm font-medium text-ink-600 hover:text-ink-900"

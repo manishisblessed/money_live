@@ -23,7 +23,7 @@ export function Compliance() {
             </span>
             <h2 className="mt-4 font-display text-3xl font-bold leading-tight md:text-5xl">
               Regulated. Audited.{" "}
-              <span className="bg-gradient-to-r from-brand-300 via-violet-300 to-accent-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-royal-300 via-brand-300 to-accent-300 bg-clip-text text-transparent">
                 Indian by law.
               </span>
             </h2>
@@ -56,10 +56,10 @@ export function Compliance() {
               <article className="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:border-white/30 hover:bg-white/[0.08] hover:shadow-glow">
                 <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-brand-400/30 to-accent-400/30 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="flex items-center justify-between">
-                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white font-display text-sm font-bold transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-royal-500 via-brand-500 to-accent-500 text-white font-display text-sm font-bold transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
                     {c.code}
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-300">
                     <ShieldCheck className="h-3 w-3" />
                     {c.status}
                   </span>
@@ -106,7 +106,7 @@ export function Compliance() {
 function ComplianceLine({ title, body }: { title: string; body: string }) {
   return (
     <div className="group flex items-start gap-3">
-      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-500/15 text-emerald-300 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-500/25">
+      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-500/15 text-accent-300 transition-all duration-300 group-hover:scale-110 group-hover:bg-accent-500/25">
         <ShieldCheck className="h-4 w-4" />
       </span>
       <div>

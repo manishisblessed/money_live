@@ -51,12 +51,12 @@ export function IntegrationsConstellation() {
           delay={0.1}
           className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-ink-600"
         >
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 font-semibold">
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent-50 px-3 py-1 text-accent-700 font-semibold">
             <span className="relative grid h-2 w-2 place-items-center">
-              <span className="absolute inset-0 rounded-full bg-emerald-500 animate-pulse-ring" />
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute inset-0 rounded-full bg-accent-500 animate-pulse-ring" />
+              <span className="h-2 w-2 rounded-full bg-accent-500" />
             </span>
-            99.97% uptime
+            99.9% uptime
           </span>
           <span>·</span>
           <span>1,238 live billers</span>

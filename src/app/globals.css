@@ -61,9 +61,9 @@ button {
     opacity var(--dur-fast) var(--ease-out-quart);
 }
 
-/* Subtle, branded selection — eMoney blue→green */
+/* Subtle, branded selection — eMoney premium purple */
 ::selection {
-  background: rgb(37 99 235 / 0.18);
+  background: rgb(124 58 237 / 0.18);
   color: rgb(14 22 38);
 }
 
@@ -83,8 +83,9 @@ button {
 *::-webkit-scrollbar-thumb {
   background: linear-gradient(
     180deg,
-    rgba(37, 99, 235, 0.45),
-    rgba(34, 197, 94, 0.45)
+    rgba(124, 58, 237, 0.5),
+    rgba(37, 99, 235, 0.5),
+    rgba(34, 197, 94, 0.5)
   );
   border-radius: 999px;
   border: 2px solid transparent;
@@ -93,8 +94,9 @@ button {
 *::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(
     180deg,
-    rgba(37, 99, 235, 0.75),
-    rgba(34, 197, 94, 0.75)
+    rgba(124, 58, 237, 0.8),
+    rgba(37, 99, 235, 0.8),
+    rgba(34, 197, 94, 0.8)
   );
   background-clip: padding-box;
   border: 2px solid transparent;
@@ -122,7 +124,7 @@ button {
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-700;
+    @apply inline-flex items-center gap-2 rounded-full border border-royal-200 bg-royal-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-royal-700;
   }
 
   .heading-xl {
@@ -146,7 +148,17 @@ button {
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-brand-700 via-brand-500 to-accent-500 bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      110deg,
+      #7c3aed 0%,
+      #2563eb 34%,
+      #22c55e 66%,
+      #fb7185 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* A card surface that lifts smoothly on hover */
@@ -210,8 +222,8 @@ button {
 
   .text-glow {
     text-shadow:
-      0 0 24px rgba(37, 99, 235, 0.4),
-      0 0 60px rgba(34, 197, 94, 0.18);
+      0 0 24px rgba(124, 58, 237, 0.35),
+      0 0 60px rgba(37, 99, 235, 0.18);
   }
 
   .glass {
@@ -233,16 +245,42 @@ button {
   }
 
   .conic-glow {
-    /* eMoney conic: blue → teal → green loop */
+    /* eMoney premium conic: purple → blue → green → coral loop */
     background: conic-gradient(
-      from 90deg at 50% 50%,
-      #1E88E5 0deg,
-      #1DA7B0 120deg,
-      #22C55E 240deg,
-      #1E88E5 360deg
+      from 140deg at 50% 50%,
+      #7c3aed 0deg,
+      #2563eb 95deg,
+      #22c55e 205deg,
+      #fb7185 300deg,
+      #7c3aed 360deg
     );
-    filter: blur(50px);
-    opacity: 0.45;
+    filter: blur(56px);
+    opacity: 0.42;
+  }
+
+  /* Slowly rotating aurora blob for premium hero/section backgrounds */
+  .aurora-glow {
+    background: conic-gradient(
+      from 140deg at 50% 50%,
+      #7c3aed 0deg,
+      #2563eb 95deg,
+      #22c55e 205deg,
+      #fb7185 300deg,
+      #7c3aed 360deg
+    );
+    filter: blur(64px);
+    opacity: 0.4;
+    animation: aurora-spin 22s linear infinite;
+  }
+  @keyframes aurora-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-glow {
+      animation: none;
+    }
   }
 
   .scroll-snap-x {
@@ -264,7 +302,7 @@ button {
     bottom: 6px;
     height: 2px;
     border-radius: 2px;
-    background: linear-gradient(90deg, #2563eb, #22c55e);
+    background: linear-gradient(90deg, #7c3aed, #2563eb, #22c55e);
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 320ms var(--ease-out-quart);

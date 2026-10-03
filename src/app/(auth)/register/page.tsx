@@ -216,7 +216,7 @@ export default function JoinPage() {
                   id="city"
                   value={form.city}
                   onChange={(e) => update("city", e.target.value)}
-                  placeholder="e.g. Surat"
+                  placeholder="e.g. Gurugram"
                 />
               </div>
               <div className="sm:col-span-2">

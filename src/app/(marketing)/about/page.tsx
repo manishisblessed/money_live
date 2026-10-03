@@ -37,7 +37,7 @@ import { company } from "@/lib/data";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "eMoney (operated by eMoney) is a Surat-born digital banking & utility fintech building the rails that bring formal financial services to every Indian — from village kiranas to urban distributors."
+    "eMoney is a Gurugram-born digital banking & utility fintech building the rails that bring formal financial services to every Indian — from village kiranas to urban distributors."
 };
 
 const values = [
@@ -196,7 +196,7 @@ const milestones = [
   {
     year: "Q2 2025",
     title: "Incorporation",
-    text: "eMoney is registered in Gurugram, Haryana — CIN TBD."
+    text: "eMoney is registered in Gurugram, Haryana."
   },
   {
     year: "Q3 2025",
@@ -216,13 +216,13 @@ const milestones = [
   {
     year: "Today",
     title: "India-wide network",
-    text: "Building an India-wide distributor network from Surat — 28 states, 8 UTs, 9 languages, one mission."
+    text: "Building an India-wide distributor network from Gurugram — 28 states, 8 UTs, 9 languages, one mission."
   }
 ];
 
 const recognition = [
   "Featured in YourStory's '25 Fintechs to watch in 2026'",
-  "Surat Chamber of Commerce — Emerging Fintech of the Year, 2025",
+  "Gurugram Chamber of Commerce — Emerging Fintech of the Year, 2025",
   "Selected for NPCI's BBPS scale-up cohort, 2026",
   "Member, Payments Council of India (PCI)"
 ];
@@ -264,8 +264,7 @@ export default function AboutPage() {
         description={
           <>
             eMoney (operated by{" "}
-            <span className="font-semibold text-ink-800">{company.legalName}</span>,
-            CIN {company.cin}) is a digital banking &amp; utility fintech
+            <span className="font-semibold text-ink-800">{company.legalName}</span>) is a digital banking &amp; utility fintech
             platform on a mission to simplify financial services for every
             Indian. From village kiranas to urban distributors, our retailers
             serve millions of customers every day — across 28 states, 9
@@ -345,10 +344,10 @@ export default function AboutPage() {
             <div className="lg:col-span-5">
               <span className="eyebrow">Our story</span>
               <h2 className="heading-lg mt-4">
-                Born in Surat. <span className="gradient-text">Built for Bharat.</span>
+                Born in Gurugram. <span className="gradient-text">Built for Bharat.</span>
               </h2>
               <p className="lead mt-5">
-                eMoney started in a small office in Surat in 2025 with a
+                eMoney started in a small office in Gurugram in 2025 with a
                 stubborn belief — that the same financial services available to
                 a Mumbai professional should be available to a kirana owner in
                 Banswara, in seconds, in their language, at a fair price.
@@ -368,7 +367,7 @@ export default function AboutPage() {
                   the customer's counter.
                 </p>
                 <p>
-                  Today, that same Surat team powers AePS withdrawals, money
+                  Today, that same Gurugram team powers AePS withdrawals, money
                   transfers, bill payments, recharges, travel bookings, payment
                   gateway, POS terminals and QR collections — all under one
                   login, one ledger and one phone number for support.
@@ -378,7 +377,7 @@ export default function AboutPage() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/contact">
                   <Button>
-                    Visit our Surat office <ArrowRight className="h-4 w-4" />
+                    Visit our Gurugram office <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/products">
@@ -600,8 +599,7 @@ export default function AboutPage() {
               <span className="font-semibold text-ink-800">
                 {company.legalName}
               </span>{" "}
-              · CIN {company.cin} · GSTIN {company.gstin} · Registered office:{" "}
-              {company.jurisdiction}.
+              · Registered office: {company.jurisdiction}.
             </span>
             <Link
               href="/legal/privacy"
@@ -690,7 +688,7 @@ export default function AboutPage() {
           <div className="mb-12 max-w-2xl">
             <span className="eyebrow">Our journey</span>
             <h2 className="heading-lg mt-4">
-              From a Surat office to India&rsquo;s trusted fintech partner
+              From a Gurugram office to India&rsquo;s trusted fintech partner
             </h2>
             <p className="mt-3 text-ink-600">
               Less than two years old — and already powering thousands of
@@ -765,7 +763,7 @@ export default function AboutPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
                   { l: "Founded", v: company.incorporated },
-                  { l: "Headquarters", v: "Surat, GJ" },
+                  { l: "Headquarters", v: "Gurugram, HR" },
                   { l: "Services", v: "60+" },
                   { l: "Languages", v: "9" }
                 ].map((s) => (

@@ -52,7 +52,7 @@ export function Navbar() {
         transition={{ duration: reduce ? 0 : 0.35, ease: easeOut }}
         className="container-x flex items-center justify-between gap-6"
       >
-        <Logo className="transition-transform hover:scale-[1.02]" />
+        <Logo size="lg" tagline />
 
         <nav className="hidden lg:flex">
           <ul className="flex items-center gap-1">
@@ -66,7 +66,7 @@ export function Navbar() {
                     href={item.href}
                     data-active={isActive}
                     className={cn(
-                      "link-underline inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition",
+                      "link-underline inline-flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition",
                       isActive
                         ? "text-ink-900"
                         : "text-ink-700 hover:bg-ink-100/70 hover:text-ink-900"

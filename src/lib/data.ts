@@ -37,7 +37,7 @@ export const company = {
   legalEmail: "legal@emoney.today",
   grievanceEmail: "grievance@emoney.today",
   nodalEmail: "nodal@emoney.today",
-  phone: "0000000000",
+  phone: "9650001862",
   cin: "TBD",
   gstin: "TBD",
   incorporated: "2026",
@@ -53,7 +53,7 @@ export const grievanceOfficer = {
   name: "Grievance Officer",
   designation: "Grievance Redressal Officer",
   email: "grievance@emoney.today",
-  phone: "+91 0000000000",
+  phone: "+91 9650001862",
   hours: "Monday to Saturday, 10:00 AM – 6:00 PM IST",
   address:
     "First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana - 122002",
@@ -64,7 +64,7 @@ export const nodalOfficer = {
   name: "Nodal Officer",
   designation: "Principal Nodal Officer",
   email: "nodal@emoney.today",
-  phone: "+91 0000000000"
+  phone: "+91 9650001862"
 };
 
 export type ServiceItem = {
@@ -437,7 +437,7 @@ export type NavLink = {
 
 export const mainNav: NavLink[] = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
+  { label: "Why eMoney", href: "/about" },
   {
     label: "Services",
     href: "/services",
@@ -450,8 +450,7 @@ export const mainNav: NavLink[] = [
     ]
   },
   { label: "Products", href: "/products" },
-  { label: "Career", href: "/career" },
-  { label: "Team", href: "/team" },
+  { label: "Our Team", href: "/team" },
   { label: "Contact", href: "/contact" }
 ];
 
@@ -714,7 +713,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
         id: "introduction",
         heading: "1. Introduction",
         body: [
-          "This Privacy Policy (\"Policy\") governs the processing of personal data by eMoney (CIN: TBD), a company incorporated under the Companies Act, 2013 and having its registered office at First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana – 122002 (\"eMoney\", \"Company\", \"We\", \"Us\"), through its website emoney.today, mobile applications and APIs (collectively, the \"Platform\").",
+          "This Privacy Policy (\"Policy\") governs the processing of personal data by eMoney, a company incorporated under the Companies Act, 2013 and having its registered office at First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana – 122002 (\"eMoney\", \"Company\", \"We\", \"Us\"), through its website emoney.today, mobile applications and APIs (collectively, the \"Platform\").",
           "By accessing or using the Platform, you (the \"Data Principal\") consent to the practices described in this Policy. If you do not agree, please do not use the Platform."
         ]
       },
@@ -1125,7 +1124,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
             list: [
               "In-app — Help → Raise a Ticket",
               "E-mail — support@emoney.today",
-              "WhatsApp / Phone — +91 0000000000 (10 AM – 6 PM IST, Mon–Sat)",
+              "WhatsApp / Phone — +91 9650001862 (10 AM – 6 PM IST, Mon–Sat)",
               "Letter — Customer Care, eMoney, First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana – 122002"
             ]
           }
@@ -1140,8 +1139,8 @@ export const legalDocuments: Record<string, LegalDocument> = {
               headers: ["Level", "Officer", "Channel", "TAT"],
               rows: [
                 ["Level 1", "Customer Care Executive", "support@emoney.today", "7 working days"],
-                ["Level 2", "Grievance Officer", "grievance@emoney.today · +91 0000000000", "15 working days"],
-                ["Level 3", "Principal Nodal Officer", "nodal@emoney.today · +91 0000000000", "30 days"],
+                ["Level 2", "Grievance Officer", "grievance@emoney.today · +91 9650001862", "15 working days"],
+                ["Level 3", "Principal Nodal Officer", "nodal@emoney.today · +91 9650001862", "30 days"],
                 ["Level 4", "RBI Integrated Ombudsman", "cms.rbi.org.in · 14448 (toll-free)", "As per scheme"]
               ]
             }
