@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "NextGenPay — Payment Gateway, POS & QR Payments";
+export const alt = "eMoney — Payment Gateway, POS & QR Payments";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,30 +16,35 @@ export default async function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 80,
+          // eMoney gradient — blue → teal → green
           background:
-            "radial-gradient(60% 80% at 20% 20%, rgba(233,69,96,0.4) 0%, rgba(233,69,96,0) 60%), radial-gradient(50% 60% at 100% 100%, rgba(212,168,67,0.3) 0%, rgba(212,168,67,0) 60%), linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+            "radial-gradient(60% 80% at 20% 20%, rgba(30,136,229,0.45) 0%, rgba(30,136,229,0) 60%), radial-gradient(50% 60% at 100% 100%, rgba(34,197,94,0.4) 0%, rgba(34,197,94,0) 60%), linear-gradient(135deg, #0b1f52 0%, #0f3a63 50%, #0b3b2a 100%)",
           color: "white",
           fontFamily: "system-ui, sans-serif"
         }}
       >
-        {/* Top: logo lockup — bare violet mark + wordmark */}
+        {/* Top: logo lockup — gradient "e" mark + wordmark */}
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          <svg width="102" height="70" viewBox="0 0 32 22" fill="none">
+          <svg width="86" height="86" viewBox="0 0 48 48" fill="none">
+            <defs>
+              <linearGradient id="og-mark" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#38BDF8" />
+                <stop offset="55%" stopColor="#2DD4BF" />
+                <stop offset="100%" stopColor="#4ADE80" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#og-mark)" />
             <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
-              fill="#7367F0"
-            />
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
-              fill="#7367F0"
+              d="M34 29c-2 3.2-5.6 5.3-9.7 5.3-6.3 0-11.3-5-11.3-11.3s5-11.3 11.3-11.3c6.2 0 11.2 4.9 11.3 11 0 .7-.6 1.3-1.3 1.3H17.5"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="3.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
-          <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: -1 }}>
-            NextGenPay
+          <div style={{ fontSize: 56, fontWeight: 800, letterSpacing: -1 }}>
+            eMoney
           </div>
         </div>
 
@@ -57,7 +62,7 @@ export default async function OpengraphImage() {
             <span
               style={{
                 background:
-                  "linear-gradient(90deg, #e94560 0%, #f0d68a 100%)",
+                  "linear-gradient(90deg, #38BDF8 0%, #4ADE80 100%)",
                 backgroundClip: "text",
                 color: "transparent"
               }}
@@ -69,7 +74,7 @@ export default async function OpengraphImage() {
             style={{
               marginTop: 24,
               fontSize: 26,
-              color: "rgba(255,255,255,0.78)",
+              color: "rgba(255,255,255,0.82)",
               maxWidth: 880,
               lineHeight: 1.4
             }}
@@ -87,14 +92,14 @@ export default async function OpengraphImage() {
             justifyContent: "space-between",
             paddingTop: 28,
             borderTop: "1px solid rgba(255,255,255,0.15)",
-            color: "rgba(255,255,255,0.7)",
+            color: "rgba(255,255,255,0.75)",
             fontSize: 20
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontWeight: 600 }}>nxtgpay.com</span>
+            <span style={{ fontWeight: 600 }}>emoney.today</span>
             <span>·</span>
-            <span>Info@nxtgpay.com</span>
+            <span>support@emoney.today</span>
           </div>
           <div style={{ display: "flex", gap: 18 }}>
             {["PG", "POS", "QR", "AePS", "DMT", "BBPS"].map((tag) => (
@@ -103,8 +108,8 @@ export default async function OpengraphImage() {
                 style={{
                   padding: "8px 16px",
                   borderRadius: 999,
-                  background: "rgba(255,255,255,0.12)",
-                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.22)",
                   fontSize: 18,
                   fontWeight: 600
                 }}

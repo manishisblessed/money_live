@@ -329,7 +329,7 @@ function LoginForm({ location }: { location: LocationData }) {
             <Sparkles className="h-3.5 w-3.5" /> Unified portal
           </span>
           <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-            One NextGenPay. <br /> Four powerful dashboards.
+            One eMoney. <br /> Four powerful dashboards.
           </h2>
           <p className="mt-3 text-white/85">
             Retailer, distributor, master distributor and super distributor — each with its own purpose-built workspace, KPIs and controls.
@@ -354,7 +354,7 @@ function LoginForm({ location }: { location: LocationData }) {
       <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
         <h1 className="heading-md">Sign in</h1>
         <p className="mt-2 text-sm text-ink-500">
-          New to NextGenPay?{" "}
+          New to eMoney?{" "}
           <Link href="/register" className="font-semibold text-brand-700">
             Request to join
           </Link>
@@ -426,7 +426,7 @@ function LoginForm({ location }: { location: LocationData }) {
               id="identifier"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="you@example.com or 8780224955"
+              placeholder="you@example.com or 9999999999"
               required
             />
           </div>

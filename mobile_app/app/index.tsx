@@ -45,10 +45,10 @@ export default function Splash() {
         <View style={styles.logoBadge}>
           <Text style={styles.logoP}>P</Text>
         </View>
-        <Text style={styles.brand}>NextGenPay</Text>
+        <Text style={styles.brand}>eMoney</Text>
         <Text style={styles.tagline}>Banking that builds Bharat</Text>
       </View>
-      <Text style={styles.foot}>Powered by JMP NEXTGENPAY PRIVATE LIMITED</Text>
+      <Text style={styles.foot}>Powered by eMoney</Text>
     </LinearGradient>
   );
 }

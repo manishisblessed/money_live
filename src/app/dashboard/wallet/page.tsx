@@ -265,7 +265,7 @@ export default function WalletPage() {
     <div>
       <ServicePageHeader
         icon={Wallet}
-        title="NextGenPay Wallet"
+        title="eMoney Wallet"
         description="Top-up your wallet instantly via UPI, or view your balance history."
       />
 

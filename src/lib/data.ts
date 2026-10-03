@@ -22,44 +22,49 @@ import {
   type LucideIcon
 } from "lucide-react";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// eMoney — central brand & regulatory details.
+// TODO: Replace `cin`, `gstin`, `phone`, `incorporated`, officer names &
+// phone numbers with the actual registered values before going live.
+// ─────────────────────────────────────────────────────────────────────────────
 export const company = {
-  legalName: "JMP NEXTGENPAY PRIVATE LIMITED",
-  brand: "NextGenPay",
-  tradeName: "jmpnextgenpay",
-  domain: "nxtgpay.com",
-  email: "Info@nxtgpay.com",
-  supportEmail: "support@nxtgpay.com",
-  legalEmail: "legal@nxtgpay.com",
-  grievanceEmail: "grievance@nxtgpay.com",
-  nodalEmail: "nodal@nxtgpay.com",
-  phone: "8780224955",
-  cin: "U66190GJ2025PTC170905",
-  gstin: "24AAHCJ1843N1ZC",
-  incorporated: "2025",
-  jurisdiction: "Surat, Gujarat",
+  legalName: "eMoney",
+  brand: "eMoney",
+  tradeName: "emoney",
+  domain: "emoney.today",
+  email: "support@emoney.today",
+  supportEmail: "support@emoney.today",
+  legalEmail: "legal@emoney.today",
+  grievanceEmail: "grievance@emoney.today",
+  nodalEmail: "nodal@emoney.today",
+  phone: "0000000000",
+  cin: "TBD",
+  gstin: "TBD",
+  incorporated: "2026",
+  jurisdiction: "Gurugram, Haryana",
   address:
-    "2nd Floor, 201, Devi Arcade, Ashwini Kumar Road, Modi Maholla, Surat, Gujarat - 395008",
-  shortAddress: "Devi Arcade, Ashwini Kumar Road, Surat"
+    "First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana - 122002",
+  shortAddress: "JMD Empire Square, DLF Phase-1, Gurugram"
 };
 
 // Mandatory under IT Rules 2021 (Intermediary Guidelines) & RBI Master Direction
 // on Customer Service in Banks, 2024.
 export const grievanceOfficer = {
-  name: "Mr. Rakesh Patel",
+  name: "Grievance Officer",
   designation: "Grievance Redressal Officer",
-  email: "grievance@nxtgpay.com",
-  phone: "+91 8780224955",
+  email: "grievance@emoney.today",
+  phone: "+91 0000000000",
   hours: "Monday to Saturday, 10:00 AM – 6:00 PM IST",
   address:
-    "2nd Floor, 201, Devi Arcade, Ashwini Kumar Road, Modi Maholla, Surat, Gujarat – 395008",
+    "First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana - 122002",
   responseSla: "Acknowledgement within 24 hours · Resolution within 15 working days"
 };
 
 export const nodalOfficer = {
-  name: "Ms. Priya Sharma",
+  name: "Nodal Officer",
   designation: "Principal Nodal Officer",
-  email: "nodal@nxtgpay.com",
-  phone: "+91 8780224955"
+  email: "nodal@emoney.today",
+  phone: "+91 0000000000"
 };
 
 export type ServiceItem = {
@@ -131,7 +136,7 @@ export const services: ServiceItem[] = [
   {
     slug: "wallet",
     title: "Wallet Pay",
-    description: "Top-up your NextGenPay wallet and pay anywhere instantly.",
+    description: "Top-up your eMoney wallet and pay anywhere instantly.",
     icon: Wallet,
     href: "/dashboard/wallet",
     category: "banking"
@@ -255,8 +260,8 @@ export type FaqItem = { q: string; a: string };
 
 export const faqs: FaqItem[] = [
   {
-    q: "What is NextGenPay?",
-    a: "NextGenPay (operated by JMP NEXTGENPAY PRIVATE LIMITED) is a digital banking & utility fintech platform that helps retailers and consumers access 60+ services — money transfer, AePS, recharges, bill payments, travel bookings — all from a single dashboard, with zero hidden fees."
+    q: "What is eMoney?",
+    a: "eMoney (operated by eMoney) is a digital banking & utility fintech platform that helps retailers and consumers access 60+ services — money transfer, AePS, recharges, bill payments, travel bookings — all from a single dashboard, with zero hidden fees."
   },
   {
     q: "Is it safe to use the platform?",
@@ -267,12 +272,12 @@ export const faqs: FaqItem[] = [
     a: "Electricity, water, piped gas & LPG, broadband, DTH, postpaid mobile, landline, credit-card bills, education fees, insurance premiums, FASTag, municipal taxes and more — across 1,200+ billers."
   },
   {
-    q: "How do I become a NextGenPay agent?",
+    q: "How do I become a eMoney agent?",
     a: "Sign up with your PAN, Aadhaar and shop details, complete KYC in under 5 minutes, and start earning commissions on every transaction. There is no joining fee."
   },
   {
     q: "How are commissions paid?",
-    a: "Commissions are credited to your NextGenPay wallet in real-time on every successful transaction. You can withdraw to your bank account 24x7 with instant IMPS settlement."
+    a: "Commissions are credited to your eMoney wallet in real-time on every successful transaction. You can withdraw to your bank account 24x7 with instant IMPS settlement."
   },
   {
     q: "Do you charge any hidden fees?",
@@ -292,7 +297,7 @@ export const testimonials: Testimonial[] = [
     name: "Kasendar Prasad",
     role: "Owner, Rishabh Telecom & Money Transfer",
     quote:
-      "Working with NextGenPay has transformed my business. The platform is fast, the commissions are great, and the support team is always there when I need them.",
+      "Working with eMoney has transformed my business. The platform is fast, the commissions are great, and the support team is always there when I need them.",
     rating: 5
   },
   {
@@ -306,7 +311,7 @@ export const testimonials: Testimonial[] = [
     name: "Priya Sharma",
     role: "Owner, Sharma Mobile World",
     quote:
-      "I doubled my monthly income within 3 months of joining NextGenPay. The training and onboarding is top-notch.",
+      "I doubled my monthly income within 3 months of joining eMoney. The training and onboarding is top-notch.",
     rating: 5
   },
   {
@@ -538,7 +543,7 @@ export const indiaMissions: IndiaMission[] = [
     code: "04",
     title: "Aatmanirbhar Bharat",
     body:
-      "100% Made-in-India fintech stack. Data resident on Indian soil, engineered in Surat, processed in India only.",
+      "100% Made-in-India fintech stack. Data resident on Indian soil, engineered in Gurugram, processed in India only.",
     stat: "🇮🇳",
     statLabel: "Proudly Made in India"
   }
@@ -696,7 +701,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
     title: "Privacy Policy",
     eyebrow: "Legal · Privacy",
     description:
-      "How JMP NEXTGENPAY PRIVATE LIMITED collects, uses, stores and protects your personal data — drafted as per the Digital Personal Data Protection Act, 2023, the Information Technology Act, 2000 and the SPDI Rules, 2011.",
+      "How eMoney collects, uses, stores and protects your personal data — drafted as per the Digital Personal Data Protection Act, 2023, the Information Technology Act, 2000 and the SPDI Rules, 2011.",
     lastUpdated: "01 April 2026",
     governedBy: [
       "Digital Personal Data Protection Act, 2023",
@@ -709,7 +714,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
         id: "introduction",
         heading: "1. Introduction",
         body: [
-          "This Privacy Policy (\"Policy\") governs the processing of personal data by JMP NEXTGENPAY PRIVATE LIMITED (CIN: U66190GJ2025PTC170905), a company incorporated under the Companies Act, 2013 and having its registered office at 2nd Floor, 201, Devi Arcade, Ashwini Kumar Road, Modi Maholla, Surat, Gujarat – 395008 (\"NextGenPay\", \"Company\", \"We\", \"Us\"), through its website www.nxtgpay.com, mobile applications and APIs (collectively, the \"Platform\").",
+          "This Privacy Policy (\"Policy\") governs the processing of personal data by eMoney (CIN: TBD), a company incorporated under the Companies Act, 2013 and having its registered office at First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana – 122002 (\"eMoney\", \"Company\", \"We\", \"Us\"), through its website emoney.today, mobile applications and APIs (collectively, the \"Platform\").",
           "By accessing or using the Platform, you (the \"Data Principal\") consent to the practices described in this Policy. If you do not agree, please do not use the Platform."
         ]
       },
@@ -787,7 +792,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
               "Lodge a complaint with the Data Protection Board of India."
             ]
           },
-          "To exercise any of the above rights, please write to our Grievance Officer at grievance@nxtgpay.com. We will respond within fifteen (15) working days."
+          "To exercise any of the above rights, please write to our Grievance Officer at grievance@emoney.today. We will respond within fifteen (15) working days."
         ]
       },
       {
@@ -832,7 +837,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
     title: "Terms & Conditions",
     eyebrow: "Legal · Terms of Use",
     description:
-      "The contract between you and JMP NEXTGENPAY PRIVATE LIMITED for use of the NextGenPay Platform, drawn up under the Indian Contract Act, 1872 and the Information Technology Act, 2000.",
+      "The contract between you and eMoney for use of the eMoney Platform, drawn up under the Indian Contract Act, 1872 and the Information Technology Act, 2000.",
     lastUpdated: "01 April 2026",
     governedBy: [
       "Indian Contract Act, 1872",
@@ -845,7 +850,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
         id: "acceptance",
         heading: "1. Acceptance of Terms",
         body: [
-          "These Terms & Conditions (\"Terms\") form a binding electronic record under Section 10A of the Information Technology Act, 2000 between you (\"User\", \"Retailer\", \"Distributor\", \"Customer\") and JMP NEXTGENPAY PRIVATE LIMITED (\"NextGenPay\", \"Company\"). By registering, accessing or using the Platform you accept these Terms in full."
+          "These Terms & Conditions (\"Terms\") form a binding electronic record under Section 10A of the Information Technology Act, 2000 between you (\"User\", \"Retailer\", \"Distributor\", \"Customer\") and eMoney (\"eMoney\", \"Company\"). By registering, accessing or using the Platform you accept these Terms in full."
         ]
       },
       {
@@ -859,7 +864,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
         id: "services",
         heading: "3. Description of services",
         body: [
-          "NextGenPay is a technology aggregator that facilitates digital financial services including, but not limited to, AePS, DMT, BBPS, UPI, recharges, travel bookings and PAN application. The underlying banking / settlement services are provided by RBI-licensed sponsor banks and NPCI rails. NextGenPay does not itself accept deposits or extend credit."
+          "eMoney is a technology aggregator that facilitates digital financial services including, but not limited to, AePS, DMT, BBPS, UPI, recharges, travel bookings and PAN application. The underlying banking / settlement services are provided by RBI-licensed sponsor banks and NPCI rails. eMoney does not itself accept deposits or extend credit."
         ]
       },
       {
@@ -869,7 +874,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
           {
             list: [
               "You shall complete KYC as required under the RBI Master Direction on KYC, 2016 prior to availing transactional services.",
-              "You are responsible for maintaining confidentiality of your login credentials, MPIN, biometric authentication and OTPs. NextGenPay will never ask for these over phone, SMS or e-mail.",
+              "You are responsible for maintaining confidentiality of your login credentials, MPIN, biometric authentication and OTPs. eMoney will never ask for these over phone, SMS or e-mail.",
               "Any transaction performed using your credentials shall be deemed to be performed by you.",
               "You shall not share, sublicense or commercially exploit your access in violation of these Terms."
             ]
@@ -903,35 +908,35 @@ export const legalDocuments: Record<string, LegalDocument> = {
         id: "intellectual",
         heading: "7. Intellectual property",
         body: [
-          "All trademarks, logos, software, designs, content and brand elements on the Platform are the exclusive property of JMP NEXTGENPAY PRIVATE LIMITED or its licensors, and are protected under the Copyright Act, 1957 and the Trade Marks Act, 1999. No part of the Platform may be reproduced without prior written consent."
+          "All trademarks, logos, software, designs, content and brand elements on the Platform are the exclusive property of eMoney or its licensors, and are protected under the Copyright Act, 1957 and the Trade Marks Act, 1999. No part of the Platform may be reproduced without prior written consent."
         ]
       },
       {
         id: "liability",
         heading: "8. Limitation of liability",
         body: [
-          "To the maximum extent permitted by law, the aggregate liability of NextGenPay arising out of or relating to the use of the Platform shall not exceed the aggregate commission earned by, or fees paid by, the User in the three (3) months preceding the event giving rise to the claim. NextGenPay shall not be liable for indirect, incidental, consequential, punitive or special damages."
+          "To the maximum extent permitted by law, the aggregate liability of eMoney arising out of or relating to the use of the Platform shall not exceed the aggregate commission earned by, or fees paid by, the User in the three (3) months preceding the event giving rise to the claim. eMoney shall not be liable for indirect, incidental, consequential, punitive or special damages."
         ]
       },
       {
         id: "force",
         heading: "9. Force majeure",
         body: [
-          "NextGenPay shall not be liable for any failure or delay arising out of events beyond its reasonable control, including acts of God, war, pandemics, regulatory action, internet outages, sponsor-bank downtime or NPCI / UIDAI service disruptions."
+          "eMoney shall not be liable for any failure or delay arising out of events beyond its reasonable control, including acts of God, war, pandemics, regulatory action, internet outages, sponsor-bank downtime or NPCI / UIDAI service disruptions."
         ]
       },
       {
         id: "termination",
         heading: "10. Suspension & termination",
         body: [
-          "NextGenPay reserves the right to suspend or terminate your account, with or without notice, where it has reasonable grounds to believe that you are in breach of these Terms, applicable law, or any RBI / NPCI / UIDAI direction."
+          "eMoney reserves the right to suspend or terminate your account, with or without notice, where it has reasonable grounds to believe that you are in breach of these Terms, applicable law, or any RBI / NPCI / UIDAI direction."
         ]
       },
       {
         id: "law",
         heading: "11. Governing law & dispute resolution",
         body: [
-          "These Terms shall be governed by and construed in accordance with the laws of India. Any dispute, controversy or claim arising out of or in connection with these Terms shall first be attempted to be resolved through good-faith negotiation, failing which through arbitration by a sole arbitrator appointed under the Arbitration & Conciliation Act, 1996. The seat and venue of arbitration shall be Surat, Gujarat. The courts at Surat shall have exclusive jurisdiction subject to the arbitration clause."
+          "These Terms shall be governed by and construed in accordance with the laws of India. Any dispute, controversy or claim arising out of or in connection with these Terms shall first be attempted to be resolved through good-faith negotiation, failing which through arbitration by a sole arbitrator appointed under the Arbitration & Conciliation Act, 1996. The seat and venue of arbitration shall be Gurugram, Haryana. The courts at Gurugram shall have exclusive jurisdiction subject to the arbitration clause."
         ]
       },
       {
@@ -960,7 +965,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
         id: "scope",
         heading: "1. Scope",
         body: [
-          "This Refund Policy applies to all transactions initiated through the NextGenPay Platform — AePS, DMT, BBPS, UPI, recharges, travel bookings and any value-added services. Refunds for products / services delivered by third-party billers (electricity boards, telecom operators, airlines, IRCTC, hotel chains) are governed by the policies of the respective billers, but NextGenPay will assist you with end-to-end follow-up."
+          "This Refund Policy applies to all transactions initiated through the eMoney Platform — AePS, DMT, BBPS, UPI, recharges, travel bookings and any value-added services. Refunds for products / services delivered by third-party billers (electricity boards, telecom operators, airlines, IRCTC, hotel chains) are governed by the policies of the respective billers, but eMoney will assist you with end-to-end follow-up."
         ]
       },
       {
@@ -989,8 +994,8 @@ export const legalDocuments: Record<string, LegalDocument> = {
         body: [
           {
             list: [
-              "Log in to your NextGenPay dashboard → Transactions → Raise Dispute.",
-              "Or e-mail support@nxtgpay.com with the transaction reference number (RRN), date, amount and a short description.",
+              "Log in to your eMoney dashboard → Transactions → Raise Dispute.",
+              "Or e-mail support@emoney.today with the transaction reference number (RRN), date, amount and a short description.",
               "For UPI disputes you may also raise a request directly with the issuer bank, the NPCI UDIR portal or the RBI Digital Ombudsman."
             ]
           }
@@ -1023,8 +1028,8 @@ export const legalDocuments: Record<string, LegalDocument> = {
           "If you are not satisfied with the resolution provided at L1 support within 7 days, escalate to:",
           {
             list: [
-              "L2 — Grievance Officer, grievance@nxtgpay.com (response within 15 working days)",
-              "L3 — Principal Nodal Officer, nodal@nxtgpay.com",
+              "L2 — Grievance Officer, grievance@emoney.today (response within 15 working days)",
+              "L3 — Principal Nodal Officer, nodal@emoney.today",
               "L4 — RBI Integrated Ombudsman Scheme, 2021 at cms.rbi.org.in or NPCI Digital Ombudsman"
             ]
           }
@@ -1037,7 +1042,7 @@ export const legalDocuments: Record<string, LegalDocument> = {
     title: "Charges & Fees",
     eyebrow: "Legal · Pricing transparency",
     description:
-      "All convenience fees, commissions and GST that may apply to transactions on the NextGenPay Platform — published in line with RBI's directions on display of charges.",
+      "All convenience fees, commissions and GST that may apply to transactions on the eMoney Platform — published in line with RBI's directions on display of charges.",
     lastUpdated: "01 April 2026",
     governedBy: [
       "RBI Master Direction on Issuance & Operation of PPIs, 2021",
@@ -1119,9 +1124,9 @@ export const legalDocuments: Record<string, LegalDocument> = {
           {
             list: [
               "In-app — Help → Raise a Ticket",
-              "E-mail — support@nxtgpay.com",
-              "WhatsApp / Phone — +91 8780224955 (10 AM – 6 PM IST, Mon–Sat)",
-              "Letter — Customer Care, JMP NEXTGENPAY PRIVATE LIMITED, 2nd Floor, 201, Devi Arcade, Ashwini Kumar Road, Modi Maholla, Surat – 395008"
+              "E-mail — support@emoney.today",
+              "WhatsApp / Phone — +91 0000000000 (10 AM – 6 PM IST, Mon–Sat)",
+              "Letter — Customer Care, eMoney, First Floor, JMD Empire Square, Mehrauli - Gurgaon Road, A-Block, DLF Phase-1, Sector-24, Gurugram, Haryana – 122002"
             ]
           }
         ]
@@ -1134,9 +1139,9 @@ export const legalDocuments: Record<string, LegalDocument> = {
             table: {
               headers: ["Level", "Officer", "Channel", "TAT"],
               rows: [
-                ["Level 1", "Customer Care Executive", "support@nxtgpay.com", "7 working days"],
-                ["Level 2", "Grievance Officer", "grievance@nxtgpay.com · +91 8780224955", "15 working days"],
-                ["Level 3", "Principal Nodal Officer", "nodal@nxtgpay.com · +91 8780224955", "30 days"],
+                ["Level 1", "Customer Care Executive", "support@emoney.today", "7 working days"],
+                ["Level 2", "Grievance Officer", "grievance@emoney.today · +91 0000000000", "15 working days"],
+                ["Level 3", "Principal Nodal Officer", "nodal@emoney.today · +91 0000000000", "30 days"],
                 ["Level 4", "RBI Integrated Ombudsman", "cms.rbi.org.in · 14448 (toll-free)", "As per scheme"]
               ]
             }
@@ -1320,11 +1325,11 @@ export type AuditEvent = {
 };
 
 export const auditEvents: AuditEvent[] = [
-  { id: "AU-94221", actor: "admin@nxtgpay.com", action: "Approved KYC", target: "Vivek Joshi (KYC-004)", ip: "10.18.4.21", ts: "Apr 19, 10:22 AM", severity: "info" },
-  { id: "AU-94220", actor: "neha.k@nxtgpay.com", action: "Override commission", target: "DMT IMPS · JNPD2017", ip: "49.207.211.4", ts: "Apr 19, 09:51 AM", severity: "warn" },
-  { id: "AU-94219", actor: "admin@nxtgpay.com", action: "Suspended retailer", target: "JNPR3217 (Patil Enterprises)", ip: "10.18.4.21", ts: "Apr 19, 09:14 AM", severity: "danger" },
+  { id: "AU-94221", actor: "admin@emoney.today", action: "Approved KYC", target: "Vivek Joshi (KYC-004)", ip: "10.18.4.21", ts: "Apr 19, 10:22 AM", severity: "info" },
+  { id: "AU-94220", actor: "neha.k@emoney.today", action: "Override commission", target: "DMT IMPS · JNPD2017", ip: "49.207.211.4", ts: "Apr 19, 09:51 AM", severity: "warn" },
+  { id: "AU-94219", actor: "admin@emoney.today", action: "Suspended retailer", target: "JNPR3217 (Patil Enterprises)", ip: "10.18.4.21", ts: "Apr 19, 09:14 AM", severity: "danger" },
   { id: "AU-94218", actor: "system", action: "Biller routing failover", target: "DTH · Tata Play → fallback", ip: "n/a", ts: "Apr 19, 08:42 AM", severity: "warn" },
-  { id: "AU-94217", actor: "rohit.v@nxtgpay.com", action: "Approved fund request", target: "FR-9003 · ₹15,000", ip: "182.65.21.99", ts: "Apr 18, 06:30 PM", severity: "info" },
+  { id: "AU-94217", actor: "rohit.v@emoney.today", action: "Approved fund request", target: "FR-9003 · ₹15,000", ip: "182.65.21.99", ts: "Apr 18, 06:30 PM", severity: "info" },
   { id: "AU-94216", actor: "system", action: "Settlement run", target: "T+1 · ₹8.42 Cr · 12,481 txns", ip: "n/a", ts: "Apr 18, 11:05 PM", severity: "info" }
 ];
 
@@ -1561,11 +1566,11 @@ export type QrCodeItem = {
 };
 
 export const qrCodes: QrCodeItem[] = [
-  { id: "QR-5001", type: "Static", label: "Shop Counter 1", vpa: "nextgenpay.desai@icici", created: "May 02, 2026", payments: 1841, collected: 1284500, status: "Active" },
-  { id: "QR-5002", type: "Static", label: "Shop Counter 2", vpa: "nextgenpay.desai2@icici", created: "May 02, 2026", payments: 644, collected: 412800, status: "Active" },
-  { id: "QR-5014", type: "Dynamic", label: "Invoice #4421", vpa: "nextgenpay.desai@icici", amount: 12400, created: "Jun 12, 2026", payments: 1, collected: 12400, status: "Expired" },
-  { id: "QR-5015", type: "Dynamic", label: "Invoice #4427", vpa: "nextgenpay.desai@icici", amount: 8600, created: "Jun 12, 2026", payments: 0, collected: 0, status: "Active" },
-  { id: "QR-5009", type: "Static", label: "Delivery Van", vpa: "nextgenpay.desai3@icici", created: "May 22, 2026", payments: 102, collected: 89200, status: "Disabled" }
+  { id: "QR-5001", type: "Static", label: "Shop Counter 1", vpa: "eMoney.desai@icici", created: "May 02, 2026", payments: 1841, collected: 1284500, status: "Active" },
+  { id: "QR-5002", type: "Static", label: "Shop Counter 2", vpa: "eMoney.desai2@icici", created: "May 02, 2026", payments: 644, collected: 412800, status: "Active" },
+  { id: "QR-5014", type: "Dynamic", label: "Invoice #4421", vpa: "eMoney.desai@icici", amount: 12400, created: "Jun 12, 2026", payments: 1, collected: 12400, status: "Expired" },
+  { id: "QR-5015", type: "Dynamic", label: "Invoice #4427", vpa: "eMoney.desai@icici", amount: 8600, created: "Jun 12, 2026", payments: 0, collected: 0, status: "Active" },
+  { id: "QR-5009", type: "Static", label: "Delivery Van", vpa: "eMoney.desai3@icici", created: "May 22, 2026", payments: 102, collected: 89200, status: "Disabled" }
 ];
 
 export type QrPayment = {

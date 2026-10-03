@@ -17,14 +17,14 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "NextGenPay — Payment Gateway, POS & QR Payments",
-    template: "%s · NextGenPay"
+    default: "eMoney — Payment Gateway, POS & QR Payments",
+    template: "%s · eMoney"
   },
   description:
-    "NextGenPay (JMP NEXTGENPAY PRIVATE LIMITED, Surat) is a fintech distribution platform offering payment gateway, POS machines, QR collections, AePS, money transfer, recharges and bill payments for retailers and merchants across India.",
+    "eMoney is a next-generation fintech distribution platform offering payment gateway, POS machines, QR collections, AePS, money transfer, recharges and bill payments for retailers and merchants across India.",
   keywords: [
-    "NextGenPay",
-    "nxtgpay",
+    "eMoney",
+    "emoney.today",
     "payment gateway",
     "POS machine",
     "QR payments",
@@ -37,14 +37,18 @@ export const metadata: Metadata = {
     "fintech India",
     "agent banking"
   ],
-  metadataBase: new URL("https://nxtgenpay.space"),
+  metadataBase: new URL("https://emoney.today"),
   openGraph: {
-    title: "NextGenPay — Payment Gateway, POS & QR Payments",
+    title: "eMoney — Payment Gateway, POS & QR Payments",
     description:
       "Payment gateway, POS machines, QR collections and 60+ digital services for retailers, distributors and merchants.",
-    url: "https://nxtgenpay.space",
-    siteName: "NextGenPay",
+    url: "https://emoney.today",
+    siteName: "eMoney",
     type: "website"
+  },
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/eMoney_logo.png" }]
   }
 };
 

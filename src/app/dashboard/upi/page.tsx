@@ -10,9 +10,9 @@ export default function UpiPage() {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [copied, setCopied] = useState(false);
-  const upiId = "nextgenpay@axisbank";
-  const link = `upi://pay?pa=${upiId}&pn=NextGenPay&am=${amount}&tn=${encodeURIComponent(
-    note || "NextGenPay payment"
+  const upiId = "eMoney@axisbank";
+  const link = `upi://pay?pa=${upiId}&pn=eMoney&am=${amount}&tn=${encodeURIComponent(
+    note || "eMoney payment"
   )}&cu=INR`;
 
   function copy() {

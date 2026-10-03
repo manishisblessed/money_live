@@ -1,14 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none" role="img" aria-label="NextGenPay">
-  <!-- ===== MARK ===== -->
-  <g transform="translate(0 6) scale(1.636)">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z" fill="#7367F0"/>
-    <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd" d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z" fill="#161616"/>
-    <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd" d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z" fill="#161616"/>
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z" fill="#7367F0"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none" role="img" aria-label="eMoney">
+  <defs>
+    <linearGradient id="emoney-mark-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E88E5"/>
+      <stop offset="55%" stop-color="#1DA7B0"/>
+      <stop offset="100%" stop-color="#22C55E"/>
+    </linearGradient>
+    <linearGradient id="emoney-arrow-grad" x1="0" y1="48" x2="48" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E88E5"/>
+      <stop offset="100%" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Speed lines -->
+  <g stroke="url(#emoney-arrow-grad)" stroke-width="2.6" stroke-linecap="round" opacity="0.85">
+    <line x1="2"  y1="20" x2="12" y2="20"/>
+    <line x1="4"  y1="28" x2="14" y2="28"/>
+    <line x1="6"  y1="36" x2="16" y2="36"/>
   </g>
 
-  <!-- ===== WORDMARK ===== -->
-  <text x="66" y="33" font-family="Manrope, 'Segoe UI', system-ui, sans-serif" font-size="26" font-weight="800" letter-spacing="-0.6" fill="#0e1626">
-    NextGenPay
+  <!-- "e" circular mark -->
+  <g transform="translate(16 6)">
+    <circle cx="18" cy="18" r="17" fill="url(#emoney-mark-grad)"/>
+    <path d="M26.5 22.5c-1.6 2.6-4.5 4.3-7.8 4.3-5 0-9-4-9-9s4-9 9-9c4.9 0 8.9 3.9 9 8.7 0 .6-.5 1-1.1 1h-13"
+          fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="60" y="33" font-family="Manrope, 'Segoe UI', system-ui, sans-serif" font-size="26" font-weight="800" letter-spacing="-0.6" fill="#0e1626">
+    eMoney
   </text>
+
+  <!-- Rising arrow accent -->
+  <path d="M184 36 L212 14 L220 22 M212 14 L212 24 M212 14 L202 14"
+        fill="none" stroke="url(#emoney-arrow-grad)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -18,31 +18,33 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // Brand = eMoney primary blue (matches logo "e" mark)
         brand: {
-          50: "#eef1fb",
-          100: "#dce3f7",
-          200: "#c0cdf0",
-          300: "#95abe4",
-          400: "#6383d4",
-          500: "#4263c7",
-          600: "#2e49ad",
-          700: "#273b8d",
-          800: "#243373",
-          900: "#1a2350",
-          950: "#10142e"
+          50: "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
+          400: "#60a5fa",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+          950: "#0b1f52"
         },
+        // Accent = eMoney growth green (matches rising arrow)
         accent: {
-          50: "#fdf2f4",
-          100: "#fce7eb",
-          200: "#f9d0d9",
-          300: "#f4a9ba",
-          400: "#ed7392",
-          500: "#e94560",
-          600: "#d52a52",
-          700: "#b41d45",
-          800: "#971b40",
-          900: "#811a3c",
-          950: "#48091d"
+          50: "#ecfdf5",
+          100: "#d1fae5",
+          200: "#a7f3d0",
+          300: "#6ee7b7",
+          400: "#34d399",
+          500: "#22c55e",
+          600: "#16a34a",
+          700: "#15803d",
+          800: "#166534",
+          900: "#14532d",
+          950: "#052e16"
         },
         ink: {
           50: "#f5f7fa",
@@ -76,14 +78,17 @@ const config: Config = {
         ]
       },
       backgroundImage: {
+        // eMoney hero: blue top-left → green bottom-right
         "hero-radial":
-          "radial-gradient(60% 80% at 50% 0%, rgba(66,99,199,0.18) 0%, rgba(66,99,199,0) 60%), radial-gradient(40% 60% at 100% 100%, rgba(233,69,96,0.12) 0%, rgba(233,69,96,0) 60%)",
+          "radial-gradient(60% 80% at 50% 0%, rgba(37,99,235,0.18) 0%, rgba(37,99,235,0) 60%), radial-gradient(40% 60% at 100% 100%, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0) 60%)",
         "grid-pattern":
-          "linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px)"
+          "linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px)",
+        "brand-gradient":
+          "linear-gradient(135deg, #1E88E5 0%, #1DA7B0 55%, #22C55E 100%)"
       },
       boxShadow: {
         soft: "0 10px 30px -12px rgba(15,23,42,0.18)",
-        glow: "0 20px 50px -12px rgba(66,99,199,0.45)"
+        glow: "0 20px 50px -12px rgba(37,99,235,0.45)"
       },
       keyframes: {
         "fade-up": {

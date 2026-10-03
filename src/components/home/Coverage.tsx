@@ -28,7 +28,7 @@ export function Coverage() {
             </h2>
             <p className="lead mt-5">
               35 lakh+ kirana shops, CSPs and distributors in 19,400+ PIN codes
-              already power their daily ledger on NextGenPay. The app, dashboard
+              already power their daily ledger on eMoney. The app, dashboard
               and support team operate in nine Indian languages so no retailer
               is left behind.
             </p>

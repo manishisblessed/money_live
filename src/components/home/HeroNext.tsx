@@ -65,7 +65,7 @@ export function HeroNext() {
           </h1>
 
           <p className="lead mt-6 max-w-2xl animate-fade-up [animation-delay:160ms]">
-            NextGenPay is the operating system for India&apos;s digital banking economy. 60+ services,
+            eMoney is the operating system for India&apos;s digital banking economy. 60+ services,
             4 personas, real-time settlements, 99.97% uptime — built for the next 100 million retailers.
           </p>
 
@@ -178,7 +178,7 @@ function Hero3DCard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest text-ink-500">
-                NextGenPay Wallet
+                eMoney Wallet
               </p>
               <p className="mt-1 font-display text-2xl font-bold text-ink-900">
                 ₹ 28,450.00

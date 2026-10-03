@@ -21,7 +21,7 @@ import { api, ApiError } from "@/lib/api";
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState("retailer@nxtgpay.com");
+  const [email, setEmail] = useState("retailer@emoney.today");
   const [password, setPassword] = useState("Demo@1234");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -63,7 +63,7 @@ export default function Login() {
       const enrolled = await LocalAuth.isEnrolledAsync();
       if (!has || !enrolled) return signIn();
       const r = await LocalAuth.authenticateAsync({
-        promptMessage: "Sign in to NextGenPay",
+        promptMessage: "Sign in to eMoney",
         cancelLabel: "Use password",
         disableDeviceFallback: false
       });
@@ -145,7 +145,7 @@ export default function Login() {
           <View style={styles.demo}>
             <Text style={styles.demoText}>
               <Text style={{ fontWeight: "800" }}>Demo · </Text>
-              retailer@nxtgpay.com / Demo@1234
+              retailer@emoney.today / Demo@1234
             </Text>
           </View>
         </View>

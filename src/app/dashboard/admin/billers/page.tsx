@@ -80,7 +80,7 @@ export default function AdminBillersPage() {
           <>
             <ReportActions
               filename="billers"
-              title="JMP NextGenPay · Billers & Routing"
+              title="JMP eMoney · Billers & Routing"
               subtitle="Category-level uptime and routing"
               columns={[
                 { key: "category", header: "Category" },

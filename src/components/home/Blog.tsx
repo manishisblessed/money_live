@@ -13,7 +13,7 @@ export function Blog() {
         <Reveal>
           <SectionHeading
             eyebrow="News & insights"
-            title="Latest from NextGenPay"
+            title="Latest from eMoney"
             description="Tips, trends and product updates to help your business grow faster."
           />
         </Reveal>

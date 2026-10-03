@@ -1,8 +1,8 @@
 {
-  "name": "nextgenpay-portal",
+  "name": "emoney-portal",
   "version": "0.1.0",
   "private": true,
-  "description": "NextGenPay (JMP NEXTGENPAY PRIVATE LIMITED) - Digital banking & utility fintech portal",
+  "description": "eMoney — Digital banking & utility fintech portal (emoney.today)",
   "scripts": {
     "dev": "next dev --turbo",
     "dev:all": "concurrently -k -n web,worker -c cyan,magenta \"npm run dev\" \"npm run worker\"",

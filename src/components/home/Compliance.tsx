@@ -28,7 +28,7 @@ export function Compliance() {
               </span>
             </h2>
             <p className="mt-4 max-w-2xl text-white/70">
-              Every rupee that moves through NextGenPay is settled through
+              Every rupee that moves through eMoney is settled through
               RBI-licensed sponsor banks, certified NPCI rails and ISO-grade
               security controls — and every byte stays inside Indian data
               centres as mandated by the RBI on Storage of Payment System Data,

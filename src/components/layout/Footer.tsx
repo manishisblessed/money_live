@@ -47,7 +47,7 @@ export function Footer() {
           <div className="md:col-span-2 lg:col-span-4">
             <Logo variant="light" />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-400">
-              NextGenPay simplifies high-end fintech so anyone — from a village
+              eMoney simplifies high-end fintech so anyone — from a village
               kirana to an urban distributor — can offer 60+ digital services
               and grow with us. Engineered in Bharat, certified by India.
             </p>

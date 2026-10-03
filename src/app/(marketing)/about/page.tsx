@@ -37,7 +37,7 @@ import { company } from "@/lib/data";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "NextGenPay (operated by JMP NEXTGENPAY PRIVATE LIMITED) is a Surat-born digital banking & utility fintech building the rails that bring formal financial services to every Indian — from village kiranas to urban distributors."
+    "eMoney (operated by eMoney) is a Surat-born digital banking & utility fintech building the rails that bring formal financial services to every Indian — from village kiranas to urban distributors."
 };
 
 const values = [
@@ -191,17 +191,17 @@ const milestones = [
   {
     year: "Q1 2025",
     title: "The idea",
-    text: "Founders walk into 200+ kirana stores across Gujarat. The brief becomes painfully clear: Bharat needs one trusted, fair, instant rail."
+    text: "Founders walk into 200+ kirana stores across the NCR. The brief becomes painfully clear: Bharat needs one trusted, fair, instant rail."
   },
   {
     year: "Q2 2025",
     title: "Incorporation",
-    text: "JMP NEXTGENPAY PRIVATE LIMITED is incorporated in Surat, Gujarat (CIN U66190GJ2025PTC170905)."
+    text: "eMoney is registered in Gurugram, Haryana — CIN TBD."
   },
   {
     year: "Q3 2025",
     title: "First go-live",
-    text: "AePS, DMT and BBPS go live for our first 50 pilot retailers across Surat, Vadodara and Ahmedabad."
+    text: "AePS, DMT and BBPS go live for our first 50 pilot retailers across Delhi NCR, Jaipur and Chandigarh."
   },
   {
     year: "Q4 2025",
@@ -263,7 +263,7 @@ export default function AboutPage() {
         }
         description={
           <>
-            NextGenPay (operated by{" "}
+            eMoney (operated by{" "}
             <span className="font-semibold text-ink-800">{company.legalName}</span>,
             CIN {company.cin}) is a digital banking &amp; utility fintech
             platform on a mission to simplify financial services for every
@@ -308,7 +308,7 @@ export default function AboutPage() {
           <SectionHeading
             eyebrow="By the numbers"
             title="A network growing faster than ever"
-            description="Real-time snapshot of the NextGenPay network — updated every quarter, audited every year."
+            description="Real-time snapshot of the eMoney network — updated every quarter, audited every year."
             align="left"
           />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -348,7 +348,7 @@ export default function AboutPage() {
                 Born in Surat. <span className="gradient-text">Built for Bharat.</span>
               </h2>
               <p className="lead mt-5">
-                NextGenPay started in a small office in Surat in 2025 with a
+                eMoney started in a small office in Surat in 2025 with a
                 stubborn belief — that the same financial services available to
                 a Mumbai professional should be available to a kirana owner in
                 Banswara, in seconds, in their language, at a fair price.
@@ -397,7 +397,7 @@ export default function AboutPage() {
                         Headquartered in
                       </p>
                       <p className="mt-1 font-display text-xl font-bold text-ink-900">
-                        Surat, Gujarat
+                        Gurugram, Haryana
                       </p>
                       <p className="mt-1 text-sm text-ink-500">
                         Diamond city. Now a fintech city too.
@@ -463,7 +463,7 @@ export default function AboutPage() {
       <Section className="bg-ink-50/50">
         <Container>
           <SectionHeading
-            eyebrow="Why NextGenPay"
+            eyebrow="Why eMoney"
             title="Six things we refuse to compromise on"
             description="The retailer down the street is running a small business with thin margins. They deserve a tech partner that takes their time, money and trust seriously."
             align="left"
@@ -536,7 +536,7 @@ export default function AboutPage() {
               </h2>
               <p className="lead mt-5">
                 We measure success in pin codes, not in metros. Today
-                NextGenPay&rsquo;s rails reach 650+ districts and 10,000+ pin
+                eMoney&rsquo;s rails reach 650+ districts and 10,000+ pin
                 codes — including blocks where the nearest bank branch is over
                 15 km away.
               </p>
@@ -571,7 +571,7 @@ export default function AboutPage() {
           <SectionHeading
             eyebrow="Trust &amp; compliance"
             title="Regulated by design, not by reaction"
-            description="Compliance isn't a department at NextGenPay — it's a starting point. Every product decision is reviewed by our compliance team before a single line of customer-facing code is written."
+            description="Compliance isn't a department at eMoney — it's a starting point. Every product decision is reviewed by our compliance team before a single line of customer-facing code is written."
             align="left"
           />
           <div className="grid gap-4 md:grid-cols-3">
@@ -619,7 +619,7 @@ export default function AboutPage() {
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
               <span className="eyebrow">Leadership</span>
-              <h2 className="heading-lg mt-4">The people behind NextGenPay</h2>
+              <h2 className="heading-lg mt-4">The people behind eMoney</h2>
               <p className="mt-2 max-w-xl text-ink-600">
                 A small founding team with deep payments, design and field
                 experience — backed by a wider crew of 85+ engineers,

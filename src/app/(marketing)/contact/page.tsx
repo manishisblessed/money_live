@@ -32,7 +32,7 @@ const channels = [
   {
     icon: Headphones,
     label: "Agent helpdesk",
-    value: "agent@nxtgpay.com",
+    value: "agent@emoney.today",
     sub: "For onboarded agents only"
   }
 ];
@@ -115,7 +115,7 @@ export default function ContactPage() {
                   Visit our HQ
                 </h2>
                 <p className="mt-2 text-sm text-ink-700">
-                  At Devi Arcade on Ashwini Kumar Road — in the heart of Surat's bustling commercial district.
+                  At JMD Empire Square on Mehrauli - Gurgaon Road — in the heart of DLF Phase-1, Gurugram.
                 </p>
                 <div className="mt-6 space-y-4 text-sm text-ink-700">
                   <div className="flex items-start gap-3">
@@ -144,8 +144,8 @@ export default function ContactPage() {
                 </div>
                 <div className="mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-white/60 bg-white">
                   <iframe
-                    title="JMP NextGenPay HQ — Devi Arcade, Ashwini Kumar Road, Surat"
-                    src="https://www.google.com/maps?q=Devi+Arcade+Ashwini+Kumar+Road+Surat+Gujarat+395008&output=embed"
+                    title="eMoney HQ — JMD Empire Square, DLF Phase-1, Gurugram"
+                    src="https://www.google.com/maps?q=JMD+Empire+Square+Mehrauli+Gurgaon+Road+DLF+Phase+1+Sector+24+Gurugram+Haryana+122002&output=embed"
                     className="h-full w-full"
                     loading="lazy"
                   />

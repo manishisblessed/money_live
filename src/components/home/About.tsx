@@ -52,7 +52,7 @@ export function About() {
           </div>
 
           <div className="lg:col-span-6">
-            <span className="eyebrow">About NextGenPay</span>
+            <span className="eyebrow">About eMoney</span>
             <h2 className="heading-lg mt-4">
               Digitizing financial services for every corner of India
             </h2>
@@ -60,7 +60,7 @@ export function About() {
               We simplify high-end financial technology so it can be assimilated
               at the last mile — transforming the lives of our retail partners
               and the customers they serve. From a Tier-1 metro to a remote
-              village in Bihar, NextGenPay makes formal banking and
+              village in Bihar, eMoney makes formal banking and
               digital services available, affordable and instant.
             </p>
 

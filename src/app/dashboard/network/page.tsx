@@ -314,7 +314,7 @@ export default function NetworkPage() {
           <>
             <ReportActions
               filename={`my-${meta.plural.replace(/ /g, "-")}`}
-              title={`JMP NextGenPay · My ${meta.plural.replace(/\b\w/g, (c) => c.toUpperCase())}`}
+              title={`JMP eMoney · My ${meta.plural.replace(/\b\w/g, (c) => c.toUpperCase())}`}
               subtitle={`${users.length} record${users.length === 1 ? "" : "s"}`}
               columns={[
                 { key: "id", header: "Code" },

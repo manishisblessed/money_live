@@ -136,7 +136,7 @@ export default function Profile() {
           <Text style={{ color: colors.rose[600], fontWeight: "800", marginLeft: 8 }}>Sign out</Text>
         </Pressable>
 
-        <Text style={styles.foot}>NextGenPay v1.0.0 · Powered by JMP NEXTGENPAY PRIVATE LIMITED</Text>
+        <Text style={styles.foot}>eMoney v1.0.0 · Powered by eMoney</Text>
       </ScrollView>
     </SafeAreaView>
   );

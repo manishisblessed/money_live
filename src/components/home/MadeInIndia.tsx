@@ -33,7 +33,7 @@ export function MadeInIndia() {
               — UPI, Aadhaar, BBPS &amp; ONDC.
             </h2>
             <p className="lead mt-5 max-w-2xl">
-              NextGenPay is a 100% Indian fintech stack — engineered in Surat,
+              eMoney is a 100% Indian fintech stack — engineered in Surat,
               hosted on Indian soil, and certified by every domestic regulator
               that matters. Every line of code is aligned with national missions
               that move Bharat from cash to digital.
