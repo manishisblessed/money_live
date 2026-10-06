@@ -290,9 +290,9 @@ export const viableUpi: UpiProvider = {
   async collect(input: UpiCollectInput): Promise<PartnerResult<UpiCollectOutput>> {
     const body = {
       amount: input.amount, // rupees (verified: Viable amounts are in ₹)
-      name: input.customerName || "NextGenPay Customer",
+      name: input.customerName || "eMoney Customer",
       mobile: input.customerPhone,
-      email: input.customerEmail || "noreply@nextgenpay.co.in",
+      email: input.customerEmail || "noreply@emoney.today",
       redirectUri: input.callbackUrl,
     };
     const requested = resolveChannelRoute(input.channel);
@@ -429,8 +429,8 @@ async function probeRoute(route: string): Promise<{ healthy: boolean; detail: st
       amount: PROBE_AMOUNT,
       name: "Health Probe",
       mobile: "9999999999",
-      email: "noreply@nextgenpay.co.in",
-      redirectUri: "https://nextgenpay.co.in/health",
+      email: "noreply@emoney.today",
+      redirectUri: "https://emoney.today/api/healthz",
     },
     { retries: 0 }
   );

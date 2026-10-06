@@ -464,7 +464,7 @@ export async function POST(
       const emailProvider = getPartner("email");
       await emailProvider.send({
         to: inviter.email,
-        subject: `NextGenPay — New Registration: ${data.name} awaits approval`,
+        subject: `eMoney — New Registration: ${data.name} awaits approval`,
         html: `
           <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;">
             <h1 style="color:#1e293b;font-size:22px;margin:0 0 16px;">New Registration Awaiting Approval</h1>
@@ -485,7 +485,7 @@ export async function POST(
             </div>
             <p style="color:#64748b;font-size:13px;">${["MASTER_ADMIN", "ADMIN", "SUPPORT"].includes(inviter.role) ? "Please review and approve within 48–72 working hours." : "An admin will review and activate the account within 48–72 working hours."}</p>
             <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
-            <p style="color:#94a3b8;font-size:12px;text-align:center;">NextGenPay — Emoney</p>
+            <p style="color:#94a3b8;font-size:12px;text-align:center;">eMoney</p>
           </div>
         `,
       });
@@ -514,7 +514,7 @@ export async function POST(
     const nextSteps = [
       { n: "1", t: "KYC & documents review", d: "Our compliance team is reviewing your submission." },
       { n: "2", t: "Approval within 48\u201372 hrs", d: "You'll be notified by email and SMS the moment it's approved." },
-      { n: "3", t: "Start transacting", d: "Log in to your dashboard and go live with NextGenPay services." },
+      { n: "3", t: "Start transacting", d: "Log in to your dashboard and go live with eMoney services." },
     ];
     const nextStepsHtml = nextSteps
       .map(
@@ -534,18 +534,18 @@ export async function POST(
     const emailProvider = getPartner("email");
     await emailProvider.send({
       to: invite.email,
-      subject: `Welcome to NextGenPay, ${firstName} \u2014 you're onboarded!`,
+      subject: `Welcome to eMoney, ${firstName} \u2014 you're onboarded!`,
       html: `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light" />
-    <title>Welcome to NextGenPay</title>
+    <title>Welcome to eMoney</title>
   </head>
   <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#0f172a;">
     <div style="display:none;font-size:1px;color:#f1f5f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
-      You're onboarded! Sign in to your NextGenPay ${roleLabel} account.
+      You're onboarded! Sign in to your eMoney ${roleLabel} account.
     </div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f5f9;padding:32px 12px;">
       <tr>
@@ -554,7 +554,7 @@ export async function POST(
             <tr>
               <td style="background:#4f46e5;background-image:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);padding:36px 32px;text-align:center;">
                 <div style="display:inline-block;padding:6px 14px;background:rgba(255,255,255,0.18);border-radius:999px;font-size:11px;font-weight:700;letter-spacing:1.4px;color:#ffffff;text-transform:uppercase;">
-                  NextGenPay
+                  eMoney
                 </div>
                 <h1 style="margin:18px 0 6px;font-size:26px;line-height:1.25;color:#ffffff;font-weight:700;">You're all set, ${firstName}!</h1>
                 <p style="margin:0;font-size:14px;color:#e0e7ff;">Your ${roleLabel} onboarding is complete.</p>
@@ -566,7 +566,7 @@ export async function POST(
                   Dear <strong style="color:#0f172a;">${data.name}</strong>,
                 </p>
                 <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#334155;">
-                  Thank you for choosing <strong>NextGenPay</strong>. We've successfully received your KYC, documents and business details for your <strong>${roleLabel}</strong> account.
+                  Thank you for choosing <strong>eMoney</strong>. We've successfully received your KYC, documents and business details for your <strong>${roleLabel}</strong> account.
                 </p>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;background:${statusBg};border:1px solid ${statusBorder};border-left:4px solid ${statusAccent};border-radius:12px;">
                   <tr>
@@ -621,9 +621,9 @@ export async function POST(
             </tr>
             <tr>
               <td style="padding:24px 32px 28px;background:#0f172a;color:#94a3b8;font-size:12px;line-height:1.6;text-align:center;">
-                <p style="margin:0 0 4px;color:#f1f5f9;font-weight:700;letter-spacing:0.4px;">NextGenPay</p>
-                <p style="margin:0 0 10px;color:#cbd5e1;">Emoney</p>
-                <p style="margin:0;color:#64748b;">&copy; ${year} NextGenPay. All rights reserved.<br />This is an automated message &mdash; please do not reply.</p>
+                <p style="margin:0 0 4px;color:#f1f5f9;font-weight:700;letter-spacing:0.4px;">eMoney</p>
+                <p style="margin:0 0 10px;color:#cbd5e1;">emoney.today</p>
+                <p style="margin:0;color:#64748b;">&copy; ${year} eMoney. All rights reserved.<br />This is an automated message &mdash; please do not reply.</p>
               </td>
             </tr>
           </table>

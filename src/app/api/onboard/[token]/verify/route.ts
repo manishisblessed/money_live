@@ -416,7 +416,7 @@ export async function POST(
               {
                 ok: false,
                 type: "AADHAAR_COMPLETE",
-                message: "This Aadhaar is already linked to another NextGenPay account. Each Aadhaar can only be used once.",
+                message: "This Aadhaar is already linked to another eMoney account. Each Aadhaar can only be used once.",
                 code: "AADHAAR_DUPLICATE",
               },
               { status: 409 }
@@ -462,7 +462,7 @@ export async function POST(
               {
                 ok: false,
                 type: "AADHAAR_COMPLETE",
-                message: "This Aadhaar is already linked to another NextGenPay account. Each Aadhaar can only be used once.",
+                message: "This Aadhaar is already linked to another eMoney account. Each Aadhaar can only be used once.",
                 code: "AADHAAR_DUPLICATE",
               },
               { status: 409 }
