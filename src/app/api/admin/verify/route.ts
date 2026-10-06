@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { requireRole, AuthError } from "@/lib/auth-server";
 import { requireAdminActivity } from "@/lib/security/adminActivity";
 import { toErrorResponse } from "@/lib/security/apiErrors";

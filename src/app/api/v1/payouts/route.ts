@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { prisma } from "@/lib/db";
 import { flags } from "@/lib/env";
 import { holdFunds, LedgerError } from "@/lib/ledger";

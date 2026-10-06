@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 

@@ -7,9 +7,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("→ Seeding NextGenPay database…");
 
+  // ── Demo password hash (Lion_9090702707) — shared by all demo accounts ──
+  const roleHash = await bcrypt.hash("Lion_9090702707", 12);
+
   // ── Master Admin (primary platform owner) ──
   const masterAdminHash = await bcrypt.hash("9090702707", 12);
-  const masterAdmin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: "manish@shahworks.com" },
     update: { passwordHash: masterAdminHash, status: UserStatus.ACTIVE },
     create: {
@@ -23,20 +26,56 @@ async function main() {
     }
   });
 
-  // ── Role network accounts (Lion_9090702707) ──
-  const roleHash = await bcrypt.hash("Lion_9090702707", 12);
+  // ── Demo Master Admin ──
+  const masterAdmin = await prisma.user.upsert({
+    where: { email: "support@grandhr.in" },
+    update: {
+      name: "Manish Master",
+      passwordHash: roleHash,
+      role: Role.MASTER_ADMIN,
+      status: UserStatus.ACTIVE,
+    },
+    create: {
+      name: "Manish Master",
+      email: "support@grandhr.in",
+      phone: "+919000000200",
+      passwordHash: roleHash,
+      role: Role.MASTER_ADMIN,
+      status: UserStatus.ACTIVE,
+    }
+  });
 
+  // ── Demo Admin ──
+  await prisma.user.upsert({
+    where: { email: "cto@samedaysolution.in" },
+    update: {
+      name: "Manish admin",
+      passwordHash: roleHash,
+      role: Role.ADMIN,
+      status: UserStatus.ACTIVE,
+    },
+    create: {
+      name: "Manish admin",
+      email: "cto@samedaysolution.in",
+      phone: "+919000000205",
+      passwordHash: roleHash,
+      role: Role.ADMIN,
+      status: UserStatus.ACTIVE,
+    }
+  });
+
+  // ── Role network accounts (Lion_9090702707) ──
   const demoSD = await prisma.user.upsert({
     where: { email: "manishspecial009@outlook.com" },
     update: {
-      name: "Manish K Shah",
+      name: "Manish SD",
       passwordHash: roleHash,
       role: Role.SUPER_DISTRIBUTOR,
       status: UserStatus.ACTIVE,
       walletBalance: 0,
     },
     create: {
-      name: "Manish K Shah",
+      name: "Manish SD",
       email: "manishspecial009@outlook.com",
       phone: "+919000000201",
       passwordHash: roleHash,
@@ -50,14 +89,14 @@ async function main() {
   const demoMD = await prisma.user.upsert({
     where: { email: "manishspecial009@gmail.com" },
     update: {
-      name: "Manish Kumar",
+      name: "Manish MD",
       passwordHash: roleHash,
       role: Role.MASTER_DISTRIBUTOR,
       status: UserStatus.ACTIVE,
       walletBalance: 0,
     },
     create: {
-      name: "Manish Kumar",
+      name: "Manish MD",
       email: "manishspecial009@gmail.com",
       phone: "+919000000202",
       passwordHash: roleHash,
@@ -71,14 +110,14 @@ async function main() {
   const demoDT = await prisma.user.upsert({
     where: { email: "manishkshah27@outlook.com" },
     update: {
-      name: "M K Shah",
+      name: "Manish DT",
       passwordHash: roleHash,
       role: Role.DISTRIBUTOR,
       status: UserStatus.ACTIVE,
       walletBalance: 0,
     },
     create: {
-      name: "M K Shah",
+      name: "Manish DT",
       email: "manishkshah27@outlook.com",
       phone: "+919000000203",
       passwordHash: roleHash,
@@ -92,7 +131,7 @@ async function main() {
   await prisma.user.upsert({
     where: { email: "manishisspecial@gmail.com" },
     update: {
-      name: "Manish Shah",
+      name: "Manish RT",
       passwordHash: roleHash,
       role: Role.RETAILER,
       status: UserStatus.ACTIVE,
@@ -100,7 +139,7 @@ async function main() {
       walletBalance: 0,
     },
     create: {
-      name: "Manish Shah",
+      name: "Manish RT",
       email: "manishisspecial@gmail.com",
       phone: "+919000000204",
       passwordHash: roleHash,
@@ -173,13 +212,15 @@ async function main() {
   console.log(`  Service routes: +${routes.created} new, ${routes.updated} refreshed`);
 
   console.log("✓ Seed complete.");
-  console.log("  Master Admin:        manish@shahworks.com / 9090702707");
+  console.log("  Master Admin (original): manish@shahworks.com / 9090702707");
   console.log("");
-  console.log("  Role accounts (password: Lion_9090702707):");
-  console.log("  Super Distributor:   manishspecial009@outlook.com  (Manish K Shah)");
-  console.log("  Master Distributor:  manishspecial009@gmail.com    (Manish Kumar)");
-  console.log("  Distributor:         manishkshah27@outlook.com     (M K Shah)");
-  console.log("  Retailer:            manishisspecial@gmail.com     (Manish Shah)");
+  console.log("  Demo accounts (password: Lion_9090702707):");
+  console.log("  Master Admin:        support@grandhr.in            (Manish Master)");
+  console.log("  Admin:               cto@samedaysolution.in        (Manish admin)");
+  console.log("  Super Distributor:   manishspecial009@outlook.com  (Manish SD)");
+  console.log("  Master Distributor:  manishspecial009@gmail.com    (Manish MD)");
+  console.log("  Distributor:         manishkshah27@outlook.com     (Manish DT)");
+  console.log("  Retailer:            manishisspecial@gmail.com     (Manish RT)");
   console.log("");
   console.log("  K3next accounts (password: K3next@250120):");
   console.log("  Super Distributor:   nikunjdeshani7878@gmail.com   (Nikunj Ashokbhai Deshani)");

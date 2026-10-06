@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../db";
 import { isNetworkTier } from "../../security/kycGate";

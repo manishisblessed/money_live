@@ -11,7 +11,7 @@
  *                     idempotencyKey `topup:<txnId>` so webhook + poll + admin
  *                     retry can all race safely.
  */
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../db";
 import { creditWallet } from "../ledger";

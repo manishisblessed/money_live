@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../db";
 import { maskTail } from "../crypto/fieldEncryption";

@@ -1,5 +1,5 @@
 import { Prisma, type ServiceCode, type TxnStatus } from "@prisma/client";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { prisma } from "../db";
 import { creditWallet, debitWallet, LedgerError } from "../ledger";
 import { add, sub, round } from "../money";

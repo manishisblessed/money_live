@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import type { Dispute, DisputeCategory, DisputePriority, DisputeStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { sendOpsAlert } from "@/lib/monitoring/alerts";

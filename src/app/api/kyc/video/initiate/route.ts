@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { requireAuth } from "@/lib/auth-server";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/security/rateLimit";
 import { clientIp } from "@/lib/security/audit";

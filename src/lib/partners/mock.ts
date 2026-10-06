@@ -4,7 +4,7 @@
  * occasionally fail so the UI / state machines exercise both happy and
  * sad paths.
  */
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import type {
   AepsProvider,
   BbpsProvider,

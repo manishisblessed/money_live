@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { flags, isProd } from "../env";
 import {
   ekychubConfigured,

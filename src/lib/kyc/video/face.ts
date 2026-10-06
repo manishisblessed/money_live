@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { mkdtemp, writeFile, readFile, rm } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { env, flags, isProd } from "../../env";
 import { ekychubConfigured, faceRegister as hubFaceRegister } from "../../partners/ekychub";
 import {

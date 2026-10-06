@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { isProd, flags } from "@/lib/env";
 import {
   samedaySettlementConfigured,

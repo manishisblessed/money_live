@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { requireRole, AuthError } from "@/lib/auth-server";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";

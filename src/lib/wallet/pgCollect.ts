@@ -15,7 +15,7 @@
  * This is what makes live PG payins flow: the BulkPe PG webhook (and the status
  * poll) resolve a `PGC…` reference to its Transaction and settle it here.
  */
-import { nanoid } from "nanoid";
+import { nanoid } from "@/lib/nanoid";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../db";
 import { getPartner, assertRealMoneyProvider } from "../partners";
