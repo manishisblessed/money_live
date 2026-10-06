@@ -66,7 +66,7 @@ async function shareInviteLink(link: string, name?: string | null) {
   if (typeof navigator !== "undefined" && "share" in navigator) {
     try {
       await navigator.share({
-        title: "NextGen Onboarding",
+        title: "eMoney Onboarding",
         text: name ? `Onboarding link for ${name}` : "Complete your onboarding",
         url: link,
       });

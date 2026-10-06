@@ -96,7 +96,7 @@ export async function POST(req: Request) {
 
   // Slip file must live in THIS user's private folder — blocks referencing any
   // other user's / arbitrary Cloudinary asset (the id is client-reported).
-  if (!d.slipPublicId.startsWith(`nextgenpay/private/${user.id}/`))
+  if (!d.slipPublicId.startsWith(`emoney/private/${user.id}/`))
     return NextResponse.json({ error: "Invalid slip upload reference" }, { status: 400 });
 
   if (d.slipFormat && !MANUAL_SLIP_FORMATS.includes(d.slipFormat.toLowerCase() as never))
