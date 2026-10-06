@@ -12,7 +12,7 @@
  *                        against the retailer's scheme, credits the NET, and
  *                        mirrors the GROSS into the company payin wallet.
  *
- * This is what makes live PG payins flow: the BulkPe PG webhook (and the status
+ * This is what makes live PG payins flow: the PG webhook (and the status
  * poll) resolve a `PGC…` reference to its Transaction and settle it here.
  */
 import { nanoid } from "@/lib/nanoid";

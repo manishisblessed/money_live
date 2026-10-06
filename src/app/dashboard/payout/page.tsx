@@ -1146,7 +1146,7 @@ function PayoutReceipt({
     ? `Pay by emoney by RT Code - ${session.userCode}`
     : "Pay by emoney";
 
-  // A payout is disbursed asynchronously (approval → worker → BulkPe), so the
+  // A payout is disbursed asynchronously (approval → worker → provider), so the
   // status returned at submit time is almost always non-terminal. Poll the live
   // record until it settles so the receipt reflects the true outcome instead of
   // being frozen on "processing".

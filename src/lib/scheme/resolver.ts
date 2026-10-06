@@ -129,9 +129,9 @@ export async function getEffectiveRate(
  * resilient to the two different vocabularies in play:
  *
  *   - Scheme slabs / ServiceRoute store the SHORT catalog name the admin picks
- *     in Commission Master (e.g. "SAMEDAY", "BULKPE" — see services/catalog.ts).
+ *     in Commission Master (e.g. "SAMEDAY" — see services/catalog.ts).
  *   - Runtime callers pass the partner ADAPTER `.name` handling the txn
- *     (e.g. "SAMEDAY_PAY2NEW", "SAMEDAY_SETTLEMENT", "BULKPE_BBPS").
+ *     (e.g. "SAMEDAY_PAY2NEW", "SAMEDAY_SETTLEMENT").
  *
  * Without collapsing both to a family, a slab pinned to "SAMEDAY" would never
  * match a caller passing "SAMEDAY_PAY2NEW", silently resolving the charge to ₹0.
@@ -143,7 +143,6 @@ export function normalizeProviderTag(provider?: string | null): string | null {
   const p = provider.trim().toUpperCase();
   if (!p) return null;
   if (p.startsWith("SAMEDAY")) return "SAMEDAY";
-  if (p.startsWith("BULKPE")) return "BULKPE";
   if (p.startsWith("RAZORPAY")) return "RAZORPAY";
   if (p.startsWith("PAYSPRINT")) return "PAYSPRINT";
   if (p.startsWith("NPCI")) return "NPCI";

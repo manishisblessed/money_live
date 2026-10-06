@@ -122,7 +122,7 @@ export interface PayoutProvider {
   payout(input: PayoutInput): Promise<PartnerResult<PayoutOutput>>;
   /**
    * Poll the terminal state of a payout. Accepts the provider txn id when
-   * known, otherwise our reference_id (providers like BulkPe support lookup by
+   * known, otherwise our reference_id (providers may support lookup by
    * either), so the reconciler can recover even if the initiate call's id was
    * never persisted.
    */
@@ -171,7 +171,7 @@ export interface BbpsBiller {
   name: string;
   category: BbpsFetchInput["category"];
   /**
-   * Optional: the customer input fields this biller requires (BulkPe exposes
+   * Optional: the customer input fields this biller requires (the provider may expose
    * these via selectBiller). UIs use them to render dynamic fetch-bill forms;
    * absent for providers that don't publish param metadata.
    */

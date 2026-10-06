@@ -1340,10 +1340,10 @@ enum ServiceRouteKind {
 model ServiceRoute {
   id        String           @id @default(cuid())
   key       String           @unique // machine key, e.g. "payout_bulkpe"
-  name      String // human label, e.g. "Payout (BulkPe)"
+  name      String // human label, e.g. "Payout (Same Day)"
   type      ServiceRouteType @default(SERVICE)
   kind      ServiceRouteKind @default(OTHER)
-  provider  String? // e.g. "BULKPE", "SAMEDAY", "EKYCHUB"
+  provider  String? // e.g. "SAMEDAY", "RAZORPAY", "EKYCHUB"
   enabled   Boolean          @default(true)
   note      String? // operational note shown in the On/Off panel
   balance   Decimal?         @db.Decimal(14, 2) // vendor wallet balance (dashboard)
@@ -1389,7 +1389,7 @@ model RateLimit {
 }
 
 // =====================================================================
-// Payouts (BulkPe) — bank/UPI disbursals with maker-checker + ledger holds
+// Payouts — bank/UPI disbursals with maker-checker + ledger holds
 // =====================================================================
 
 enum PayoutMode {
@@ -1403,11 +1403,11 @@ enum PayoutStatus {
   DRAFT // created but not submitted (reserved for future bulk uploads)
   PENDING_APPROVAL // submitted by maker, funds held, awaiting checker
   APPROVED // checker approved, queued for the worker
-  PROCESSING // sent to BulkPe, awaiting terminal state (webhook/poll)
-  SUCCESS // settled at BulkPe; hold captured into a real DEBIT
-  FAILED // BulkPe declined / failed; hold released back to spendable
+  PROCESSING // sent to provider, awaiting terminal state (webhook/poll)
+  SUCCESS // settled at provider; hold captured into a real DEBIT
+  FAILED // provider declined / failed; hold released back to spendable
   REJECTED // checker rejected before initiation; hold released
-  REVERSED // settled then reversed by bank/BulkPe; funds returned
+  REVERSED // settled then reversed by bank; funds returned
 }
 
 /// A single disbursal to a beneficiary. The user pays
@@ -1447,9 +1447,9 @@ model PayoutRequest {
   checkerId String? // who approved/rejected
   remarks   String? // checker remarks on approve/reject
 
-  // Provider (BulkPe) correlation
-  bulkpeReferenceId String  @unique // our idempotency reference_id sent to BulkPe
-  bulkpeTxnId       String? // BulkPe's transaction id
+  // Provider correlation (column names retained for backward compatibility)
+  bulkpeReferenceId String  @unique // our idempotency reference_id sent to the provider
+  bulkpeTxnId       String? // provider's transaction id
   utr               String? // bank UTR on success
   failureReason     String?
 
@@ -1460,7 +1460,7 @@ model PayoutRequest {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   approvedAt  DateTime?
-  processedAt DateTime? // when handed to BulkPe
+  processedAt DateTime? // when handed to the payout provider
   completedAt DateTime? // terminal (success/failed/reversed)
 
   @@index([userId, status])
@@ -2784,7 +2784,7 @@ model PgSettlementEntry {
   settledVia     String?
   walletTxnId    String? // ref to the credit WalletTxn
   paymentMode    String? // UPI | CARD | NETBANKING | WALLET
-  provider       String? // rail scopeKey the acquirer cost was priced against (e.g. RAZORPAY / BULKPE)
+  provider       String? // rail scopeKey the acquirer cost was priced against (e.g. RAZORPAY)
   // Scheme pricing context (audit / re-pricing at settlement).
   schemeId       String?
   slabId         String?
@@ -2960,14 +2960,14 @@ model CompanyMdrFloor {
 
   // Per-entity scope within a rail. null = platform-wide (applies to every
   // entity of this serviceKind). A specific value pins the floor to one entity:
-  //   PG  -> pipeline provider (ServiceRoute.provider, e.g. "BULKPE")
+  //   PG  -> pipeline provider (ServiceRoute.provider, e.g. "RAZORPAY")
   //   QR  -> QR provider (ServiceRoute.provider where kind = QR)
   // POS is NOT scoped here: its floor is the manually-approved BrandMdrRate,
   // enforced at slab assignment (vendor locked to the brand rate).
   // Matching mirrors the MDR resolver: a scoped floor bites only when the caller
   // passes the same scopeKey; a null-scope floor always applies.
   scopeKey   String? // stable key (provider). null = all entities of the rail
-  scopeLabel String? // human label for display (e.g. "BulkPe")
+  scopeLabel String? // human label for display
 
   minAmount  Decimal  @db.Decimal(14, 2)
   maxAmount  Decimal  @db.Decimal(14, 2)
@@ -2985,13 +2985,13 @@ model CompanyMdrFloor {
 // ---------- Rail MDR Rate (PG / QR) ----------
 // Per-provider acquiring rate card for the PG & QR rails — the direct analogue
 // of BrandMdrRate for POS. `scopeKey` is the ServiceRoute.provider that powers
-// the rail (e.g. "BULKPE"). A scheme's PG/QR MDR slab locks its vendor cost to
+// the rail (e.g. "RAZORPAY"). A scheme's PG/QR MDR slab locks its vendor cost to
 // the most specific approved rate here, so no scheme can be priced below the
 // acquirer cost. Dimension/band matching mirrors BrandMdrRate exactly.
 model RailMdrRate {
   id          String         @id @default(cuid())
   serviceKind MdrServiceKind // PG | QR
-  scopeKey    String // ServiceRoute.provider (pipeline / QR provider), e.g. "BULKPE"
+  scopeKey    String // ServiceRoute.provider (pipeline / QR provider), e.g. "RAZORPAY"
   scopeLabel  String? // human label for display
 
   // Dimensions. "*" (or null) = wildcard; an exact match beats a wildcard.

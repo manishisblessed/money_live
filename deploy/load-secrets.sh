@@ -15,7 +15,6 @@ set -euo pipefail
 #             Each app env var is a parameter, e.g.
 #               /emoney/prod/NEXTAUTH_SECRET      (SecureString)
 #               /emoney/prod/APP_ENCRYPTION_KEY   (SecureString)
-#               /emoney/prod/BULKPE_TOKEN         (SecureString)
 #               /emoney/prod/DATABASE_URL         (SecureString)
 #             Put them there once with:
 #               aws ssm put-parameter --name /emoney/prod/NEXTAUTH_SECRET \

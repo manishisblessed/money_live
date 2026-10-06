@@ -8,7 +8,7 @@ import { isCardClassificationEnabled } from "@/lib/settings";
  * Rail MDR engine — the PG/QR analogue of the POS brand MDR engine
  * (src/lib/brand/mdr.ts). Resolves the acquirer (vendor) cost for a PG or QR
  * rail against a provider's own rate card (RailMdrRate), keyed by the powering
- * ServiceRoute provider (scopeKey, e.g. "BULKPE").
+ * ServiceRoute provider (scopeKey).
  *
  * Rates are keyed by (provider, paymentMode, card dims, amount band). "*" (or
  * null) is a wildcard; an exact dimension match beats a wildcard. mdrValue is

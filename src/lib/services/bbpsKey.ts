@@ -2,8 +2,8 @@ import { SERVICE_KEYS } from "./catalog";
 
 /**
  * Resolve a BBPS bill category to the granular service key that gates it.
- * CREDIT_CARD routes through Same Day (BBPS-1 / Credit Card tab); everything
- * else routes through BulkPe (BBPS-2). Returns null for unknown categories so
+ * CREDIT_CARD routes through the dedicated Credit Card tab; everything else
+ * routes through BBPS Same Day. Returns null for unknown categories so
  * the caller still sees the master BBPS gate.
  */
 export function bbpsServiceKey(category: string | null | undefined): string | null {
@@ -16,7 +16,7 @@ export function bbpsServiceKey(category: string | null | undefined): string | nu
     case "EDUCATION":
     case "INSURANCE":
     case "BROADBAND":
-      return SERVICE_KEYS.BBPS_BULKPE;
+      return SERVICE_KEYS.BBPS_SAMEDAY;
     default:
       return null;
   }

@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 
 /**
  * Shared, provider-agnostic payout lifecycle logic. Used by the queue worker,
- * the BulkPe webhook, and the reconciliation poller so that all three drive the
+ * the payout webhook, and the reconciliation poller so that all three drive the
  * exact same idempotent state machine + ledger finalization.
  *
  * State machine (funds are HELD from submit until terminal):
@@ -36,7 +36,7 @@ function asJson(value: unknown): Prisma.InputJsonValue | typeof Prisma.JsonNull 
   return (value ?? Prisma.JsonNull) as Prisma.InputJsonValue | typeof Prisma.JsonNull;
 }
 
-/** Enqueue the worker job that actually calls BulkPe. */
+/** Enqueue the worker job that actually calls the payout provider. */
 export async function enqueuePayoutInitiate(payoutRequestId: string): Promise<void> {
   await enqueue(
     QUEUES.PAYOUT_INITIATE,
@@ -185,7 +185,7 @@ export async function reversePayout(
       where: { id: payoutRequestId, status: "SUCCESS" },
       data: {
         status: "REVERSED",
-        failureReason: data.reason ?? "Reversed by bank/BulkPe",
+        failureReason: data.reason ?? "Reversed by bank",
         response: asJson(data.response ?? row.response),
         completedAt: new Date(),
       },
@@ -263,9 +263,9 @@ function beneficiaryFor(row: PayoutRequest, contactMobile?: string) {
 
 /**
  * Worker entry for QUEUES.PAYOUT_INITIATE. Transitions APPROVED -> PROCESSING,
- * calls BulkPe with the unique reference_id, and finalizes immediately if the
- * provider returns a terminal state. Retry-safe: if already sent, it reconciles
- * instead of re-initiating.
+ * calls the payout provider with the unique reference_id, and finalizes
+ * immediately if the provider returns a terminal state. Retry-safe: if already
+ * sent, it reconciles instead of re-initiating.
  */
 export async function processPayoutInitiate(payoutRequestId: string): Promise<void> {
   const row = await prisma.payoutRequest.findUnique({ where: { id: payoutRequestId } });
@@ -273,7 +273,7 @@ export async function processPayoutInitiate(payoutRequestId: string): Promise<vo
   if (TERMINAL.includes(row.status)) return;
   if (row.status === "PENDING_APPROVAL" || row.status === "DRAFT") return; // not approved yet
 
-  // Already handed to BulkPe on a previous attempt → reconcile, don't re-send.
+  // Already handed to the provider on a previous attempt → reconcile, don't re-send.
   if (row.bulkpeTxnId) {
     await reconcilePayout(payoutRequestId);
     return;
@@ -351,8 +351,8 @@ export async function processPayoutInitiate(payoutRequestId: string): Promise<vo
 }
 
 /**
- * Poll BulkPe for the terminal state of a single in-flight payout and finalize.
- * Safe fallback when a webhook is missed.
+ * Poll the payout provider for the terminal state of a single in-flight payout
+ * and finalize. Safe fallback when a webhook is missed.
  */
 export async function reconcilePayout(payoutRequestId: string): Promise<void> {
   const row = await prisma.payoutRequest.findUnique({ where: { id: payoutRequestId } });

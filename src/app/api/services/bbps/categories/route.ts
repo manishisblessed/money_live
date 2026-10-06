@@ -2,17 +2,14 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-server";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/security/rateLimit";
 import { toErrorResponse } from "@/lib/security/apiErrors";
-import { assertServiceEnabled, isServiceEnabled } from "@/lib/services/guard";
+import { assertServiceEnabled } from "@/lib/services/guard";
 import { SERVICE_KEYS } from "@/lib/services/catalog";
 import { AuthError } from "@/lib/auth-server";
-import { bulkpeBbpsCategories } from "@/lib/partners/bulkpe-bbps";
-import { flags } from "@/lib/env";
 
 /**
  * GET /api/services/bbps/categories
  *
- * Returns the live list of BBPS bill categories from BulkPe.
- * Falls back to a hardcoded catalog when the provider is offline.
+ * Returns the list of BBPS bill categories from a static catalog.
  */
 
 const FALLBACK_CATEGORIES = [
@@ -44,18 +41,6 @@ export async function GET() {
     await enforceRateLimit(`bbps:categories:${user.id}`, RATE_LIMITS.default);
   } catch (e) {
     return toErrorResponse(e);
-  }
-
-  // The live category catalog is a BulkPe feature. Serve the static list when
-  // BulkPe is held (env flag) or BBPS-2 is disabled on the admin panel.
-  const bbps2On = flags.bbpsBulkpe && (await isServiceEnabled(SERVICE_KEYS.BBPS_BULKPE));
-  if (!bbps2On) {
-    return NextResponse.json({ source: "FALLBACK", categories: FALLBACK_CATEGORIES });
-  }
-
-  const r = await bulkpeBbpsCategories();
-  if (r.ok) {
-    return NextResponse.json({ source: "BULKPE", categories: r.data });
   }
 
   return NextResponse.json({ source: "FALLBACK", categories: FALLBACK_CATEGORIES });

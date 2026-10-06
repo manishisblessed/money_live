@@ -147,7 +147,7 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
   }
 
   // Onboarding liveness + monthly Re-KYC gates — block a network-tier checker
-  // from releasing money (approval queues the BulkPe disbursal) until both pass.
+  // from releasing money (approval queues the provider disbursal) until both pass.
   if (parsed.data.action === "approve") {
     try {
       await assertLivenessReady(user);
@@ -216,7 +216,7 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
     },
   });
 
-  // Hand off to the PM2 worker; it calls BulkPe from the IP-whitelisted box.
+  // Hand off to the PM2 worker; it calls the provider from the IP-whitelisted box.
   await enqueuePayoutInitiate(params.id);
 
   return NextResponse.json({ status: "APPROVED" });

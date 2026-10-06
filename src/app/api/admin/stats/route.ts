@@ -87,7 +87,7 @@ export async function GET() {
       }),
     ]);
 
-    // BulkPe balance refresh is intentionally NOT awaited here — it can take
+    // Provider balance refresh is intentionally NOT awaited here — it can take
     // several seconds and was blocking the admin home. Cached route balance
     // is shown immediately; a background refresh updates next load.
     const payoutRoute = serviceRoutes.find((r) => r.key === SERVICE_KEYS.PAYOUT);
@@ -105,7 +105,7 @@ export async function GET() {
             }
           }
         } catch (err) {
-          console.warn("[admin/stats] BulkPe fetchBalance failed (non-fatal):", err);
+          console.warn("[admin/stats] fetchBalance failed (non-fatal):", err);
         }
       })();
     }

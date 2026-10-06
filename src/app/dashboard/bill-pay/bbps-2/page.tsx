@@ -68,7 +68,7 @@ export default function Bbps2Page() {
         serviceTitle={active.label}
         consumerLabel={active.consumer}
         refPrefix={active.ref}
-        route={SERVICE_KEYS.BBPS_BULKPE}
+        route={SERVICE_KEYS.BBPS_SAMEDAY}
       />
     </div>
   );

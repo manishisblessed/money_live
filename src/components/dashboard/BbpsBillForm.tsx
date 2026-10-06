@@ -14,7 +14,7 @@ import { generateRefId, formatINR } from "@/lib/utils";
 /**
  * Live BBPS bill payment — works for any category (electricity, water, gas,
  * education, …). Billers come from /api/services/bbps/billers; when the
- * provider (BulkPe) publishes each biller's required customer params, the
+ * provider publishes each biller's required customer params, the
  * form renders those inputs dynamically. Payment is PIN-confirmed and the
  * PIN travels only in the x-txn-pin header.
  */

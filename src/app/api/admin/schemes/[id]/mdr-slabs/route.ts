@@ -77,7 +77,7 @@ async function lockPosVendorToBrandRate(input: {
  * PG/QR slabs are governed by the provider's approved rail rate card (the direct
  * analogue of the POS brand rate). The vendor cost is locked to it and the MDR
  * can never be priced below it. The slab's `company` field carries the provider
- * scope key (ServiceRoute.provider, e.g. "BULKPE") for these rails.
+ * scope key (ServiceRoute.provider) for these rails.
  */
 async function lockRailVendorToRate(input: {
   serviceKind: "PG" | "QR";

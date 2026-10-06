@@ -12,7 +12,6 @@ import {
   ShieldAlert,
   CircleDot,
   CreditCard,
-  Send,
   ShieldCheck,
   Zap,
 } from "lucide-react";
@@ -38,11 +37,6 @@ const PROVIDER_META: Record<
   string,
   { subtitle: string; tint: "teal" | "violet" | "emerald" | "amber" | "sky"; icon: React.ComponentType<{ className?: string }> }
 > = {
-  bulkpe: {
-    subtitle: "Payout · IMPS / NEFT / RTGS",
-    tint: "violet",
-    icon: Send,
-  },
   sameday_settlement: {
     subtitle: "Settlement wallet · Same Day",
     tint: "teal",

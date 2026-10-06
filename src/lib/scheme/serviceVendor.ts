@@ -51,7 +51,7 @@ export type ServiceVendorInfo = {
  * lookup used by the live slab table, the modal preview, the vendor lock, and
  * the relock backfill. Candidate scope order: exact per-product BBPS scope
  * (rate card keyed by the ServiceRoute key, e.g. "bbps_credit_card"), then the
- * backing partner family ("SAMEDAY"/"BULKPE"). Returns null when the service is
+ * backing partner family ("SAMEDAY"). Returns null when the service is
  * not a charge-driven rail, no provider/product is pinned, or no card matches.
  */
 export async function resolveServiceVendorInfo(input: {

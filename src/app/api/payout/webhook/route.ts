@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyBulkpeWebhook } from "@/lib/partners/bulkpe";
 import {
   finalizePayoutSuccess,
   finalizePayoutFailure,
   reversePayout,
 } from "@/lib/payout/service";
+import crypto from "crypto";
 
 /**
- * BulkPe payout webhook. Verifies the HMAC signature, then reconciles the
+ * Payout provider webhook. Verifies the HMAC signature, then reconciles the
  * referenced PayoutRequest to its terminal ledger state. Idempotent: duplicate
  * deliveries are no-ops thanks to the conditional state claims in the service.
  *
@@ -27,14 +27,25 @@ function pick(obj: Record<string, unknown>, keys: string[]): string | undefined 
   return undefined;
 }
 
+/** Verify the webhook HMAC-SHA256 signature against the configured secret. */
+function verifyWebhookSignature(rawBody: string, signature: string | null): boolean {
+  const secret = process.env.PAYOUT_WEBHOOK_SECRET;
+  if (!secret || !signature) return false;
+  const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  const a = Buffer.from(expected);
+  const b = Buffer.from(provided);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const signature =
-    req.headers.get("x-bulkpe-signature") ||
     req.headers.get("x-webhook-signature") ||
     req.headers.get("signature");
 
-  if (!verifyBulkpeWebhook(rawBody, signature)) {
+  if (!verifyWebhookSignature(rawBody, signature)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -45,7 +56,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // BulkPe may nest the txn under `data`; support both flat and nested shapes.
+  // The provider may nest the txn under `data`; support both flat and nested shapes.
   const data = (payload.data && typeof payload.data === "object"
     ? (payload.data as Record<string, unknown>)
     : payload) as Record<string, unknown>;
@@ -65,8 +76,8 @@ export async function POST(req: Request) {
     select: { id: true },
   });
 
-  // Acknowledge unknown references with 200 so BulkPe stops retrying a payload
-  // we can't act on (avoids an infinite retry loop on stray events).
+  // Acknowledge unknown references with 200 so the provider stops retrying a
+  // payload we can't act on (avoids an infinite retry loop on stray events).
   if (!row) return NextResponse.json({ ok: true, matched: false });
 
   await prisma.auditLog.create({

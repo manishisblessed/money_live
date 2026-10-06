@@ -13,7 +13,7 @@ import { SERVICE_FAMILIES } from "@/lib/scheme/constants";
  *   - the rail rate card is keyed by the scope (vendor cost + minimum), and
  *   - the Transaction records the scope (revenue reported per product).
  *
- * Legacy slabs/cards pinned to the partner family ("SAMEDAY"/"BULKPE") keep
+ * Legacy slabs/cards pinned to the partner family ("SAMEDAY") keep
  * resolving via {@link priceScopeFamily} as a fallback until re-pinned.
  */
 export const BBPS_PRICE_SCOPES = {
@@ -25,8 +25,6 @@ export const BBPS_PRICE_SCOPES = {
   RECHARGEKIT_CC: SERVICE_KEYS.RECHARGEKIT_CC,
   /** Offline CC Bill Payment (offline-cc-pay) — direct RechargeKit API. */
   RECHARGEKIT_DIRECT: SERVICE_KEYS.RECHARGEKIT_DIRECT,
-  /** Unified Bill Payment Platform (bbps-2) — BulkPe. */
-  BBPS_BULKPE: SERVICE_KEYS.BBPS_BULKPE,
 } as const;
 
 export type BbpsPriceScope = (typeof BBPS_PRICE_SCOPES)[keyof typeof BBPS_PRICE_SCOPES];
@@ -34,7 +32,7 @@ export type BbpsPriceScope = (typeof BBPS_PRICE_SCOPES)[keyof typeof BBPS_PRICE_
 const SCOPE_KEYS: readonly string[] = Object.values(BBPS_PRICE_SCOPES);
 
 /** Map each product scope to the backing partner family (for the fallback). */
-const SCOPE_FAMILY: Record<string, "SAMEDAY" | "BULKPE"> = {
+const SCOPE_FAMILY: Record<string, "SAMEDAY"> = {
   [BBPS_PRICE_SCOPES.BBPS_SAMEDAY]: "SAMEDAY",
   [BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD]: "SAMEDAY",
   [BBPS_PRICE_SCOPES.RECHARGEKIT_CC]: "SAMEDAY",
@@ -42,7 +40,6 @@ const SCOPE_FAMILY: Record<string, "SAMEDAY" | "BULKPE"> = {
   // fallback points at SAMEDAY so existing CC rate cards/slabs still apply until
   // a dedicated card is pinned to this product.
   [BBPS_PRICE_SCOPES.RECHARGEKIT_DIRECT]: "SAMEDAY",
-  [BBPS_PRICE_SCOPES.BBPS_BULKPE]: "BULKPE",
 };
 
 /** Friendly product name per scope, sourced from the service catalog. */
@@ -56,7 +53,7 @@ export function isBbpsPriceScope(v: string | null | undefined): v is BbpsPriceSc
 }
 
 /** The partner family a scope falls back to (null when not a product scope). */
-export function priceScopeFamily(scope: string | null | undefined): "SAMEDAY" | "BULKPE" | null {
+export function priceScopeFamily(scope: string | null | undefined): "SAMEDAY" | null {
   return scope && SCOPE_FAMILY[scope] ? SCOPE_FAMILY[scope] : null;
 }
 
@@ -92,8 +89,6 @@ const CC_ONLY_SCOPES = new Set<string>([
 ]);
 const UTILITY_ONLY_SCOPES = new Set<string>([
   BBPS_PRICE_SCOPES.BBPS_SAMEDAY,
-  BBPS_PRICE_SCOPES.BBPS_BULKPE,
-  "bbps_bulkpe", // legacy pricing key retained in the catalog
 ]);
 
 /**

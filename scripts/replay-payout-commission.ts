@@ -1,7 +1,7 @@
 /**
  * Replay commission distribution for past SUCCESS payouts that received zero
  * commission (they settled on the pre-fix code where the provider was hardcoded
- * to BULKPE and never matched the SAMEDAY scheme slabs).
+ * and never matched the SAMEDAY scheme slabs).
  *
  * Uses the REAL distributeCommission engine, which is idempotency-keyed
  * (`commission:{txnId}:{userId}`), so re-running is always safe and never
@@ -58,7 +58,7 @@ async function main() {
       skipped++;
       continue;
     }
-    const provider = PAYOUT_MODE_PROVIDER[po.mode] ?? "BULKPE";
+    const provider = PAYOUT_MODE_PROVIDER[po.mode] ?? "SAMEDAY";
     const refId = `PYC${po.id.slice(-10).toUpperCase()}`;
 
     // Does a synthetic txn already exist, and does it already have credits?

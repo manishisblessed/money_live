@@ -70,7 +70,7 @@ type RailRate = {
 type Provider = {
   scopeKey: string;
   name: string;
-  /** Backing acquirer/partner (e.g. "SAMEDAY", "BULKPE") for display. */
+  /** Backing acquirer/partner (e.g. "SAMEDAY") for display. */
   partner: string | null;
   rateCount: number;
   rates: RailRate[];

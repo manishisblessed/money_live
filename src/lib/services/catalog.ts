@@ -40,7 +40,7 @@ export type ServiceRouteSeed = {
  * is a single edit.
  */
 export const SERVICE_KEYS = {
-  PAYOUT: "payout_bulkpe",
+  PAYOUT: "payout_bulkpe", // stable key — do not rename (referenced in DB rows)
   PG: "pg_razorpay",
   POS: "pos_sameday",
   QR: "qr_dynamic",
@@ -50,7 +50,6 @@ export const SERVICE_KEYS = {
   RECHARGE: "recharge_mobile",
   BBPS: "bbps_billpay",
   BBPS_SAMEDAY: "bbps_sameday",
-  BBPS_BULKPE: "bbps_bulkpe_svc",
   BBPS_CREDIT_CARD: "bbps_credit_card",
   TRAVEL: "travel_booking",
   VERIFICATION: "verify_ekychub",
@@ -88,7 +87,6 @@ export const SERVICE_KEY_TO_HREF: Record<string, string> = {
   [SERVICE_KEYS.RECHARGE]: "/dashboard/recharge/mobile",
   [SERVICE_KEYS.BBPS]: "/dashboard/bill-pay/electricity",
   [SERVICE_KEYS.BBPS_SAMEDAY]: "/dashboard/bill-pay/bbps-1",
-  [SERVICE_KEYS.BBPS_BULKPE]: "/dashboard/bill-pay/bbps-2",
   [SERVICE_KEYS.BBPS_CREDIT_CARD]: "/dashboard/bill-pay/credit-card",
   [SERVICE_KEYS.RECHARGEKIT_CC]: "/dashboard/bill-pay/cc-pay",
   [SERVICE_KEYS.RECHARGEKIT_DIRECT]: "/dashboard/bill-pay/offline-cc-pay",
@@ -111,7 +109,6 @@ const SERVICE_HREF_PREFIXES: Array<[prefix: string, key: string]> = [
   ["/dashboard/upi", SERVICE_KEYS.UPI],
   ["/dashboard/recharge", SERVICE_KEYS.RECHARGE],
   ["/dashboard/bill-pay/bbps-1", SERVICE_KEYS.BBPS_SAMEDAY],
-  ["/dashboard/bill-pay/bbps-2", SERVICE_KEYS.BBPS_BULKPE],
   ["/dashboard/bill-pay/credit-card", SERVICE_KEYS.BBPS_CREDIT_CARD],
   ["/dashboard/bill-pay/cc-pay", SERVICE_KEYS.RECHARGEKIT_CC],
   ["/dashboard/bill-pay/offline-cc-pay", SERVICE_KEYS.RECHARGEKIT_DIRECT],
@@ -153,9 +150,9 @@ export const KNOWN_SERVICE_ROUTES: ServiceRouteSeed[] = [
     name: "Payment Gateway",
     type: "SERVICE",
     kind: "PG",
-    provider: "BULKPE",
+    provider: null,
     enabled: true,
-    note: "Hosted checkout / UPI collections (BulkPe Simple PG) — powers instant wallet top-ups.",
+    note: "Hosted checkout / UPI collections — powers instant wallet top-ups.",
     sortOrder: 20,
   },
   {
@@ -247,26 +244,6 @@ export const KNOWN_SERVICE_ROUTES: ServiceRouteSeed[] = [
     enabled: true,
     note: "Dedicated credit card bill payment tab — Same Day Pay2New rail. Separate sidebar entry for credit card only.",
     sortOrder: 91,
-  },
-  {
-    key: SERVICE_KEYS.BBPS_BULKPE,
-    name: "Unified Bill Payment Platform",
-    type: "SERVICE",
-    kind: "BBPS",
-    provider: "BULKPE",
-    enabled: false,
-    note: "Unified Bill Payment Platform (electricity, water, gas, and all non-credit-card categories). Enable once BulkPe IP whitelist is active.",
-    sortOrder: 92,
-  },
-  {
-    key: "bbps_bulkpe",
-    name: "BulkPe BBPS Pricing (legacy key)",
-    type: "CONFIG",
-    kind: "BBPS",
-    provider: "BULKPE",
-    enabled: true,
-    note: "Legacy pricing config row — retained for backward compatibility with scheme slabs pinned to this key.",
-    sortOrder: 93,
   },
   {
     key: SERVICE_KEYS.RECHARGEKIT_CC,

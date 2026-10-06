@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   // Persist a UPI_COLLECT Transaction (refId `PGC…`) and fire the provider
-  // collect. The inbound credit posts to the ledger later — the BulkPe PG
+  // collect. The inbound credit posts to the ledger later — the PG
   // webhook / status poll resolve this reference and settle it through the PG
   // engine (net credit + company payin mirror).
   try {

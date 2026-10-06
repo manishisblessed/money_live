@@ -185,7 +185,7 @@ describe("per-product BBPS price scope", () => {
   });
 
   it("does not cross-match a different partner family", async () => {
-    // A BulkPe-only slab must never price a Same Day product (no null slab).
+    // A slab pinned to one provider must never price a different provider's product.
     state.slabs = [
       slab({ id: "bulkpe", service: "BILL_ELECTRICITY", provider: "bbps_bulkpe_svc", chargeValue: d(8) }),
     ];
