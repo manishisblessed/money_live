@@ -65,8 +65,8 @@ const STEPS = [
   { label: "Email Verification", icon: Mail },
   { label: "Aadhaar Verification", icon: Fingerprint },
   { label: "PAN Verification", icon: CreditCard },
-  { label: "Bank Verification", icon: Building2 },
   { label: "GST & MSME", icon: Building2 },
+  { label: "Bank Verification", icon: Building2 },
   { label: "Selfie & Video", icon: Upload },
   { label: "Documents", icon: FileText },
   { label: "Declaration", icon: FileSignature },
@@ -177,17 +177,28 @@ function OnboardContent() {
 
   // Derived (not state) so it recomputes when a step is edited & re-verified.
   const bankRefName = aadhaarResult?.name || panResult?.registered_name;
-  const nameMismatch =
-    !!(
-      aadhaarResult?.name &&
-      panResult?.registered_name &&
-      !namesMatch(aadhaarResult.name, panResult.registered_name)
-    ) ||
-    !!(
-      bankRefName &&
-      bankResult?.nameAtBank &&
-      !namesMatch(bankRefName, bankResult.nameAtBank)
-    );
+  // Company/trade name from GST verification (used as an alternate bank-name reference
+  // for business accounts where the bank account is in the company name).
+  const gstTradeName =
+    gstResult?.trade_name ??
+    gstResult?.trade_name_of_business ??
+    gstResult?.legal_name ??
+    gstResult?.legal_name_of_business ??
+    "";
+  // PAN vs Aadhaar individual mismatch — blocks the PAN step Continue button.
+  const panAadhaarMismatch = !!(
+    aadhaarResult?.name &&
+    panResult?.registered_name &&
+    !namesMatch(aadhaarResult.name, panResult.registered_name)
+  );
+  // Bank name must match Aadhaar/PAN *or* the GST company name (business accounts).
+  const bankNameMismatch = !!(
+    bankResult?.nameAtBank &&
+    bankRefName &&
+    !namesMatch(bankRefName, bankResult.nameAtBank) &&
+    !(gstTradeName && namesMatch(gstTradeName, bankResult.nameAtBank))
+  );
+  const nameMismatch = panAadhaarMismatch || bankNameMismatch;
 
   // Name-mismatch self-declaration popup
   const [showNameDeclaration, setShowNameDeclaration] = useState(false);
@@ -1119,13 +1130,15 @@ function OnboardContent() {
       case 3:
         return aadhaarVerified;
       case 4:
-        return !!panResult;
+        // PAN must be verified AND names must match Aadhaar (edit PAN if mismatch).
+        return !!panResult && !panAadhaarMismatch;
       case 5:
-        return !!bankResult;
-      case 6:
         // GST is optional, but a business / shop name is always required so the
         // self-declaration and final registration have a firm name.
         return form.shopName.trim().length >= 2;
+      case 6:
+        // Bank must be verified AND account-holder name must match Aadhaar/PAN or GST company name.
+        return !!bankResult && !bankNameMismatch;
       case 7:
         return selfieUploaded && videoCompleted;
       case 8: {
@@ -1170,7 +1183,7 @@ function OnboardContent() {
       gstResult?.legal_name ??
       gstResult?.legal_name_of_business ??
       "";
-    if (step === 6 && form.shopName.trim().length >= 2 && !gstTrade) {
+    if (step === 5 && form.shopName.trim().length >= 2 && !gstTrade) {
       setVerifying(true);
       try {
         const res = await fetch(`/api/onboard/${token}/business`, {
@@ -1723,123 +1736,23 @@ function OnboardContent() {
                       name2={panResult.registered_name}
                     />
                   )}
+                  {/* Hard block when PAN name doesn't match Aadhaar */}
+                  {panAadhaarMismatch && (
+                    <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                      <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
+                      <strong>Name mismatch — Continue is blocked.</strong> The PAN must belong to
+                      the same person as the verified Aadhaar. Please use the <strong>Edit</strong> button
+                      to enter the correct PAN number.
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Step 5: Bank Verification */}
+          {/* Step 5: GST + MSME (Optional) — business name required if no GST */}
+          {/* Placed before Bank so the company name is available for bank-name matching */}
           {step === 5 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Building2 className="h-5 w-5" />
-                <h2 className="font-bold">Bank Account Verification</h2>
-              </div>
-              <p className="text-sm text-ink-600">
-                We&apos;ll verify your bank account via Penny Drop (₹1
-                deposit) and confirm the account holder name.
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label>Account Number *</Label>
-                  <Input
-                    value={form.bankAccountNumber}
-                    onChange={(e) =>
-                      updateForm("bankAccountNumber", e.target.value)
-                    }
-                    placeholder="Enter account number"
-                    disabled={!!bankResult}
-                  />
-                </div>
-                <div>
-                  <Label>IFSC Code *</Label>
-                  <Input
-                    value={form.bankIfsc}
-                    onChange={(e) =>
-                      updateForm("bankIfsc", e.target.value.toUpperCase())
-                    }
-                    placeholder="SBIN0001234"
-                    maxLength={11}
-                    className="uppercase"
-                    disabled={!!bankResult}
-                  />
-                </div>
-              </div>
-              {!bankResult && (
-                <Button
-                  type="button"
-                  onClick={verifyBank}
-                  disabled={
-                    verifying || !form.bankAccountNumber || !form.bankIfsc
-                  }
-                >
-                  {verifying ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ShieldCheck className="h-4 w-4" />
-                  )}
-                  Verify Bank Account
-                </Button>
-              )}
-              {bankResult && (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold text-emerald-800">
-                        Bank Account Verified
-                      </p>
-                      <button
-                        type="button"
-                        onClick={editBank}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
-                      >
-                        <Pencil className="h-3 w-3" /> Edit
-                      </button>
-                    </div>
-                    <div className="mt-2 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                      <p>
-                        <span className="text-emerald-700">Name at Bank:</span>{" "}
-                        {bankResult.nameAtBank}
-                      </p>
-                      <p>
-                        <span className="text-emerald-700">Account Status:</span>{" "}
-                        <span
-                          className={
-                            bankResult.accountStatus === "active"
-                              ? "font-semibold text-emerald-700"
-                              : "font-semibold text-rose-600"
-                          }
-                        >
-                          {bankResult.accountStatus?.toUpperCase() ?? "ACTIVE"}
-                        </span>
-                      </p>
-                      {bankResult.utr && (
-                        <p>
-                          <span className="text-emerald-700">UTR:</span>{" "}
-                          {bankResult.utr}
-                        </p>
-                      )}
-                      <p>
-                        <span className="text-emerald-700">Penny Drop:</span>{" "}
-                        ₹{bankResult.depositAmount ?? 1} deposited
-                      </p>
-                    </div>
-                  </div>
-                  {/* Name match with Aadhaar/PAN */}
-                  {(aadhaarResult?.name || panResult?.registered_name) && (
-                    <NameMatchBadge
-                      label="Aadhaar/PAN"
-                      name1={aadhaarResult?.name ?? panResult?.registered_name}
-                      name2={bankResult.nameAtBank}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 6: GST + MSME (Optional) — business name required if no GST */}
-          {step === 6 && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-brand-700">
                 <Building2 className="h-5 w-5" />
@@ -1968,6 +1881,135 @@ function OnboardContent() {
                   stored for records.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Step 6: Bank Verification — after GST so company name is available for name matching */}
+          {step === 6 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-brand-700">
+                <Building2 className="h-5 w-5" />
+                <h2 className="font-bold">Bank Account Verification</h2>
+              </div>
+              <p className="text-sm text-ink-600">
+                We&apos;ll verify your bank account via Penny Drop (₹1
+                deposit) and confirm the account holder name matches your
+                Aadhaar / PAN{gstTradeName ? " / GST company name" : ""}.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Account Number *</Label>
+                  <Input
+                    value={form.bankAccountNumber}
+                    onChange={(e) =>
+                      updateForm("bankAccountNumber", e.target.value)
+                    }
+                    placeholder="Enter account number"
+                    disabled={!!bankResult}
+                  />
+                </div>
+                <div>
+                  <Label>IFSC Code *</Label>
+                  <Input
+                    value={form.bankIfsc}
+                    onChange={(e) =>
+                      updateForm("bankIfsc", e.target.value.toUpperCase())
+                    }
+                    placeholder="SBIN0001234"
+                    maxLength={11}
+                    className="uppercase"
+                    disabled={!!bankResult}
+                  />
+                </div>
+              </div>
+              {!bankResult && (
+                <Button
+                  type="button"
+                  onClick={verifyBank}
+                  disabled={
+                    verifying || !form.bankAccountNumber || !form.bankIfsc
+                  }
+                >
+                  {verifying ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="h-4 w-4" />
+                  )}
+                  Verify Bank Account
+                </Button>
+              )}
+              {bankResult && (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-emerald-800">
+                        Bank Account Verified
+                      </p>
+                      <button
+                        type="button"
+                        onClick={editBank}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                    </div>
+                    <div className="mt-2 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                      <p>
+                        <span className="text-emerald-700">Name at Bank:</span>{" "}
+                        {bankResult.nameAtBank}
+                      </p>
+                      <p>
+                        <span className="text-emerald-700">Account Status:</span>{" "}
+                        <span
+                          className={
+                            bankResult.accountStatus === "active"
+                              ? "font-semibold text-emerald-700"
+                              : "font-semibold text-rose-600"
+                          }
+                        >
+                          {bankResult.accountStatus?.toUpperCase() ?? "ACTIVE"}
+                        </span>
+                      </p>
+                      {bankResult.utr && (
+                        <p>
+                          <span className="text-emerald-700">UTR:</span>{" "}
+                          {bankResult.utr}
+                        </p>
+                      )}
+                      <p>
+                        <span className="text-emerald-700">Penny Drop:</span>{" "}
+                        ₹{bankResult.depositAmount ?? 1} deposited
+                      </p>
+                    </div>
+                  </div>
+                  {/* Name match with Aadhaar/PAN */}
+                  {(aadhaarResult?.name || panResult?.registered_name) && (
+                    <NameMatchBadge
+                      label="Aadhaar/PAN"
+                      name1={aadhaarResult?.name ?? panResult?.registered_name}
+                      name2={bankResult.nameAtBank}
+                    />
+                  )}
+                  {/* Name match with GST company name (business accounts) */}
+                  {gstTradeName && (
+                    <NameMatchBadge
+                      label="GST Company"
+                      name1={gstTradeName}
+                      name2={bankResult.nameAtBank}
+                    />
+                  )}
+                  {/* Hard block if name doesn't match any reference */}
+                  {bankNameMismatch && (
+                    <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                      <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
+                      <strong>Name mismatch — Continue is blocked.</strong> The bank account holder name
+                      must match your Aadhaar name{panResult?.registered_name ? ", PAN name" : ""}
+                      {gstTradeName ? ", or GST company name" : ""}. Please use the <strong>Edit</strong> button
+                      to enter the correct account details or verify a different account.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -2680,7 +2722,7 @@ function OnboardContent() {
                 onClick={handleNext}
                 disabled={!canProceed() || verifying}
               >
-                {verifying && step === 6 ? (
+                {verifying && step === 5 ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : null}
                 {step === 0 ? "Get Started" : "Continue"}{" "}
