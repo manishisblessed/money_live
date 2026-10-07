@@ -12,9 +12,12 @@ import { renderInviteEmail, renderAccountApprovedEmail } from "@/lib/email/templ
 import { adminInviteInScope } from "@/lib/security/ownership";
 import { computeInviteExpiry } from "@/lib/onboarding/inviteExpiry";
 
-// A plain admin needs the master-admin-granted "invites" tab to touch invites.
+// A plain admin needs the "invites" tab to touch invites. An empty allowedTabs
+// means full access (mirrors the sidebar), so we only block when tabs are
+// explicitly set and "invites" is not among them.
 function adminLacksInvitePermission(user: { role: string; allowedTabs?: string[] }): boolean {
-  return user.role === "ADMIN" && !(user.allowedTabs ?? []).includes("invites");
+  const tabs = user.allowedTabs ?? [];
+  return user.role === "ADMIN" && tabs.length > 0 && !tabs.includes("invites");
 }
 
 const PatchBody = z.object({

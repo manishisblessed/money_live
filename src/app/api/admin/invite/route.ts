@@ -221,12 +221,14 @@ export async function GET(req: Request) {
     throw e;
   }
 
-  // Master admin sees every invite. A plain admin can only see invites when a
-  // master admin has granted the "invites" tab, and even then their view is
-  // scoped to their own hierarchy (the SDs they onboarded + downline).
+  // Master admin sees every invite. A plain admin can see invites either when
+  // master admin has explicitly granted the "invites" tab, OR when their
+  // allowedTabs is empty (empty = full access, mirroring the sidebar).
+  // In either case their view is scoped to their own hierarchy.
   const isMasterAdmin = user.role === "MASTER_ADMIN";
+  const adminTabs = user.allowedTabs ?? [];
   const isPermittedAdmin =
-    user.role === "ADMIN" && (user.allowedTabs ?? []).includes("invites");
+    user.role === "ADMIN" && (adminTabs.length === 0 || adminTabs.includes("invites"));
   if (!isMasterAdmin && !isPermittedAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
