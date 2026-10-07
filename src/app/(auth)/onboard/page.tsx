@@ -481,29 +481,6 @@ function OnboardContent() {
     setVerifying(false);
   }
 
-  async function skipVerification(channel: "SMS" | "EMAIL") {
-    setVerifying(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/onboard/${token}/otp/skip`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ channel }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        if (channel === "SMS") setPhoneVerified(true);
-        else setEmailVerified(true);
-        setOtpSent(false);
-        setOtpCode("");
-      } else {
-        setError(data.error ?? "Failed to skip verification");
-      }
-    } catch {
-      setError("Network error. Please try again.");
-    }
-    setVerifying(false);
-  }
 
   // ----- Aadhaar DigiLocker -----
   async function initAadhaar() {
@@ -1465,14 +1442,6 @@ function OnboardContent() {
                       </button>
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => skipVerification("SMS")}
-                    disabled={verifying}
-                    className="w-full text-center text-sm text-ink-400 hover:text-ink-600 hover:underline disabled:opacity-50"
-                  >
-                    Skip for now →
-                  </button>
                 </>
               )}
             </div>
@@ -1548,14 +1517,6 @@ function OnboardContent() {
                       </button>
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => skipVerification("EMAIL")}
-                    disabled={verifying}
-                    className="w-full text-center text-sm text-ink-400 hover:text-ink-600 hover:underline disabled:opacity-50"
-                  >
-                    Skip for now →
-                  </button>
                 </>
               )}
             </div>
