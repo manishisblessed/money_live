@@ -198,6 +198,8 @@ export async function PATCH(
     const onboardingLink = `${appUrl}/onboard?token=${invite.token}`;
     let emailSent = false;
     let emailError: string | undefined;
+    let smsSent = false;
+    let smsError: string | undefined;
 
     try {
       const emailProvider = getPartner("email");
@@ -220,13 +222,26 @@ export async function PATCH(
       emailError = (e as Error).message;
     }
 
+    try {
+      const smsProvider = getPartner("sms");
+      const smsResult = await smsProvider.sendTransactional({
+        phone: invite.phone,
+        templateId: "onboard_invite",
+        variables: { link: onboardingLink, role: invite.role.replace(/_/g, " ") },
+      });
+      smsSent = smsResult.ok;
+      if (!smsResult.ok) smsError = `${smsResult.code}: ${smsResult.message}`;
+    } catch (e) {
+      smsError = (e as Error).message;
+    }
+
     await prisma.auditLog.create({
       data: {
         userId: user.id,
         action: "invite.resent",
         entity: "Invite",
         entityId: id,
-        meta: { email: invite.email, emailSent, emailError },
+        meta: { email: invite.email, phone: invite.phone, emailSent, emailError, smsSent, smsError },
         ip: clientIp(req),
       },
     });
@@ -234,7 +249,9 @@ export async function PATCH(
     return NextResponse.json({
       ok: true,
       emailSent,
+      smsSent,
       ...(emailError ? { emailError } : {}),
+      ...(smsError ? { smsError } : {}),
       message: emailSent
         ? "Onboarding email resent successfully"
         : `Failed to send email${emailError ? ` — ${emailError}` : " — please check email provider configuration"}`,

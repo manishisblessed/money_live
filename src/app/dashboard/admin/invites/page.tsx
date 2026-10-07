@@ -213,7 +213,13 @@ export default function AdminInvitesPage() {
       });
       const data = await res.json();
       if (res.ok && data.emailSent) {
-        toast.success("Onboarding email resent successfully!");
+        if (data.smsSent === false && data.smsError) {
+          toast.success(`Email sent! (SMS failed: ${data.smsError})`);
+        } else if (data.smsSent === false) {
+          toast.success("Email sent! SMS delivery failed — share the link manually if needed.");
+        } else {
+          toast.success("Onboarding email resent successfully!");
+        }
       } else if (res.ok && !data.emailSent) {
         toast.error(
           data.emailError

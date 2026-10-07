@@ -19,7 +19,7 @@ import { leegalityConfigured } from "./leegality";
 import { msg91Configured, msg91Sms } from "./msg91";
 import { resendConfigured, resendEmail } from "./resend";
 import { ekychubConfigured, ekychubVerification } from "./ekychub";
-import { twilioVerify, isTwilioOtpEnabled } from "./twilio";
+import { twilioVerify, isTwilioOtpEnabled, twilioSms, twilioSmsConfigured } from "./twilio";
 import type {
   AepsProvider,
   BbpsProvider,
@@ -121,7 +121,13 @@ export function getPartner<V extends Vertical>(v: V): ProviderMap[V] {
     case "pan":
       return mock.mockPan as ProviderMap[V]; // wire NSDL e-Gov
     case "sms":
-      return (flags.sms && msg91Configured() ? msg91Sms : mock.mockSms) as ProviderMap[V];
+      // Twilio Programmable Messaging is preferred over MSG91 when both are
+      // configured. Set PARTNER_SMS_ENABLED=true and supply Twilio credentials
+      // (TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_MESSAGING_SERVICE_SID
+      // or TWILIO_FROM_NUMBER) to activate.
+      if (flags.sms && twilioSmsConfigured()) return twilioSms as ProviderMap[V];
+      if (flags.sms && msg91Configured()) return msg91Sms as ProviderMap[V];
+      return mock.mockSms as ProviderMap[V];
     case "email":
       return (flags.email && resendConfigured() ? resendEmail : mock.mockEmail) as ProviderMap[V];
     case "verification":
@@ -207,7 +213,7 @@ export function partnerStatus() {
     recharge: { live: false, provider: "MOCK" },
     travel:   { live: false, provider: "MOCK" },
     pan:      { live: false, provider: "MOCK" },
-    sms:      { live: flags.sms && msg91Configured(), provider: flags.sms && msg91Configured() ? "MSG91" : "MOCK" },
+    sms:      { live: flags.sms && (twilioSmsConfigured() || msg91Configured()), provider: flags.sms && twilioSmsConfigured() ? "TWILIO_SMS" : flags.sms && msg91Configured() ? "MSG91" : "MOCK" },
     email:    { live: flags.email && resendConfigured(), provider: flags.email && resendConfigured() ? "RESEND" : "MOCK" },
     verification: { live: flags.verification && ekychubConfigured(), provider: flags.verification && ekychubConfigured() ? "EKYCHUB" : "NONE" },
     otpVerify: { live: isTwilioOtpEnabled(), provider: isTwilioOtpEnabled() ? "TWILIO_VERIFY" : "NONE" },

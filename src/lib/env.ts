@@ -171,6 +171,11 @@ const schema = z.object({
   KYC_VIDEO_RETENTION_ENABLED: z.string().default("false"),
   KYC_VIDEO_RETENTION_DAYS: z.string().default("180"),
 
+  // MSG91 Flow IDs — map human-readable slug → actual MSG91 flow/template ID
+  // from the MSG91 dashboard (Flow → copy the Flow ID, NOT the template ID).
+  // Required when PARTNER_SMS_ENABLED=true and you want transactional SMS.
+  MSG91_FLOW_ONBOARD_INVITE: z.string().min(1).optional(),
+
   // ---------- Global default scheme fallback (Scheme Manager) ----------
   // When "true", any user WITHOUT an explicit active scheme (User.schemeId null
   // or its scheme inactive) is priced off the single platform default scheme
