@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default function ElectricityBillPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Lightbulb}
         title="Electricity Bill Payment"
-        description="Pay state and private electricity bills across India — BBPS-integrated for instant confirmation."
+        description="Pay state and private electricity bills across India â€” BBPS-integrated for instant confirmation."
       />
       <BbpsBillForm
         category="ELECTRICITY"

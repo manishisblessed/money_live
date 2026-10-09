@@ -14,8 +14,8 @@ import {
 import { ServicePageHeader } from "@/components/dashboard/ServicePage";
 import { CreditCardBillForm } from "@/components/dashboard/CreditCardBillForm";
 import { BbpsBillForm } from "@/components/dashboard/BbpsBillForm";
+import { PillTabs } from "@/components/dashboard/services/StepHeader";
 import { SERVICE_KEYS } from "@/lib/services/catalog";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -36,34 +36,23 @@ export default function Bbps1Page() {
   const active = TABS.find((t) => t.key === tab)!;
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Receipt}
         title="BBPS-Bharat BillPay"
-        description="Bill payments powered by Bharat BillPay — pay credit card bills, electricity, water, gas, education, insurance, and broadband via BBPS."
+        description="Credit card, electricity, water, gas, education, insurance and broadband — one Bharat BillPay rail for all of them."
       />
 
-      <div className="mb-6 flex gap-2 overflow-x-auto rounded-xl border border-ink-100 bg-ink-50 p-1">
-        {TABS.map((t) => {
+      <PillTabs
+        className="mb-6"
+        layoutId="bbps-1-tabs"
+        tabs={TABS.map((t) => {
           const Icon = t.icon;
-          return (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all",
-                tab === t.key
-                  ? "bg-white text-brand-700 shadow-sm"
-                  : "text-ink-500 hover:text-ink-900"
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {t.label}
-            </button>
-          );
+          return { key: t.key, label: t.label, icon: <Icon className="h-4 w-4" /> };
         })}
-      </div>
+        value={tab}
+        onChange={setTab}
+      />
 
       {active.form === "cc" ? (
         <CreditCardBillForm route={SERVICE_KEYS.BBPS_SAMEDAY} />

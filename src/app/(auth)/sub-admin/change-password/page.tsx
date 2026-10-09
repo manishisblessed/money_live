@@ -3,18 +3,19 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import {
-  Eye,
-  EyeOff,
-  KeyRound,
-  ShieldCheck,
-  ArrowRight,
-  AlertTriangle,
-  Check,
-  X,
-} from "lucide-react";
+import { ArrowRight, Check, Password, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { FloatingInput } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { Badge } from "@/components/ui/Badge";
+import {
+  AuthAlert,
+  AuthCard,
+  AuthCardHeader,
+  AuthLinksRow,
+  PasswordToggle,
+} from "@/components/auth/AuthCard";
+import { cn } from "@/lib/utils";
 
 type Rule = { label: string; ok: boolean };
 
@@ -88,175 +89,149 @@ export default function SubAdminChangePasswordPage() {
 
   if (status === "loading") {
     return (
-      <div className="grid min-h-[60vh] place-items-center">
-        <div className="flex items-center gap-3 text-ink-500">
-          <span className="h-3 w-3 animate-pulse rounded-full bg-brand-500" />
-          Loading...
+      <AuthCard className="grid min-h-[16rem] place-items-center" aria-busy>
+        <div className="flex items-center gap-3 text-sm text-ink-500">
+          <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-energy-gradient" />
+          Loading your account…
         </div>
-      </div>
+      </AuthCard>
     );
   }
 
+  const satisfied = rules.filter((r) => r.ok).length + (matches ? 1 : 0);
+  const total = rules.length + 1;
+
   return (
-    <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-      <div className="hidden flex-col justify-between rounded-3xl bg-gradient-to-br from-slate-700 via-slate-800 to-brand-600 p-10 text-white shadow-glow lg:flex">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-            <ShieldCheck className="h-3.5 w-3.5" /> First-time login
-          </span>
-          <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-            Set a password <br /> only you know.
-          </h2>
-          <p className="mt-3 text-white/80">
-            For your security we never let auto-generated passwords stay active.
-            Pick a strong, unique password before you continue to the sub-admin
-            console.
-          </p>
+    <AuthCard>
+      <AuthCardHeader
+        tone="staff"
+        eyebrow="First-time login"
+        title="Set a password only you know"
+        description={
+          <>
+            Welcome{name ? <>, <strong className="text-ink-900">{name}</strong></> : null}.
+            Replace the temporary password issued by your Admin before continuing to the console.
+          </>
+        }
+        icon={<IconTile icon={Password} tone="energy" size="lg" />}
+        badge={<Badge variant="royal" dot>Staff access</Badge>}
+      />
+
+      <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+        <div className="relative">
+          <FloatingInput
+            id="cur"
+            label="Temporary password"
+            type={showCurrent ? "text" : "password"}
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            required
+            autoComplete="current-password"
+            className="[&>input]:pr-14"
+          />
+          <PasswordToggle shown={showCurrent} onToggle={() => setShowCurrent((s) => !s)} />
         </div>
 
-        <div className="space-y-3 text-sm">
-          {[
-            "Never reuse a password from another service",
-            "Store it in your password manager",
-            "Don't share it — even with the Admin who created your account",
-            "We will ask you to change it every 90 days",
-          ].map((t) => (
-            <div key={t} className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-300" />
-              {t}
-            </div>
-          ))}
+        <div className="relative">
+          <FloatingInput
+            id="new"
+            label="New password"
+            type={showNew ? "text" : "password"}
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            required
+            autoComplete="new-password"
+            className="[&>input]:pr-14"
+          />
+          <PasswordToggle shown={showNew} onToggle={() => setShowNew((s) => !s)} />
         </div>
-      </div>
 
-      <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-700 text-white">
-            <KeyRound className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="heading-md">Change your password</h1>
-            <p className="text-sm text-ink-500">
-              Welcome, <strong className="text-ink-900">{name}</strong>. Replace
-              the temporary password issued by Admin to continue.
+        <FloatingInput
+          id="confirm"
+          label="Confirm new password"
+          type={showNew ? "text" : "password"}
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          required
+          autoComplete="new-password"
+          error={confirm.length > 0 && !matches ? "Passwords don't match yet" : undefined}
+        />
+
+        <div className="rounded-2xl bg-[#f6f7fb] p-4 ring-1 ring-inset ring-ink-100">
+          <div className="flex items-center justify-between text-xs">
+            <p className="font-bold uppercase tracking-[0.16em] text-ink-500">Password strength</p>
+            <p className="font-semibold tabular-nums text-ink-700">
+              {satisfied}/{total}
             </p>
           </div>
-        </div>
-
-        <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-          <div>
-            <Label htmlFor="cur">Temporary password</Label>
-            <div className="relative">
-              <Input
-                id="cur"
-                type={showCurrent ? "text" : "password"}
-                value={current}
-                onChange={(e) => setCurrent(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrent((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500 hover:text-ink-900"
-                aria-label={showCurrent ? "Hide" : "Show"}
-              >
-                {showCurrent ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="new">New password</Label>
-            <div className="relative">
-              <Input
-                id="new"
-                type={showNew ? "text" : "password"}
-                value={next}
-                onChange={(e) => setNext(e.target.value)}
-                required
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNew((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500 hover:text-ink-900"
-                aria-label={showNew ? "Hide" : "Show"}
-              >
-                {showNew ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="confirm">Confirm new password</Label>
-            <Input
-              id="confirm"
-              type={showNew ? "text" : "password"}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              autoComplete="new-password"
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-100" aria-hidden>
+            <div
+              className="h-full rounded-full bg-energy-gradient-x transition-[width] duration-300 ease-out"
+              style={{ width: `${(satisfied / total) * 100}%` }}
             />
           </div>
-
-          <ul className="grid grid-cols-1 gap-1.5 rounded-xl border border-ink-100 bg-ink-50/40 p-3 text-xs sm:grid-cols-2">
+          <ul className="mt-3 grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
             {rules.map((r) => (
               <li
                 key={r.label}
-                className={`flex items-center gap-2 ${r.ok ? "text-emerald-700" : "text-ink-500"}`}
-              >
-                {r.ok ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <X className="h-3.5 w-3.5" />
+                className={cn(
+                  "flex items-center gap-2 transition-colors",
+                  r.ok ? "text-accent-700" : "text-ink-500"
                 )}
+              >
+                <span
+                  className={cn(
+                    "grid h-4 w-4 shrink-0 place-items-center rounded-full",
+                    r.ok ? "bg-accent-100" : "bg-ink-100"
+                  )}
+                >
+                  {r.ok ? <Check size={10} weight="bold" aria-hidden /> : <X size={10} weight="bold" aria-hidden />}
+                </span>
                 {r.label}
               </li>
             ))}
             <li
-              className={`flex items-center gap-2 sm:col-span-2 ${matches ? "text-emerald-700" : "text-ink-500"}`}
-            >
-              {matches ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <X className="h-3.5 w-3.5" />
+              className={cn(
+                "flex items-center gap-2 transition-colors sm:col-span-2",
+                matches ? "text-accent-700" : "text-ink-500"
               )}
+            >
+              <span
+                className={cn(
+                  "grid h-4 w-4 shrink-0 place-items-center rounded-full",
+                  matches ? "bg-accent-100" : "bg-ink-100"
+                )}
+              >
+                {matches ? <Check size={10} weight="bold" aria-hidden /> : <X size={10} weight="bold" aria-hidden />}
+              </span>
               Confirmation matches
             </li>
           </ul>
+        </div>
 
-          {error && (
-            <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{error}</span>
-            </div>
+        <AuthAlert message={error} />
+
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          isLoading={submitting}
+          disabled={submitting || !allValid || !matches}
+        >
+          {submitting ? (
+            "Saving…"
+          ) : (
+            <>
+              Set password &amp; continue <ArrowRight size={16} weight="bold" aria-hidden />
+            </>
           )}
+        </Button>
+      </form>
 
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={submitting || !allValid || !matches}
-          >
-            {submitting ? (
-              "Saving..."
-            ) : (
-              <>
-                Set password & continue <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </form>
-      </div>
-    </div>
+      <AuthLinksRow className="mt-6 border-t border-ink-100 pt-5">
+        <span className="text-ink-400">Never reuse a password from another service.</span>
+        <span className="text-ink-400">Rotates every 90 days</span>
+      </AuthLinksRow>
+    </AuthCard>
   );
 }

@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Button } from "@/components/ui/Button";
-import { Award, RefreshCw, Sparkles } from "lucide-react";
+import { Award, RefreshCw } from "lucide-react";
+import { Percent } from "@phosphor-icons/react";
+import { IconTile } from "@/components/ui/Icon";
 import { ReportActions } from "@/components/dashboard/ReportActions";
+import { SectionCard } from "@/components/dashboard/patterns";
 import { type Role } from "@/lib/auth";
 import { useAuth } from "@/lib/useAuth";
 
@@ -48,15 +51,15 @@ export default function CommissionsPage() {
   };
 
   const cols: Column<SlabRow>[] = [
-    { key: "service", header: "Service", render: (r) => <span className="font-semibold text-ink-900">{r.service.replace(/_/g, " ")}</span> },
-    { key: "flat", header: "Payout", align: "right", render: formatPayout },
-    { key: "minAmount", header: "Range", align: "right", render: (r) => `₹${r.minAmount} – ₹${r.maxAmount}` },
+    { key: "service", header: "Service", render: (r) => <span className="font-semibold capitalize text-ink-900">{r.service.replace(/_/g, " ").toLowerCase()}</span> },
+    { key: "flat", header: "Payout", align: "right", render: (r) => <span className="font-semibold tabular-nums text-ink-900">{formatPayout(r)}</span> },
+    { key: "minAmount", header: "Range", align: "right", render: (r) => <span className="tabular-nums text-ink-600">₹{r.minAmount} – ₹{r.maxAmount}</span> },
   ];
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Commissions"
+        eyebrow="Account · Commissions"
         title={role === "master-distributor" ? "Commission master" : "Commission slabs"}
         description={role === "master-distributor"
           ? "Set rate-cards for your distributors. They can only set retailer payouts within these caps."
@@ -86,15 +89,32 @@ export default function CommissionsPage() {
                 Certificate
               </Button>
             </a>
-            <Button variant="outline" onClick={fetchSlabs} disabled={loading}>
+            <Button variant="outline" onClick={fetchSlabs} disabled={loading} aria-label="Refresh">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
           </>
         }
       />
 
+      <SectionCard tone="brand" padding="sm">
+        <div className="flex items-start gap-3">
+          <IconTile icon={Percent} tone="brand" size="md" />
+          <div className="text-sm">
+            <p className="font-display font-semibold tracking-[-0.01em] text-ink-900">
+              {role === "master-distributor" ? "Caps for your network" : "What you earn, per transaction"}
+            </p>
+            <p className="mt-0.5 text-ink-600">
+              {role === "master-distributor"
+                ? "Distributors can only set retailer payouts within these caps. Download the certificate for the financial year any time."
+                : "Flat amounts are paid per transaction; percentages apply to the transaction value within the shown range."}
+            </p>
+          </div>
+        </div>
+      </SectionCard>
+
       <DataTable
         title="Service rate-card"
+        description={`${slabs.length} slab${slabs.length === 1 ? "" : "s"}`}
         columns={cols}
         data={slabs}
         loading={loading}

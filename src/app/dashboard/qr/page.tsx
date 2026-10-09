@@ -21,9 +21,14 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Badge } from "@/components/ui/Badge";
-import { Input, Label } from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { formatINR } from "@/lib/utils";
+import { IconTile } from "@/components/ui/Icon";
+import { Field, Notice } from "@/components/dashboard/services/ServiceLayout";
+import { InfoChip } from "@/components/dashboard/services/SummaryPanel";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { PillTabs } from "@/components/dashboard/services/StepHeader";
+import { formatINR, cn } from "@/lib/utils";
 import { rejectionReasonLabel } from "@/lib/qr/rejectionReasons";
 import { QrSettlementReportTab } from "./QrSettlementReportTab";
 
@@ -150,10 +155,10 @@ function QrHeadroomMeter({ headroom }: { headroom: QrHeadroom }) {
   const remainingCount = headroom.remainingCount;
   const exhausted = (remaining != null && remaining <= 0) || (remainingCount != null && remainingCount <= 0);
   return (
-    <div className="mx-auto mt-3 w-full max-w-xs rounded-xl bg-white/90 p-3 text-left shadow-sm">
+    <div className="mx-auto mt-3 w-full max-w-xs rounded-2xl bg-white/90 p-3 text-left shadow-sm ring-1 ring-ink-100">
       <div className="flex items-center justify-between gap-2 text-xs">
         <span className="font-semibold text-ink-700">Today on this QR</span>
-        <span className="shrink-0 text-ink-500">
+        <span className="shrink-0 tabular-nums text-ink-500">
           {headroom.dailyLimit != null ? (
             <>
               {formatINR(headroom.collected)} / {formatINR(headroom.dailyLimit)}
@@ -170,13 +175,16 @@ function QrHeadroomMeter({ headroom }: { headroom: QrHeadroom }) {
           {headroom.collectedCount}/{headroom.dailyLimitCount} txns
         </p>
       )}
-      <div className="mt-2 h-1.5 w-full rounded-full bg-ink-100">
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
         <div
-          className={`h-1.5 rounded-full ${amtPct >= 100 ? "bg-rose-500" : amtPct >= 80 ? "bg-amber-500" : "bg-brand-500"}`}
+          className={cn(
+            "h-1.5 rounded-full transition-[width] duration-500",
+            amtPct >= 100 ? "bg-coral-500" : amtPct >= 80 ? "bg-amber-500" : "bg-energy-gradient-x"
+          )}
           style={{ width: `${Math.min(100, amtPct)}%` }}
         />
       </div>
-      <p className={`mt-1.5 text-[11px] font-medium ${exhausted ? "text-rose-700" : "text-ink-800"}`}>
+      <p className={`mt-1.5 text-[11px] font-medium ${exhausted ? "text-coral-700" : "text-ink-800"}`}>
         {exhausted
           ? "This QR is full for today — collect on the next QR."
           : remaining != null
@@ -211,7 +219,7 @@ function QrCollectCard({
   const inner = (
     <>
       <div className="flex items-center justify-center gap-2">
-        <h3 className="font-display text-base font-semibold text-ink-900">{title}</h3>
+        <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">{title}</h3>
         {onRefresh && (
           <button
             type="button"
@@ -219,8 +227,9 @@ function QrCollectCard({
               e.stopPropagation();
               onRefresh();
             }}
-            className="grid h-7 w-7 place-items-center rounded-lg text-ink-400 hover:bg-white hover:text-ink-700"
+            className="grid h-7 w-7 place-items-center rounded-full text-ink-400 transition hover:bg-white hover:text-ink-700 focus-energy"
             title="Refresh remaining amount"
+            aria-label="Refresh remaining amount"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
           </button>
@@ -237,21 +246,21 @@ function QrCollectCard({
       </p>
       {qr.headroom && <QrHeadroomMeter headroom={qr.headroom} />}
       {qr.nearFull && qr.headroom?.remainingAmount != null && qr.headroom.remainingAmount > 0 && (
-        <div className="mx-auto mt-3 flex max-w-xs items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-left text-[11px] font-medium text-amber-800">
+        <div className="mx-auto mt-3 flex max-w-xs items-center gap-2 rounded-2xl bg-amber-50 px-3 py-2 text-left text-[11px] font-medium text-amber-800 ring-1 ring-amber-200">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           Almost full — refresh before each new collection so you see the latest remaining amount.
         </div>
       )}
-      <div className="mx-auto mt-4 grid max-w-xs place-items-center rounded-2xl bg-white p-4 shadow-soft">
+      <div className="mx-auto mt-4 grid max-w-xs place-items-center rounded-3xl bg-white p-4 shadow-energy-sm ring-1 ring-ink-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={qr.imageUrl} alt={`${qr.label} collection QR`} className="w-full rounded-xl" />
+        <img src={qr.imageUrl} alt={`${qr.label} collection QR`} className="w-full rounded-2xl" />
       </div>
       <a
         href={qr.imageUrl}
         target="_blank"
         rel="noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-brand-700 shadow-sm"
+        className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-brand-700 shadow-sm ring-1 ring-ink-100 transition hover:ring-brand-300 focus-energy"
       >
         <UploadCloud className="h-3.5 w-3.5 rotate-180" />
         Open full size / download
@@ -261,8 +270,8 @@ function QrCollectCard({
           <span
             className={
               selected
-                ? "inline-flex rounded-full bg-brand-600 px-3 py-1 text-[11px] font-semibold text-white"
-                : "inline-flex rounded-full border border-ink-200 bg-white px-3 py-1 text-[11px] font-semibold text-ink-600"
+                ? "inline-flex rounded-full bg-energy-gradient px-3 py-1 text-[11px] font-semibold text-white shadow-energy-sm"
+                : "inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-600 ring-1 ring-ink-200"
             }
           >
             {selected ? "Selected for claims" : "Tap to claim payments on this QR"}
@@ -272,13 +281,14 @@ function QrCollectCard({
     </>
   );
 
-  const shell =
-    "rounded-2xl border p-6 text-center " +
-    (selected
-      ? "border-brand-400 bg-gradient-to-br from-brand-50 to-accent-50 shadow-soft ring-2 ring-brand-200"
+  const shell = cn(
+    "gradient-ring rounded-3xl p-6 text-center ring-1 transition",
+    selected
+      ? "bg-gradient-to-br from-royal-50/70 via-white to-coral-50/50 shadow-energy-sm ring-transparent"
       : selectable
-        ? "cursor-pointer border-ink-100 bg-gradient-to-br from-ink-50 to-white hover:border-brand-200"
-        : "border-ink-100 bg-gradient-to-br from-brand-50 to-accent-50");
+        ? "cursor-pointer bg-white ring-ink-100 hover:ring-ink-200"
+        : "bg-gradient-to-br from-brand-50/70 via-white to-accent-50/60 ring-ink-100"
+  );
 
   if (selectable) {
     return (
@@ -286,7 +296,8 @@ function QrCollectCard({
         role="button"
         tabIndex={0}
         aria-pressed={selected}
-        className={shell}
+        data-active={selected}
+        className={cn(shell, "focus-energy")}
         onClick={onSelect}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -379,34 +390,34 @@ function QrTxnReport({
     <div className="space-y-4">
       {/* Legend + colour-coded totals */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+        <div className="rounded-3xl bg-emerald-50/60 p-5 ring-1 ring-emerald-100">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Settled to wallet (net)</p>
-          <p className="mt-1 font-display text-xl font-bold text-emerald-800">{formatINR(settledNet)}</p>
+          <p className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] tabular-nums text-emerald-800">{formatINR(settledNet)}</p>
           <p className="mt-0.5 text-[11px] text-emerald-700/80">MDR deducted: {formatINR(settledMdr)} · {settled.length} txn{settled.length === 1 ? "" : "s"}</p>
         </div>
-        <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+        <div className="rounded-3xl bg-amber-50/60 p-5 ring-1 ring-amber-100">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">Pending (gross)</p>
-          <p className="mt-1 font-display text-xl font-bold text-amber-800">{formatINR(pendingGross)}</p>
+          <p className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] tabular-nums text-amber-800">{formatINR(pendingGross)}</p>
           <p className="mt-0.5 text-[11px] text-amber-700/80">Awaiting verification / settlement</p>
         </div>
-        <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+        <div className="rounded-3xl bg-rose-50/60 p-5 ring-1 ring-rose-100">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-700">Failed</p>
-          <p className="mt-1 font-display text-xl font-bold text-rose-800">{failedCount}</p>
+          <p className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] tabular-nums text-rose-800">{failedCount}</p>
           <p className="mt-0.5 text-[11px] text-rose-700/80">Rejected or reversed — nothing settled</p>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-        <div className="flex items-center justify-between border-b border-ink-100 px-4 py-3">
+      <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-ink-100">
+        <div className="flex items-center justify-between px-5 py-4">
           <div>
-            <h3 className="font-display text-sm font-semibold text-ink-900">{meta.label} — transaction report</h3>
-            <p className="text-xs text-ink-500">Gross amount, MDR deducted and the net settled to your wallet, per payment.</p>
+            <h3 className="font-display text-base font-semibold tracking-[-0.02em] text-ink-950 md:text-lg">{meta.label} — transaction report</h3>
+            <p className="mt-0.5 text-xs text-ink-500">Gross amount, MDR deducted and the net settled to your wallet, per payment.</p>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-ink-100 bg-ink-50/60 text-left text-[11px] uppercase tracking-wide text-ink-500">
+              <tr className="border-y border-ink-100 bg-ink-50/60 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-500">
                 <th className="px-4 py-2 font-semibold">Ref / Card</th>
                 <th className="px-4 py-2 font-semibold">Date</th>
                 <th className="px-4 py-2 text-right font-semibold">Amount</th>
@@ -742,7 +753,7 @@ export default function QrCollectionsPage() {
 
       {/* Primary stream selector: QR-Instant vs QR-T+1. Admin can add separate
           QRs for each; retailers see the matching pool here. */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Settlement stream">
         {(["INSTANT", "T1"] as const).map((k) => {
           const m = KIND_META[k];
           const Icon = m.icon;
@@ -751,24 +762,28 @@ export default function QrCollectionsPage() {
             <button
               key={k}
               type="button"
+              role="radio"
+              aria-checked={active}
+              data-active={active}
               onClick={() => setKind(k)}
-              className={`flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition ${
+              className={cn(
+                "gradient-ring flex items-start gap-3 rounded-3xl p-5 text-left ring-1 transition focus-energy",
                 active
-                  ? "border-brand-500 bg-gradient-to-br from-brand-50 to-accent-50 shadow-soft"
-                  : "border-ink-100 bg-white hover:border-brand-200"
-              }`}
+                  ? "bg-gradient-to-br from-royal-50/70 via-white to-coral-50/50 shadow-energy-sm ring-transparent"
+                  : "bg-white ring-ink-100 hover:ring-ink-200"
+              )}
             >
-              <span
-                className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${
-                  active ? "bg-gradient-to-br from-brand-500 to-brand-700 text-white" : "bg-ink-100 text-ink-500"
-                }`}
-              >
+              <IconTile tone={active ? "energy" : "ink"} size="lg">
                 <Icon className="h-5 w-5" />
-              </span>
-              <span>
-                <span className="flex items-center gap-2">
-                  <span className="font-display text-base font-semibold text-ink-900">{m.label}</span>
-                  {active && <Badge variant="brand">Selected</Badge>}
+              </IconTile>
+              <span className="min-w-0">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">{m.label}</span>
+                  {active && (
+                    <Badge variant="energy" size="sm">
+                      Selected
+                    </Badge>
+                  )}
                 </span>
                 <span className="mt-0.5 block text-xs text-ink-500">{m.short}</span>
               </span>
@@ -780,29 +795,21 @@ export default function QrCollectionsPage() {
       {/* Retailers toggle Collect & Claim vs Settlement Report within the stream;
           DT/MD/SD only ever see the report, so the switcher is hidden for them. */}
       {isRetailer && (
-        <div className="flex gap-1 rounded-xl border border-ink-100 bg-ink-50/60 p-1">
-          {([
-            { id: "collect", label: "Collect & Claim", icon: Store },
-            { id: "txn", label: "Transaction Report", icon: Receipt },
-            { id: "report", label: "Settlement Report", icon: Banknote },
-          ] as const).map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setSubTab(id)}
-              className={
-                subTab === id
-                  ? "flex-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-ink-900 shadow-sm"
-                  : "flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-ink-500 transition-colors hover:text-ink-700"
-              }
-            >
-              <span className="flex items-center justify-center gap-2"><Icon className="h-4 w-4" /> {label}</span>
-            </button>
-          ))}
-        </div>
+        <PillTabs
+          fill
+          layoutId="qr-sub-tabs"
+          tabs={[
+            { key: "collect", label: "Collect & Claim", icon: <Store className="h-4 w-4" /> },
+            { key: "txn", label: "Transaction Report", icon: <Receipt className="h-4 w-4" /> },
+            { key: "report", label: "Settlement Report", icon: <Banknote className="h-4 w-4" /> },
+          ]}
+          value={subTab}
+          onChange={setSubTab}
+        />
       )}
 
       {sessionStatus === "loading" ? (
-        <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center text-sm text-ink-500">
+        <div className="rounded-3xl bg-white p-10 text-center text-sm text-ink-500 ring-1 ring-ink-100">
           Loading…
         </div>
       ) : activeSubTab === "report" ? (
@@ -811,36 +818,42 @@ export default function QrCollectionsPage() {
         <QrTxnReport claims={kindClaims} meta={meta} loading={loading} />
       ) : (
       <>
-      <div className="rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 text-xs text-brand-800">
+      <Notice tone="brand">
         <span className="font-semibold">{meta.label}:</span> {meta.blurb}
-      </div>
+      </Notice>
 
       {/* Applicable MDR for this stream (T+0 for Instant, T+1 for T+1) plus, for
           T+1, when verified claims are auto-settled — straight from the scheme. */}
-      <div className="flex flex-wrap items-center gap-2">
-        {rate && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-800">
-            <IndianRupee className="h-3.5 w-3.5 text-brand-600" />
-            MDR {kind === "INSTANT" ? "T+0" : "T+1"}: {fmtRate(rate)}
-          </span>
-        )}
-        {kind === "T1" && settlementHour != null && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-800">
-            <Clock className="h-3.5 w-3.5 text-accent-600" />
-            Settles daily at {fmtSettlementHour(settlementHour)}
-          </span>
-        )}
-      </div>
+      {(rate || (kind === "T1" && settlementHour != null)) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {rate && (
+            <InfoChip
+              tone="brand"
+              icon={<IndianRupee className="h-3.5 w-3.5" />}
+              label={`MDR ${kind === "INSTANT" ? "T+0" : "T+1"}`}
+              value={fmtRate(rate)}
+            />
+          )}
+          {kind === "T1" && settlementHour != null && (
+            <InfoChip
+              tone="accent"
+              icon={<Clock className="h-3.5 w-3.5" />}
+              label="Settles daily at"
+              value={fmtSettlementHour(settlementHour)}
+            />
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Under review" value={formatINR(pendingAmount)} icon={Clock} accent="accent" />
+        <StatCard label="Under review" value={formatINR(pendingAmount)} icon={Clock} tone="amber" />
         <StatCard
           label={kind === "INSTANT" ? "Awaiting settlement" : "Ready to settle (T+1)"}
           value={formatINR(settleableTotal)}
           icon={Banknote}
-          accent="brand"
+          tone="brand"
         />
-        <StatCard label="Settled this month" value={formatINR(creditedThisMonth)} icon={CheckCircle2} accent="emerald" />
+        <StatCard label="Settled this month" value={formatINR(creditedThisMonth)} icon={CheckCircle2} tone="accent" />
         <StatCard
           label={qr?.headroom?.remainingAmount != null ? "This QR remaining" : "Active QR"}
           value={
@@ -853,7 +866,7 @@ export default function QrCollectionsPage() {
                   : "—"
           }
           icon={QrCode}
-          accent="violet"
+          tone="royal"
         />
       </div>
 
@@ -893,8 +906,8 @@ export default function QrCollectionsPage() {
               </p>
             </>
           ) : (
-            <div className="rounded-2xl border border-ink-100 bg-gradient-to-br from-brand-50 to-accent-50 p-6 text-center">
-              <h3 className="font-display text-base font-semibold text-ink-900">{meta.label} collection QR</h3>
+            <div className="rounded-3xl bg-gradient-to-br from-brand-50/70 via-white to-accent-50/60 p-6 text-center ring-1 ring-ink-100">
+              <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">{meta.label} collection QR</h3>
               <p className="mt-6 text-sm text-ink-600">
                 {loading
                   ? "Loading…"
@@ -907,14 +920,18 @@ export default function QrCollectionsPage() {
         </div>
 
         {/* Claim form */}
-        <form onSubmit={submitClaim} className="space-y-4 rounded-2xl border border-ink-100 bg-white p-6">
-          <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white">
-              <IndianRupee className="h-4 w-4" />
-            </span>
-            <div>
-              <h3 className="font-display text-base font-semibold text-ink-900">Claim a {meta.label} payment</h3>
-              <p className="text-xs text-ink-500">
+        <form onSubmit={submitClaim} className="relative space-y-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink-100">
+          <div className="flex items-start gap-3">
+            <IconTile tone="energy" size="lg">
+              <IndianRupee className="h-5 w-5" />
+            </IconTile>
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                <span className="brand-dot" />
+                Step 2
+              </p>
+              <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Claim a {meta.label} payment</h3>
+              <p className="mt-0.5 text-xs text-ink-500">
                 {collectQr
                   ? `Claim against ${collectQr.label}${collectQr.upiVpa ? ` (${collectQr.upiVpa})` : ""}.`
                   : "One claim per UPI payment — the UTR can never be claimed twice."}
@@ -922,65 +939,58 @@ export default function QrCollectionsPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="claim-amount">Amount (₹)</Label>
-              <Input
-                id="claim-amount"
-                type="number"
-                required
-                min={1}
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Exact amount received"
-              />
-              {remainingOnCollect != null && Number.isFinite(claimAmt) && claimAmt > 0 && (
-                <p className={`mt-1 text-xs ${splitExtra > 0 ? "font-medium text-amber-800" : "text-ink-500"}`}>
-                  {splitExtra > 0
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FloatField
+              id="claim-amount"
+              label="Amount (₹)"
+              type="number"
+              required
+              display
+              min={1}
+              step="0.01"
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              hint={
+                remainingOnCollect != null && Number.isFinite(claimAmt) && claimAmt > 0
+                  ? splitExtra > 0
                     ? remainingOnCollect <= 0
                       ? "This QR has no remaining capacity — collect this payment on the next QR."
                       : overflowQr
                         ? `Only ${formatINR(remainingOnCollect)} fits on this QR. Collect ${formatINR(remainingOnCollect)} here, then ${formatINR(splitExtra)} on ${overflowQr.label}.`
                         : `Only ${formatINR(remainingOnCollect)} remaining on this QR today.`
-                    : `Fits on this QR (${formatINR(remainingOnCollect)} remaining).`}
-                </p>
-              )}
-            </div>
-            <div>
-              <Label htmlFor="claim-card">Card last 4 digits</Label>
-              <Input
-                id="claim-card"
-                required
-                inputMode="numeric"
-                minLength={4}
-                maxLength={4}
-                value={cardLast4}
-                onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                placeholder="e.g. 4321"
-              />
-              <p className="mt-1 text-xs text-ink-500">For RuPay Credit Card payment — required.</p>
-            </div>
+                    : `Fits on this QR (${formatINR(remainingOnCollect)} remaining).`
+                  : "Exact amount received"
+              }
+              className={splitExtra > 0 ? "[&_p]:font-medium [&_p]:text-amber-800" : undefined}
+            />
+            <FloatField
+              id="claim-card"
+              label="Card last 4 digits"
+              required
+              mono
+              inputMode="numeric"
+              minLength={4}
+              maxLength={4}
+              value={cardLast4}
+              onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              hint="For RuPay Credit Card payment — required."
+            />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="claim-utr">UPI UTR / reference number (12 digits)</Label>
-              <Input
-                id="claim-utr"
-                inputMode="numeric"
-                minLength={12}
-                maxLength={14}
-                value={utr}
-                onChange={(e) => setUtr(e.target.value)}
-                placeholder="e.g. 415023987654"
-              />
-              <p className="mt-1 text-xs text-ink-500">
-                Optional — shown in the customer&apos;s UPI app under &quot;UTR&quot; or &quot;UPI Ref No&quot;.
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="claim-paidat">Paid on</Label>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FloatField
+              id="claim-utr"
+              label="UPI UTR / reference (12 digits)"
+              mono
+              inputMode="numeric"
+              minLength={12}
+              maxLength={14}
+              value={utr}
+              onChange={(e) => setUtr(e.target.value)}
+              hint={`Optional — shown in the customer's UPI app under "UTR" or "UPI Ref No".`}
+            />
+            <Field label="Paid on" htmlFor="claim-paidat" hint="Optional — when the customer paid.">
               <Input
                 id="claim-paidat"
                 type="datetime-local"
@@ -988,12 +998,39 @@ export default function QrCollectionsPage() {
                 max={localDateTimeMax()}
                 onChange={(e) => setPaidAt(e.target.value)}
               />
-              <p className="mt-1 text-xs text-ink-500">Optional — when the customer paid.</p>
-            </div>
+            </Field>
           </div>
 
-          <div>
-            <Label htmlFor="claim-shot">Payment screenshot</Label>
+          <Field
+            label="Payment screenshot"
+            htmlFor="claim-shot"
+            hint={
+              screenshot ? (
+                <span className="font-medium text-accent-700">Attached: {screenshot.name}</span>
+              ) : (
+                "PNG, JPG or WEBP · up to 5 MB"
+              )
+            }
+          >
+            <label
+              htmlFor="claim-shot"
+              className={cn(
+                "flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed px-4 py-3 transition",
+                screenshot ? "border-accent-300 bg-accent-50/60" : "border-ink-200 bg-ink-50/50 hover:border-brand-300 hover:bg-white"
+              )}
+            >
+              <IconTile tone={screenshot ? "accent" : "brand"} size="sm">
+                <UploadCloud className="h-4 w-4" />
+              </IconTile>
+              <span className="min-w-0 flex-1 text-sm text-ink-700">
+                <span className="block font-semibold text-ink-900">
+                  {screenshot ? "Change screenshot" : "Upload the payment screenshot"}
+                </span>
+                <span className="block truncate text-xs text-ink-500">
+                  {screenshot ? screenshot.name : "Tap to choose a file from your phone or computer"}
+                </span>
+              </span>
+            </label>
             <input
               id="claim-shot"
               ref={fileRef}
@@ -1001,10 +1038,9 @@ export default function QrCollectionsPage() {
               required
               accept="image/png,image/jpeg,image/webp"
               onChange={pickFile}
-              className="block w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700"
+              className="sr-only"
             />
-            {screenshot && <p className="mt-1 text-xs text-emerald-600">Attached: {screenshot.name}</p>}
-          </div>
+          </Field>
 
           {dailyUsage && (() => {
             const amtPct = dailyUsage.amountLimit > 0 ? (dailyUsage.amount / dailyUsage.amountLimit) * 100 : 0;
@@ -1012,21 +1048,24 @@ export default function QrCollectionsPage() {
             const remainingCount = Math.max(0, dailyUsage.countLimit - dailyUsage.count);
             const maxed = remainingAmount <= 0 || remainingCount <= 0;
             return (
-              <div className="rounded-xl border border-ink-100 bg-ink-50/60 p-3">
-                <div className="flex items-center justify-between text-xs">
+              <div className="rounded-2xl bg-ink-50/70 p-4 ring-1 ring-ink-100">
+                <div className="flex items-center justify-between gap-2 text-xs">
                   <span className="font-semibold text-ink-700">Your daily claim usage</span>
-                  <span className="text-ink-500">
+                  <span className="tabular-nums text-ink-500">
                     {formatINR(dailyUsage.amount)} / {formatINR(dailyUsage.amountLimit)} · {dailyUsage.count}/
                     {dailyUsage.countLimit} claims
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-ink-100">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
                   <div
-                    className={`h-1.5 rounded-full ${amtPct >= 100 ? "bg-rose-500" : amtPct >= 80 ? "bg-amber-500" : "bg-brand-500"}`}
+                    className={cn(
+                      "h-1.5 rounded-full transition-[width] duration-500",
+                      amtPct >= 100 ? "bg-coral-500" : amtPct >= 80 ? "bg-amber-500" : "bg-energy-gradient-x"
+                    )}
                     style={{ width: `${Math.min(100, amtPct)}%` }}
                   />
                 </div>
-                <p className="mt-1 text-[11px] text-ink-500">
+                <p className="mt-1.5 text-[11px] text-ink-500">
                   {maxed
                     ? "You've reached today's claim limit — it resets tomorrow, or contact support."
                     : `You can still claim ${formatINR(remainingAmount)} across ${remainingCount} more claim${remainingCount === 1 ? "" : "s"} today.`}
@@ -1035,14 +1074,14 @@ export default function QrCollectionsPage() {
             );
           })()}
 
-          <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
+          <Notice tone="warning" icon={<AlertTriangle className="h-4 w-4" />}>
             Claims are verified against the payment provider&apos;s settlement data. Fraudulent or
             edited screenshots lead to permanent account termination and recovery action.
-          </div>
+          </Notice>
 
           <Button
             type="submit"
-            size="lg"
+            size="xl"
             className="w-full"
             disabled={busy || !collectQr || !screenshot || cardLast4.trim().length !== 4}
             isLoading={busy}

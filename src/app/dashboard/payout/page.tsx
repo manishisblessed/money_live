@@ -17,7 +17,6 @@ import {
   Copy,
   CreditCard,
   Download,
-  Hash,
   IndianRupee,
   Landmark,
   Loader2,
@@ -30,7 +29,6 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
-  User as UserIcon,
   Wallet,
   XCircle,
   Zap,
@@ -41,9 +39,21 @@ import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { ReportActions } from "@/components/dashboard/ReportActions";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { IconTile, type IconTone } from "@/components/ui/Icon";
 import { TxnPinDialog } from "@/components/security/TxnPinDialog";
-import { formatINR } from "@/lib/utils";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+  SecureFootnote,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips, InfoChip } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { StepHeader } from "@/components/dashboard/services/StepHeader";
+import { ChargeBreakdown } from "@/components/dashboard/services/ChargeBreakdown";
+import { formatINR, cn } from "@/lib/utils";
 import { useAuth } from "@/lib/useAuth";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -350,9 +360,9 @@ export default function PayoutPage() {
 
       {/* Wallet snapshot — always visible */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Spendable" value={balances ? formatINR(balances.spendable) : "—"} icon={Wallet} accent="emerald" />
-        <StatCard label="Wallet balance" value={balances ? formatINR(balances.walletBalance) : "—"} icon={Landmark} accent="brand" />
-        <StatCard label="On hold" value={balances ? formatINR(balances.heldBalance) : "—"} icon={Lock} accent="violet" />
+        <StatCard label="Spendable" value={balances ? formatINR(balances.spendable) : "—"} icon={Wallet} tone="accent" />
+        <StatCard label="Wallet balance" value={balances ? formatINR(balances.walletBalance) : "—"} icon={Landmark} tone="brand" />
+        <StatCard label="On hold" value={balances ? formatINR(balances.heldBalance) : "—"} icon={Lock} tone="royal" />
       </div>
 
       {/* Error banner */}
@@ -362,13 +372,18 @@ export default function PayoutPage() {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
           >
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span className="flex-1">{error}</span>
-            <button onClick={() => setError(null)} aria-label="Dismiss" className="text-rose-400 hover:text-rose-600">
-              <XCircle className="h-4 w-4" />
-            </button>
+            <Notice
+              tone="danger"
+              icon={<AlertCircle className="h-4 w-4" />}
+              action={
+                <button onClick={() => setError(null)} aria-label="Dismiss" className="text-coral-400 transition hover:text-coral-600">
+                  <XCircle className="h-4 w-4" />
+                </button>
+              }
+            >
+              {error}
+            </Notice>
           </motion.div>
         )}
       </AnimatePresence>
@@ -389,8 +404,7 @@ export default function PayoutPage() {
                 subtitle="Send money to a verified bank account via IMPS"
                 cta={verifiedBenes.length > 0 ? `${verifiedBenes.length} verified · Ready to use` : "Add a beneficiary first"}
                 icon={Send}
-                gradient="from-brand-500 to-brand-700"
-                glow="from-brand-400/25 to-cyan-400/25"
+                tone="energy"
                 onClick={handleStartPayout}
               />
               <HeroCard
@@ -398,8 +412,7 @@ export default function PayoutPage() {
                 subtitle="Verify via penny-drop & save to your beneficiary book"
                 cta={fee ? `${inr2(fee.total)} · One-time per account` : "One-time verification fee"}
                 icon={Plus}
-                gradient="from-emerald-500 to-teal-600"
-                glow="from-emerald-400/25 to-teal-400/25"
+                tone="accent"
                 onClick={() => {
                   setError(null);
                   setView("add-beneficiary");
@@ -433,7 +446,7 @@ export default function PayoutPage() {
             {rows.length > 0 && (
               <button
                 onClick={() => setView("history")}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:underline"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-700 ring-1 ring-ink-100 transition hover:ring-brand-300 focus-energy"
               >
                 <Clock className="h-4 w-4" />
                 View {rows.length} recent payout{rows.length !== 1 ? "s" : ""}
@@ -517,13 +530,13 @@ export default function PayoutPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-md rounded-3xl bg-white p-6 shadow-glow"
+              className="w-full max-w-md rounded-3xl bg-white p-6 shadow-energy"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-amber-600">
+              <IconTile tone="amber" size="xl" className="mx-auto">
                 <AlertTriangle className="h-7 w-7" />
-              </div>
-              <h3 className="mt-4 text-center font-display text-lg font-bold text-ink-900">
+              </IconTile>
+              <h3 className="mt-4 text-center font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
                 No verified bank account yet
               </h3>
               <p className="mt-1 text-center text-sm text-ink-500">
@@ -568,25 +581,20 @@ function ServicePill({
 }) {
   const active = status?.available;
   return (
-    <div
-      className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm ${
-        loading
-          ? "border-ink-200 bg-white text-ink-500"
-          : active
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-rose-200 bg-rose-50 text-rose-700"
-      }`}
+    <Badge
+      variant={loading ? "default" : active ? "success" : "danger"}
+      dot={!loading && Boolean(active)}
+      className="h-9 px-3"
     >
-      <span className={`h-2 w-2 rounded-full ${loading ? "bg-ink-300" : active ? "bg-emerald-500" : "bg-rose-500"}`} />
       {loading ? "Checking service…" : active ? "Service active" : status?.reason || "Service unavailable"}
       <button
         onClick={onRefresh}
         aria-label="Refresh service status"
-        className="ml-1 rounded-full p-0.5 text-ink-500 hover:bg-white/70"
+        className="ml-0.5 rounded-full p-0.5 opacity-70 transition hover:bg-white/70 hover:opacity-100"
       >
         <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
       </button>
-    </div>
+    </Badge>
   );
 }
 
@@ -594,7 +602,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+      className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-medium text-ink-600 ring-1 ring-ink-100 transition hover:text-ink-900 hover:ring-ink-200 focus-energy"
     >
       <ArrowLeft className="h-4 w-4" />
       Back
@@ -607,16 +615,14 @@ function HeroCard({
   subtitle,
   cta,
   icon: Icon,
-  gradient,
-  glow,
+  tone,
   onClick,
 }: {
   title: string;
   subtitle: string;
   cta: string;
   icon: React.ComponentType<{ className?: string }>;
-  gradient: string;
-  glow: string;
+  tone: IconTone;
   onClick: () => void;
 }) {
   return (
@@ -624,20 +630,20 @@ function HeroCard({
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl border border-ink-100 bg-white p-6 text-left shadow-sm transition-shadow hover:shadow-lg"
+      className="group relative overflow-hidden rounded-3xl bg-white p-6 text-left shadow-sm ring-1 ring-ink-100 transition-shadow hover:shadow-energy-sm focus-energy"
     >
-      <div className={`absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br ${glow} blur-2xl transition-transform duration-700 group-hover:scale-150`} />
-      <div className="absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
-        <ChevronRight className="h-5 w-5 text-brand-500" />
-      </div>
+      <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-energy-gradient opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-20" />
+      <span className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-ink-50 text-ink-400 ring-1 ring-ink-100 transition group-hover:bg-ink-950 group-hover:text-white">
+        <ChevronRight className="h-4 w-4" />
+      </span>
       <div className="relative">
-        <div className={`mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-soft transition-transform group-hover:scale-110 group-hover:rotate-3 ${gradient}`}>
+        <IconTile tone={tone} size="xl" className="mb-4 transition-transform group-hover:scale-105">
           <Icon className="h-7 w-7" />
-        </div>
-        <h3 className="font-display text-lg font-bold text-ink-900">{title}</h3>
+        </IconTile>
+        <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">{title}</h3>
         <p className="mt-1 text-sm text-ink-500">{subtitle}</p>
-        <div className="mt-4 inline-flex items-center gap-1 rounded-full bg-ink-50 px-2.5 py-1 text-xs font-semibold text-ink-700">
-          <Sparkles className="h-3 w-3" />
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-ink-50 px-2.5 py-1 text-xs font-semibold text-ink-700 ring-1 ring-ink-100">
+          <Sparkles className="h-3 w-3 text-royal-500" />
           {cta}
         </div>
       </div>
@@ -662,7 +668,7 @@ function BeneficiaryList({
 
   if (loading && beneficiaries.length === 0) {
     return (
-      <div className="rounded-2xl border border-ink-100 bg-white p-8 text-center text-sm text-ink-500 shadow-sm">
+      <div className="rounded-3xl bg-white p-8 text-center text-sm text-ink-500 shadow-sm ring-1 ring-ink-100">
         <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
         Loading saved accounts…
       </div>
@@ -671,42 +677,40 @@ function BeneficiaryList({
 
   if (beneficiaries.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-ink-100 text-ink-500">
-          <CreditCard className="h-5 w-5" />
-        </div>
-        <p className="mt-2 text-sm font-medium text-ink-800">No saved bank accounts yet</p>
-        <p className="text-xs text-ink-500">Add one to start sending payouts — verification takes a few seconds.</p>
+      <div className="rounded-3xl border border-dashed border-ink-200 bg-white p-8 text-center shadow-sm">
+        <IconTile tone="brand" size="xl" className="mx-auto">
+          <CreditCard className="h-6 w-6" />
+        </IconTile>
+        <p className="mt-3 font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">No saved bank accounts yet</p>
+        <p className="mt-1 text-xs text-ink-500">Add one to start sending payouts — verification takes a few seconds.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-        <h3 className="inline-flex items-center gap-2 font-display text-base font-semibold text-ink-900">
-          <ShieldCheck className="h-5 w-5 text-emerald-600" />
+    <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-ink-100">
+      <div className="flex items-center justify-between px-5 py-4">
+        <h3 className="inline-flex items-center gap-2 font-display text-lg font-semibold tracking-[-0.02em] text-ink-950">
+          <IconTile tone="accent" size="sm">
+            <ShieldCheck className="h-4 w-4" />
+          </IconTile>
           Bank accounts ({beneficiaries.length})
         </h3>
         <button
           onClick={onRefresh}
           aria-label="Refresh"
-          className="rounded-lg p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-700"
+          className="rounded-full p-2 text-ink-400 transition hover:bg-ink-100 hover:text-ink-700 focus-energy"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>
-      <ul className="divide-y divide-ink-100">
+      <ul className="divide-y divide-ink-100 border-t border-ink-100">
         {beneficiaries.map((b) => (
-          <li key={b.id} className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-ink-50/50">
+          <li key={b.id} className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-brand-50/30">
             <div className="flex items-center gap-3">
-              <div
-                className={`grid h-10 w-10 place-items-center rounded-xl ${
-                  b.isVerified ? "bg-brand-50 text-brand-700" : "bg-amber-50 text-amber-600"
-                }`}
-              >
+              <IconTile tone={b.isVerified ? "brand" : "amber"} size="md">
                 <Building2 className="h-5 w-5" />
-              </div>
+              </IconTile>
               <div>
                 <p className="text-sm font-semibold text-ink-900">{b.verifiedName || b.holderName}</p>
                 <p className="font-mono text-xs text-ink-500">****{b.accountLast4} · {b.ifsc}</p>
@@ -753,7 +757,7 @@ function BeneficiaryList({
                   await onDelete(b.id);
                 }}
                 aria-label="Delete beneficiary"
-                className="rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-600"
+                className="rounded-full p-2 text-ink-400 transition hover:bg-coral-50 hover:text-coral-600 focus-energy"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -896,186 +900,254 @@ function ProcessPayoutWizard({
 
   // ── Steps ─────────────────────────────────────────────────────────────────
 
+  const WIZARD_STEPS = [
+    { key: "select-account", label: "Account" },
+    { key: "enter-amount", label: "Amount" },
+    { key: "confirm", label: "Confirm" },
+    { key: "result", label: "Done" },
+  ];
+
+  /** Sticky right-hand receipt preview — pure display of the wizard's state. */
+  const aside = (
+    <>
+      <SummaryPanel
+        title="Payout preview"
+        status={
+          step === "confirm"
+            ? { label: "Awaiting PIN", variant: "warning", dot: true }
+            : selected && quote && !insufficient
+              ? { label: "Ready to send", variant: "accent", dot: true }
+              : { label: "In progress", variant: "default" }
+        }
+        rows={[
+          { label: "To", value: selected ? selected.verifiedName || selected.holderName : "—", muted: !selected },
+          { label: "Account", value: selected ? `•••• ${selected.accountLast4}` : "—", mono: true, muted: !selected },
+          { label: "IFSC", value: selected?.ifsc ?? "—", mono: true, muted: !selected },
+          { label: "Mode", value: "IMPS · instant", tone: "brand" },
+          ...(amountNum > 0
+            ? [
+                { label: "Beneficiary receives", value: inr2(amountNum) },
+                { label: "Service charge", value: quote ? inr2(quote.serviceCharge) : "—", muted: !quote },
+                { label: `GST${quote ? ` (${quote.gstPercent}%)` : ""}`, value: quote ? inr2(quote.gst) : "—", muted: !quote },
+              ]
+            : []),
+        ]}
+        total={quote ? inr2(quote.totalDebit) : amountNum > 0 ? inr2(amountNum) : undefined}
+        totalLabel="You pay"
+        totalHint={quoting ? "Updating charges…" : "Held on submit, debited on success"}
+        footer={
+          <InfoChip
+            tone={insufficient ? "coral" : "accent"}
+            icon={<Wallet className="h-3.5 w-3.5" />}
+            label="Spendable"
+            value={inr2(spendable)}
+          />
+        }
+      />
+      <AsideTips
+        items={[
+          { icon: <Zap className="h-4 w-4" />, text: "IMPS lands in the beneficiary's account within seconds, 24×7." },
+          { icon: <ShieldCheck className="h-4 w-4" />, text: "Every payout is confirmed with your transaction PIN and comes with a UTR." },
+        ]}
+      />
+    </>
+  );
+
   if (step === "select-account") {
     return (
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
-        <div className="border-b border-ink-100 px-5 py-4">
-          <h3 className="inline-flex items-center gap-2 font-display text-base font-semibold text-ink-900">
-            <CreditCard className="h-5 w-5 text-brand-700" />
-            Select bank account
-          </h3>
-          <p className="mt-0.5 text-xs text-ink-500">Choose a verified beneficiary to send the payout to.</p>
-        </div>
-        <ul className="divide-y divide-ink-100">
-          {beneficiaries.map((b) => (
-            <li key={b.id}>
-              <button
-                onClick={() => {
-                  setSelected(b);
-                  setStep("enter-amount");
-                }}
-                className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-brand-50/50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-700">
-                    <Building2 className="h-5 w-5" />
+      <ServiceLayout aside={aside}>
+        <ServiceCard
+          icon={<IconTile tone="energy" size="lg"><CreditCard className="h-5 w-5" /></IconTile>}
+          eyebrow="Step 1 of 3"
+          title="Select bank account"
+          description="Choose a verified beneficiary to send the payout to."
+        >
+          <StepHeader className="mb-5" layoutId="payout-steps" steps={WIZARD_STEPS} current={step} />
+          <ul className="grid gap-2">
+            {beneficiaries.map((b) => (
+              <li key={b.id}>
+                <button
+                  onClick={() => {
+                    setSelected(b);
+                    setStep("enter-amount");
+                  }}
+                  className="gradient-ring group flex w-full items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3.5 text-left ring-1 ring-ink-100 transition hover:ring-ink-200 focus-energy"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <IconTile tone="brand" size="md">
+                      <Building2 className="h-5 w-5" />
+                    </IconTile>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-ink-900">{b.verifiedName || b.holderName}</p>
+                      <p className="font-mono text-xs text-ink-500">****{b.accountLast4} · {b.ifsc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink-900">{b.verifiedName || b.holderName}</p>
-                    <p className="font-mono text-xs text-ink-500">****{b.accountLast4} · {b.ifsc}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-5 w-5 text-ink-400" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-50 text-ink-400 transition group-hover:bg-ink-950 group-hover:text-white">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </ServiceCard>
+      </ServiceLayout>
     );
   }
 
   if (step === "enter-amount" && selected) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
-        <div className="border-b border-ink-100 px-5 py-4">
-          <h3 className="inline-flex items-center gap-2 font-display text-base font-semibold text-ink-900">
-            <IndianRupee className="h-5 w-5 text-brand-700" />
-            Payout details
-          </h3>
-        </div>
-        <div className="space-y-4 p-5">
-          <div className="flex items-center gap-3 rounded-xl bg-brand-50/70 p-3">
-            <Building2 className="h-5 w-5 text-brand-700" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-ink-900">{selected.verifiedName || selected.holderName}</p>
-              <p className="font-mono text-xs text-brand-800">****{selected.accountLast4} · {selected.ifsc}</p>
+      <ServiceLayout aside={aside}>
+        <ServiceCard
+          icon={<IconTile tone="energy" size="lg"><IndianRupee className="h-5 w-5" /></IconTile>}
+          eyebrow="Step 2 of 3"
+          title="Payout details"
+          description="Enter the amount — charges are quoted live before you confirm."
+        >
+          <div className="grid gap-5">
+            <StepHeader layoutId="payout-steps" steps={WIZARD_STEPS} current={step} />
+
+            <div className="flex items-center gap-3 rounded-2xl bg-brand-50/60 p-3 ring-1 ring-brand-100">
+              <IconTile tone="brand" size="sm">
+                <Building2 className="h-4 w-4" />
+              </IconTile>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-ink-900">{selected.verifiedName || selected.holderName}</p>
+                <p className="font-mono text-xs text-brand-800">****{selected.accountLast4} · {selected.ifsc}</p>
+              </div>
+              <button
+                onClick={() => setStep("select-account")}
+                className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-brand-100 transition hover:ring-brand-300 focus-energy"
+              >
+                Change
+              </button>
             </div>
-            <button
-              onClick={() => setStep("select-account")}
-              className="text-xs font-semibold text-brand-700 hover:underline"
-            >
-              Change
-            </button>
-          </div>
 
-          <div>
-            <Label>Amount (₹)</Label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              value={amount}
-              min={1}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-            />
-          </div>
+            <div>
+              <FloatField
+                id="payout-amount"
+                label="Amount (₹)"
+                type="number"
+                display
+                inputMode="decimal"
+                value={amount}
+                min={1}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              <AmountChips
+                className="mt-3"
+                amounts={[500, 1000, 2000, 5000, 10000]}
+                value={amount}
+                onPick={(v) => setAmount(String(v))}
+              />
+            </div>
 
-          <div>
-            <Label>Transfer mode</Label>
-            <div className="grid grid-cols-3 gap-2">
-              <ModeChip active label="IMPS (instant)" icon={<Zap className="h-3.5 w-3.5" />} />
-              <ModeChip disabled label="NEFT" note="Coming soon" />
-              <ModeChip disabled label="RTGS" note="Coming soon" />
+            <Field label="Transfer mode">
+              <div className="grid grid-cols-3 gap-2">
+                <ModeChip active label="IMPS (instant)" icon={<Zap className="h-3.5 w-3.5" />} />
+                <ModeChip disabled label="NEFT" note="Coming soon" />
+                <ModeChip disabled label="RTGS" note="Coming soon" />
+              </div>
+            </Field>
+
+            {amountNum > 0 && (
+              <ChargeBreakdown
+                amount={amountNum}
+                amountLabel="Beneficiary receives"
+                serviceCharge={quote?.serviceCharge}
+                gst={quote?.gst}
+                gstLabel={`GST${quote ? ` (${quote.gstPercent}%)` : ""}`}
+                totalDebit={quote?.totalDebit}
+                totalLabel="Total debit"
+                loading={quoting}
+              />
+            )}
+
+            {insufficient && (
+              <Notice tone="danger" icon={<AlertCircle className="h-4 w-4" />}>
+                Total debit exceeds your spendable balance.
+              </Notice>
+            )}
+
+            <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
+              <Button variant="ghost" onClick={() => setStep("select-account")}>
+                Back
+              </Button>
+              <Button
+                size="lg"
+                onClick={() => setStep("confirm")}
+                disabled={!quote || insufficient || amountNum <= 0}
+              >
+                Review & confirm
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-
-          {amountNum > 0 && (
-            <div className="rounded-xl border border-ink-100 bg-ink-50/60 p-4 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-ink-600">Beneficiary receives</span>
-                <span className="font-semibold text-ink-900">{inr2(amountNum)}</span>
-              </div>
-              <div className="mt-1 flex items-center justify-between">
-                <span className="text-ink-600">Service charge</span>
-                <span>{quote ? inr2(quote.serviceCharge) : "—"}</span>
-              </div>
-              <div className="mt-1 flex items-center justify-between">
-                <span className="text-ink-600">GST{quote ? ` (${quote.gstPercent}%)` : ""}</span>
-                <span>{quote ? inr2(quote.gst) : "—"}</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between border-t border-ink-100 pt-2">
-                <span className="font-semibold text-ink-900">
-                  Total debit{quoting && <Loader2 className="ml-2 inline h-3 w-3 animate-spin" />}
-                </span>
-                <span className="font-display text-lg font-bold text-brand-700">{quote ? inr2(quote.totalDebit) : "—"}</span>
-              </div>
-              <p className="mt-2 text-[11px] text-ink-500">
-                Spendable: {inr2(spendable)} · Funds are held on submit and debited on success.
-              </p>
-            </div>
-          )}
-
-          {insufficient && (
-            <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              Total debit exceeds your spendable balance.
-            </p>
-          )}
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setStep("select-account")}>
-              Back
-            </Button>
-            <Button
-              onClick={() => setStep("confirm")}
-              disabled={!quote || insufficient || amountNum <= 0}
-            >
-              Review & confirm
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+        </ServiceCard>
+      </ServiceLayout>
     );
   }
 
   if (step === "confirm" && selected) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
-        <div className="border-b border-ink-100 px-5 py-4">
-          <h3 className="inline-flex items-center gap-2 font-display text-base font-semibold text-ink-900">
-            <CheckCircle2 className="h-5 w-5 text-brand-700" />
-            Confirm payout
-          </h3>
-          <p className="mt-0.5 text-xs text-ink-500">Review carefully — this cannot be undone once approved.</p>
-        </div>
-        <div className="space-y-4 p-5">
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <InfoTile label="Beneficiary" value={selected.verifiedName || selected.holderName} />
-            <InfoTile label="Account" value={`****${selected.accountLast4}`} mono />
-            <InfoTile label="IFSC" value={selected.ifsc} mono />
-            <InfoTile label="Mode" value="IMPS (instant)" />
-            <div className="col-span-2 rounded-xl bg-brand-50/70 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-700">Beneficiary receives</p>
-              <p className="font-display text-2xl font-bold text-brand-800">{inr2(amountNum)}</p>
-              {quote && (
-                <p className="mt-1 text-xs text-brand-700/80">
-                  You pay {inr2(quote.totalDebit)} (₹{quote.serviceCharge} charge + ₹{quote.gst} GST)
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setStep("enter-amount")}>
-              Back
-            </Button>
-            <Button className="flex-1" onClick={() => setPinOpen(true)}>
-              <Send className="h-4 w-4" />
-              Confirm & send
-            </Button>
-          </div>
-        </div>
-
-        <TxnPinDialog
-          open={pinOpen}
+      <ServiceLayout aside={aside}>
+        <ServiceCard
+          icon={<IconTile tone="energy" size="lg"><CheckCircle2 className="h-5 w-5" /></IconTile>}
+          eyebrow="Step 3 of 3"
           title="Confirm payout"
-          detail={`IMPS · ${selected.verifiedName || selected.holderName}`}
-          amount={quote?.totalDebit ?? amountNum}
-          busy={submitting}
-          onConfirm={submitWithPin}
-          onCancel={() => !submitting && setPinOpen(false)}
-        />
-      </div>
+          description="Review carefully — this cannot be undone once approved."
+        >
+          <div className="grid gap-5">
+            <StepHeader layoutId="payout-steps" steps={WIZARD_STEPS} current={step} />
+
+            <div className="relative overflow-hidden rounded-3xl bg-ink-950 p-6 text-white grain">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-energy-gradient opacity-40 blur-3xl"
+              />
+              <div className="relative">
+                <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">
+                  <span className="brand-dot" />
+                  Beneficiary receives
+                </p>
+                <p className="mt-2 font-display text-4xl font-semibold tracking-[-0.03em] tabular-nums">{inr2(amountNum)}</p>
+                {quote && (
+                  <p className="mt-2 text-xs text-white/60">
+                    You pay {inr2(quote.totalDebit)} (₹{quote.serviceCharge} charge + ₹{quote.gst} GST)
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <InfoTile label="Beneficiary" value={selected.verifiedName || selected.holderName} />
+              <InfoTile label="Account" value={`****${selected.accountLast4}`} mono />
+              <InfoTile label="IFSC" value={selected.ifsc} mono />
+              <InfoTile label="Mode" value="IMPS (instant)" />
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Button variant="ghost" className="sm:w-32" onClick={() => setStep("enter-amount")}>
+                Back
+              </Button>
+              <Button size="xl" className="flex-1" onClick={() => setPinOpen(true)}>
+                <Send className="h-4 w-4" />
+                Confirm & send {quote ? inr2(quote.totalDebit) : ""}
+              </Button>
+            </div>
+            <SecureFootnote>Confirmed with your transaction PIN · funds are held on submit and debited only on success.</SecureFootnote>
+          </div>
+
+          <TxnPinDialog
+            open={pinOpen}
+            title="Confirm payout"
+            detail={`IMPS · ${selected.verifiedName || selected.holderName}`}
+            amount={quote?.totalDebit ?? amountNum}
+            busy={submitting}
+            onConfirm={submitWithPin}
+            onCancel={() => !submitting && setPinOpen(false)}
+          />
+        </ServiceCard>
+      </ServiceLayout>
     );
   }
 
@@ -1101,13 +1173,15 @@ function ModeChip({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border px-3 py-2 text-xs font-semibold ${
+      data-active={active}
+      className={cn(
+        "gradient-ring flex flex-col items-center justify-center gap-0.5 rounded-xl px-3 py-2.5 text-xs font-semibold ring-1",
         active
-          ? "border-brand-500 bg-brand-600 text-white shadow-soft"
+          ? "bg-gradient-to-br from-royal-50/70 via-white to-coral-50/50 text-ink-900 shadow-energy-sm ring-transparent"
           : disabled
-          ? "border-ink-100 bg-ink-50 text-ink-400"
-          : "border-ink-200 bg-white text-ink-700"
-      }`}
+            ? "bg-ink-50 text-ink-400 ring-ink-100"
+            : "bg-white text-ink-700 ring-ink-200"
+      )}
     >
       <span className="inline-flex items-center gap-1">
         {icon}
@@ -1120,9 +1194,9 @@ function ModeChip({
 
 function InfoTile({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-xl bg-ink-50/60 p-3">
+    <div className="rounded-2xl bg-ink-50/70 p-3.5 ring-1 ring-ink-100">
       <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-500">{label}</p>
-      <p className={`mt-0.5 text-sm font-semibold text-ink-900 ${mono ? "font-mono" : ""}`}>{value}</p>
+      <p className={`mt-0.5 truncate text-sm font-semibold text-ink-900 ${mono ? "font-mono" : ""}`}>{value}</p>
     </div>
   );
 }
@@ -1560,184 +1634,150 @@ function AddBeneficiaryPanel({
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
-      >
-        {/* Form */}
-        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm lg:col-span-2">
-          <div className="border-b border-ink-100 bg-gradient-to-r from-emerald-50/60 to-teal-50/60 px-5 py-4">
-            <h3 className="inline-flex items-center gap-2 font-display text-base font-semibold text-ink-900">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-soft">
-                <ShieldCheck className="h-4 w-4" />
+      <ServiceLayout
+        aside={
+          <>
+            {/* Live card preview */}
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="relative overflow-hidden rounded-3xl bg-ink-950 p-5 text-white grain"
+            >
+              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-energy-gradient opacity-40 blur-3xl" />
+              <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-brand-400/25 blur-3xl" />
+              <div className="relative">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/60">
+                    <span className="brand-dot" />
+                    Bank account
+                  </span>
+                  <Banknote className="h-5 w-5 text-white/60" />
+                </div>
+                <div className="mb-5 font-display text-xl font-semibold tracking-[0.12em] tabular-nums">
+                  {accNumber ? accNumber.match(/.{1,4}/g)?.join(" ") : "•••• •••• •••• ••••"}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/50">Holder</p>
+                    <p className="truncate text-sm font-semibold">{holderName || "Account holder"}</p>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/50">IFSC</p>
+                    <p className="font-mono text-sm">{ifsc || "XXXX0000000"}</p>
+                  </div>
+                </div>
               </div>
-              Add & verify bank account
-            </h3>
-            <p className="ml-10 mt-1 text-xs text-ink-500">
+            </motion.div>
+
+            <AsideTips
+              title="How it works"
+              items={[
+                { icon: <IndianRupee className="h-4 w-4" />, text: `${fee ? inr2(fee.total) : "₹4 + GST"} debited from wallet` },
+                { icon: <Send className="h-4 w-4" />, text: "₹1 sent via IMPS to your account" },
+                { icon: <BadgeCheck className="h-4 w-4" />, text: "Bank confirms the beneficiary name" },
+                { icon: <Sparkles className="h-4 w-4" />, text: "Account verified & ready for payouts" },
+              ]}
+            />
+          </>
+        }
+      >
+        <ServiceCard
+          as="form"
+          onSubmit={handleSubmit}
+          icon={<IconTile tone="accent" size="lg"><ShieldCheck className="h-5 w-5" /></IconTile>}
+          eyebrow="Penny-drop verification"
+          title="Add & verify bank account"
+          description={
+            <>
               We&apos;ll send <strong>₹1</strong> via IMPS to confirm the account is real.{" "}
               <strong>{fee ? inr2(fee.total) : "₹4 + GST"}</strong> is debited from your wallet as a one-time verification fee.
-            </p>
-          </div>
-          <div className="space-y-4 p-5">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label>Account number *</Label>
-                <div className="relative">
-                  <Hash className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-                  <Input
-                    className="pl-10"
-                    value={accNumber}
-                    onChange={(e) => setAccNumber(e.target.value.replace(/\D/g, ""))}
-                    maxLength={18}
-                    placeholder="9–18 digits"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <Label>Confirm account number *</Label>
-                <div className="relative">
-                  <Hash className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-                  <Input
-                    className={`pl-10 ${
-                      confirmAcc && !namesMatch ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100" : ""
-                    }`}
-                    value={confirmAcc}
-                    onChange={(e) => setConfirmAcc(e.target.value.replace(/\D/g, ""))}
-                    maxLength={18}
-                    placeholder="Re-enter account number"
-                    required
-                  />
-                  {namesMatch && (
-                    <Check className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
-                  )}
-                </div>
-                {confirmAcc && !namesMatch && (
-                  <p className="mt-1 text-[11px] text-rose-600">Account numbers do not match.</p>
-                )}
-              </div>
-              <div>
-                <Label>IFSC *</Label>
-                <div className="relative">
-                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-                  <Input
-                    className="pl-10"
-                    value={ifsc}
-                    onChange={(e) => setIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
-                    maxLength={11}
-                    placeholder="HDFC0001234"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <Label>Account holder name *</Label>
-                <div className="relative">
-                  <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-                  <Input
-                    className="pl-10"
-                    value={holderName}
-                    onChange={(e) => setHolderName(e.target.value)}
-                    placeholder="As per passbook"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="max-w-xs">
-              <Label>Contact mobile *</Label>
-              <Input
-                type="tel"
+            </>
+          }
+        >
+          <div className="grid gap-5">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <FloatField
+                id="bene-acc"
+                label="Account number *"
+                mono
                 inputMode="numeric"
-                value={contactMobile}
-                onChange={(e) => setContactMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                placeholder="10-digit mobile"
+                value={accNumber}
+                onChange={(e) => setAccNumber(e.target.value.replace(/\D/g, ""))}
+                maxLength={18}
+                hint="9–18 digits"
+                required
+              />
+              <FloatField
+                id="bene-acc-confirm"
+                label="Confirm account number *"
+                mono
+                inputMode="numeric"
+                value={confirmAcc}
+                onChange={(e) => setConfirmAcc(e.target.value.replace(/\D/g, ""))}
+                maxLength={18}
+                required
+                error={confirmAcc && !namesMatch ? "Account numbers do not match." : undefined}
+                hint={namesMatch ? "Account numbers match" : "Re-enter account number"}
+                className={namesMatch ? "[&>p]:text-accent-700" : undefined}
+              />
+              <FloatField
+                id="bene-ifsc"
+                label="IFSC *"
+                mono
+                value={ifsc}
+                onChange={(e) => setIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                maxLength={11}
+                hint="e.g. HDFC0001234"
+                required
+              />
+              <FloatField
+                id="bene-holder"
+                label="Account holder name *"
+                value={holderName}
+                onChange={(e) => setHolderName(e.target.value)}
+                hint="As per passbook"
                 required
               />
             </div>
 
+            <FloatField
+              id="bene-mobile"
+              label="Contact mobile *"
+              type="tel"
+              mono
+              inputMode="numeric"
+              value={contactMobile}
+              onChange={(e) => setContactMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              hint="10-digit mobile"
+              required
+              className="max-w-xs"
+            />
+
             {outcome?.kind === "pending" && (
-              <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0" />
-                <div>
-                  <p className="font-semibold">Verification in progress</p>
-                  <p className="text-xs">{outcome.message}</p>
-                </div>
-              </div>
+              <Notice tone="warning" icon={<Clock className="h-4 w-4" />}>
+                <p className="font-semibold">Verification in progress</p>
+                <p className="text-xs">{outcome.message}</p>
+              </Notice>
             )}
             {outcome?.kind === "failed" && (
-              <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-                <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                <div>
-                  <p className="font-semibold">Verification failed</p>
-                  <p className="text-xs">{outcome.message}</p>
-                  <ul className="mt-2 list-disc pl-4 text-xs text-rose-600">
-                    <li>Confirm the account number from your passbook / cheque</li>
-                    <li>Confirm the IFSC matches the branch (not the bank code)</li>
-                    <li>Confirm the account is active and not closed/frozen</li>
-                  </ul>
-                </div>
-              </div>
+              <Notice tone="danger" icon={<XCircle className="h-4 w-4" />}>
+                <p className="font-semibold">Verification failed</p>
+                <p className="text-xs">{outcome.message}</p>
+                <ul className="mt-2 list-disc pl-4 text-xs">
+                  <li>Confirm the account number from your passbook / cheque</li>
+                  <li>Confirm the IFSC matches the branch (not the bank code)</li>
+                  <li>Confirm the account is active and not closed/frozen</li>
+                </ul>
+              </Notice>
             )}
 
-            <Button type="submit" size="lg" className="w-full" isLoading={submitting} disabled={!canSubmit}>
+            <Button type="submit" size="xl" className="w-full" isLoading={submitting} disabled={!canSubmit}>
               <ShieldCheck className="h-4 w-4" />
               Verify & add account{fee ? ` (${inr2(fee.total)})` : ""}
             </Button>
           </div>
-        </div>
-
-        {/* Live card preview + info */}
-        <div className="space-y-4">
-          <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-ink-900 via-ink-800 to-ink-900 p-5 text-white shadow-glow"
-          >
-            <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
-            <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-brand-400/25 blur-3xl" />
-            <div className="relative">
-              <div className="mb-6 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Bank account</span>
-                <Banknote className="h-5 w-5 text-white/60" />
-              </div>
-              <div className="mb-5 font-mono text-lg tracking-wider">
-                {accNumber ? accNumber.match(/.{1,4}/g)?.join(" ") : "•••• •••• •••• ••••"}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/50">Holder</p>
-                  <p className="truncate text-sm font-semibold">{holderName || "Account holder"}</p>
-                </div>
-                <div>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/50">IFSC</p>
-                  <p className="font-mono text-sm">{ifsc || "XXXX0000000"}</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-sm">
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink-500">How it works</h4>
-            <div className="space-y-3">
-              {[
-                { icon: IndianRupee, text: `${fee ? inr2(fee.total) : "₹4 + GST"} debited from wallet` },
-                { icon: Send, text: "₹1 sent via IMPS to your account" },
-                { icon: BadgeCheck, text: "Bank confirms the beneficiary name" },
-                { icon: Sparkles, text: "Account verified & ready for payouts" },
-              ].map((s, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-50 text-emerald-600">
-                    <s.icon className="h-3.5 w-3.5" />
-                  </div>
-                  <p className="text-sm text-ink-700">{s.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </form>
+        </ServiceCard>
+      </ServiceLayout>
 
       {/* Celebration overlay */}
       <AnimatePresence>

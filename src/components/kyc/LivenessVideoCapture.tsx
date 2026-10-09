@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Loader2, CheckCircle2, Video, ShieldCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { Notice } from "@/components/dashboard/services/ServiceLayout";
 import { CameraPermissionGuide } from "@/components/kyc/CameraPermissionGuide";
 import {
   getMediaPermissionState,
@@ -434,24 +436,39 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
   return (
     <div className="space-y-5">
       {/* Camera viewport */}
-      <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-3xl border border-ink-200 bg-ink-900/90 shadow-soft">
+      <div
+        className="gradient-ring relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-3xl bg-ink-950 shadow-energy-sm ring-1 ring-ink-200"
+        data-active={phase === "recording"}
+      >
         <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
 
         {phase === "recording" && (
           <>
-            <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-rose-600/90 px-2.5 py-1 text-xs font-semibold text-white">
+            {/* Face guide */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-[18%] top-[12%] aspect-[3/4] rounded-[48%] border-2 border-dashed border-white/50"
+            />
+            <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-coral-600/90 px-2.5 py-1 text-xs font-semibold text-white">
               <span className="h-2 w-2 animate-pulse rounded-full bg-white" /> REC
             </div>
-            <div className="absolute right-3 top-3 grid h-9 min-w-9 place-items-center rounded-full bg-ink-900/70 px-2 text-sm font-bold text-white">
+            <div className="absolute right-3 top-3 grid h-9 min-w-9 place-items-center rounded-full bg-ink-950/70 px-2 font-display text-sm font-semibold tabular-nums text-white ring-1 ring-white/15">
               {countdown}s
             </div>
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-900/95 to-transparent p-4 pt-12">
+            {/* Countdown progress */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-white/15">
+              <div
+                className="h-1 bg-energy-gradient-x transition-[width] duration-1000 ease-linear"
+                style={{ width: `${((CAPTURE_SECONDS - countdown) / CAPTURE_SECONDS) * 100}%` }}
+              />
+            </div>
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-950/95 to-transparent p-4 pt-12">
               {challengeCode ? (
                 <div className="text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-white/80">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
                     Read this number aloud
                   </p>
-                  <p className="mt-1 text-3xl font-black tracking-[0.35em] text-white drop-shadow">
+                  <p className="mt-1 font-display text-4xl font-semibold tracking-[0.35em] text-white drop-shadow">
                     {challengeCode}
                   </p>
                 </div>
@@ -466,12 +483,17 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
 
         {(phase === "consent" || phase === "ready" || phase === "error" || phase === "fallback") && (
           <div className="absolute inset-0 grid place-items-center">
-            <Video className="h-12 w-12 text-white/30" />
+            <div className="flex flex-col items-center gap-3">
+              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15">
+                <Video className="h-8 w-8 text-white/60" />
+              </span>
+              <p className="text-xs text-white/50">Camera preview appears here</p>
+            </div>
           </div>
         )}
 
         {phase === "starting" && (
-          <div className="absolute inset-0 grid place-items-center bg-ink-900/70">
+          <div className="absolute inset-0 grid place-items-center bg-ink-950/70 backdrop-blur-sm">
             <div className="flex flex-col items-center gap-2 text-white">
               <Loader2 className="h-7 w-7 animate-spin" />
               <p className="text-sm">Starting camera…</p>
@@ -480,7 +502,7 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
         )}
 
         {(phase === "uploading" || phase === "processing") && (
-          <div className="absolute inset-0 grid place-items-center bg-ink-900/70">
+          <div className="absolute inset-0 grid place-items-center bg-ink-950/70 backdrop-blur-sm">
             <div className="flex flex-col items-center gap-2 text-white">
               <Loader2 className="h-7 w-7 animate-spin" />
               <p className="text-sm">
@@ -491,26 +513,22 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
         )}
 
         {phase === "done" && (
-          <div className="absolute inset-0 grid place-items-center bg-emerald-600/90">
+          <div className="absolute inset-0 grid place-items-center bg-accent-600/90">
             <div className="flex flex-col items-center gap-2 text-white">
               <CheckCircle2 className="h-10 w-10" />
-              <p className="text-sm font-semibold">Captured</p>
+              <p className="font-display text-lg font-semibold">Captured</p>
             </div>
           </div>
         )}
       </div>
 
-      {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700">
-          {error}
-        </div>
-      )}
+      {error && <Notice tone="danger">{error}</Notice>}
 
       {phase === "error" && errorKind === "permission" && (
         <div className="space-y-3">
           {/* Zero-permission escape hatch — always works, even in WebViews. */}
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="mb-2 text-sm text-emerald-800">
+          <div className="rounded-2xl bg-accent-50 p-4 ring-1 ring-accent-200">
+            <p className="mb-3 text-sm text-accent-800">
               <strong>No problem —</strong> record the 10-second video with your
               phone&apos;s camera app instead. No browser permission needed.
             </p>
@@ -539,7 +557,12 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
-          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-ink-200 bg-white p-4">
+          <label
+            className={`gradient-ring flex cursor-pointer items-start gap-3 rounded-2xl bg-white p-4 ring-1 transition ${
+              consent ? "ring-transparent shadow-energy-sm" : "ring-ink-200 hover:ring-ink-300"
+            }`}
+            data-active={consent}
+          >
             <input
               type="checkbox"
               checked={consent}
@@ -553,33 +576,35 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
               data-retention policy.
             </span>
           </label>
-          <div className="rounded-2xl border border-brand-100 bg-brand-50 p-3 text-center text-xs text-brand-700">
-            When recording starts, a <strong>4-digit number</strong> will appear on
-            screen. Please <strong>read it aloud</strong> clearly while looking at
-            the camera.
+          <div className="flex items-start gap-3 rounded-2xl bg-gradient-to-br from-royal-50/70 via-white to-coral-50/50 p-3.5 text-xs text-ink-700 ring-1 ring-royal-100">
+            <IconTile tone="energy" size="sm">
+              <Video className="h-4 w-4" />
+            </IconTile>
+            <span className="leading-relaxed">
+              When recording starts, a <strong>4-digit number</strong> will appear on
+              screen. Please <strong>read it aloud</strong> clearly while looking at
+              the camera.
+            </span>
           </div>
 
           {/* Priming: tell the user what to expect before the browser prompt. */}
           {permState !== "denied" && permState !== "granted" && (
-            <div className="flex items-start gap-2 rounded-2xl border border-ink-100 bg-ink-50/60 p-3 text-xs text-ink-600">
-              <Camera className="mt-0.5 h-4 w-4 shrink-0 text-ink-400" />
-              <span>
-                When you tap start, your browser will ask to use the{" "}
-                <strong>camera and microphone</strong>. Please tap{" "}
-                <strong>Allow</strong> to continue.
-              </span>
-            </div>
+            <Notice tone="info" icon={<Camera className="h-4 w-4" />} className="text-xs">
+              When you tap start, your browser will ask to use the{" "}
+              <strong>camera and microphone</strong>. Please tap{" "}
+              <strong>Allow</strong> to continue.
+            </Notice>
           )}
 
           {/* Proactive guidance if the browser already reports it as blocked. */}
           {permState === "denied" && (
             <div className="space-y-2">
-              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
+              <Notice tone="danger" className="text-xs">
                 Camera &amp; microphone access is currently <strong>blocked</strong>{" "}
                 for this site. Use your phone&apos;s camera app below (no permission
                 needed), or re-enable access and tap start.
-              </div>
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3">
+              </Notice>
+              <div className="rounded-2xl bg-accent-50 p-3 ring-1 ring-accent-200">
                 <Button
                   type="button"
                   className="w-full"
@@ -589,7 +614,7 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
                   <Video className="h-4 w-4" /> Record with Camera App
                 </Button>
                 {!consent && (
-                  <p className="mt-1.5 text-center text-[11px] text-emerald-700">
+                  <p className="mt-1.5 text-center text-[11px] text-accent-700">
                     Tick the consent box above first.
                   </p>
                 )}
@@ -598,7 +623,7 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
             </div>
           )}
 
-          <Button size="lg" className="w-full" disabled={!consent} onClick={begin}>
+          <Button size="xl" className="w-full" disabled={!consent} onClick={begin}>
             <Camera className="h-4 w-4" /> Start 10-second capture
           </Button>
           <button
@@ -627,11 +652,15 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
-          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4 text-center">
-            <p className="text-xs font-medium uppercase tracking-wide text-brand-700">
+          <div className="relative overflow-hidden rounded-3xl bg-ink-950 p-5 text-center text-white grain">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-energy-gradient opacity-40 blur-3xl"
+            />
+            <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
               Remember this number — read it aloud in your video
             </p>
-            <p className="mt-1 text-4xl font-black tracking-[0.35em] text-brand-800">
+            <p className="relative mt-2 font-display text-5xl font-semibold tracking-[0.35em] gradient-text">
               {challengeCode ?? "— — — —"}
             </p>
           </div>
@@ -676,10 +705,10 @@ export function LivenessVideoCapture({ onComplete, apiPrefix }: { onComplete?: (
       )}
 
       {phase === "done" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center text-sm text-emerald-800">
+        <Notice tone="success" icon={<ShieldCheck className="h-4 w-4" />}>
           Your liveness video is saved. We&apos;re finishing setting up your face
           baseline — your account will be ready to transact shortly.
-        </div>
+        </Notice>
       )}
 
       {phase === "error" && (

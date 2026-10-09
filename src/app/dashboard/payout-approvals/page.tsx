@@ -10,15 +10,15 @@ import {
   Loader2,
   Eye,
   X,
-  ShieldCheck,
 } from "lucide-react";
+import { ShieldCheck } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Label, Select } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
 import { ReportActions } from "@/components/dashboard/ReportActions";
+import { FilterBar, KeyValueList, PillTabs, StatusChip } from "@/components/dashboard/patterns";
 import { formatINR } from "@/lib/utils";
 
 type PayoutStatus =
@@ -60,7 +60,7 @@ type PayoutDetail = Payout & {
   completedAt: string | null;
 };
 
-const STATUS_BADGE: Record<PayoutStatus, "success" | "danger" | "warning" | "brand" | "default"> = {
+const STATUS_VARIANT: Record<PayoutStatus, "success" | "danger" | "warning" | "brand" | "default"> = {
   SUCCESS: "success",
   FAILED: "danger",
   REJECTED: "danger",
@@ -70,6 +70,11 @@ const STATUS_BADGE: Record<PayoutStatus, "success" | "danger" | "warning" | "bra
   PENDING_APPROVAL: "warning",
   DRAFT: "default",
 };
+
+const FILTER_TABS = [
+  { value: "PENDING" as const, label: "Pending only" },
+  { value: "ALL" as const, label: "All statuses" },
+];
 
 const STATUS_LABEL: Record<PayoutStatus, string> = {
   SUCCESS: "Success",
@@ -188,7 +193,9 @@ export default function PayoutApprovalsPage() {
     {
       key: "status",
       header: "Status",
-      render: (r) => <Badge variant={STATUS_BADGE[r.status]}>{STATUS_LABEL[r.status]}</Badge>,
+      render: (r) => (
+        <StatusChip status={r.status} variant={STATUS_VARIANT[r.status]} label={STATUS_LABEL[r.status]} size="sm" />
+      ),
     },
     {
       key: "actions" as keyof Payout,
@@ -200,8 +207,9 @@ export default function PayoutApprovalsPage() {
           <div className="flex justify-end gap-1">
             <button
               onClick={() => setDetailId(r.id)}
-              className="grid h-8 w-8 place-items-center rounded-lg text-ink-600 hover:bg-ink-100"
+              className="grid h-8 w-8 place-items-center rounded-xl text-ink-600 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
               title="View details"
+              aria-label="View details"
             >
               <Eye className="h-4 w-4" />
             </button>
@@ -210,16 +218,18 @@ export default function PayoutApprovalsPage() {
                 <button
                   onClick={() => setDecisionTarget({ row: r, action: "approve" })}
                   disabled={busy}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50 disabled:opacity-30"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-emerald-700 ring-1 ring-inset ring-emerald-100 transition hover:bg-emerald-50 disabled:opacity-30 focus-energy"
                   title="Approve"
+                  aria-label="Approve"
                 >
                   {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                 </button>
                 <button
                   onClick={() => setDecisionTarget({ row: r, action: "reject" })}
                   disabled={busy}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50 disabled:opacity-30"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 ring-1 ring-inset ring-rose-100 transition hover:bg-rose-50 disabled:opacity-30 focus-energy"
                   title="Reject"
+                  aria-label="Reject"
                 >
                   <XCircle className="h-4 w-4" />
                 </button>
@@ -234,7 +244,7 @@ export default function PayoutApprovalsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Approvals"
+        eyebrow="Network · Approvals"
         title="Payout approvals"
         description="Network self-withdrawals now auto-approve (a payout debits the requester's own wallet). This queue only holds any earlier requests still awaiting a decision; funds are released back if you reject."
         actions={
@@ -265,27 +275,33 @@ export default function PayoutApprovalsPage() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700">
-          <ShieldCheck className="h-4 w-4" />
-          {pendingCount} pending approval{pendingCount === 1 ? "" : "s"}
-        </div>
-        <div className="w-44">
-          <Select value={filter} onChange={(e) => setFilter(e.target.value as "PENDING" | "ALL")}>
-            <option value="PENDING">Pending only</option>
-            <option value="ALL">All statuses</option>
-          </Select>
-        </div>
-      </div>
+      <FilterBar
+        title={
+          <span className="inline-flex items-center gap-2">
+            <IconTile icon={ShieldCheck} tone={pendingCount > 0 ? "amber" : "accent"} size="sm" />
+            <span>
+              {pendingCount} pending approval{pendingCount === 1 ? "" : "s"}
+            </span>
+          </span>
+        }
+        hint={fetching ? "Loading…" : `${visible.length} payout${visible.length === 1 ? "" : "s"} shown`}
+      >
+        <PillTabs
+          aria-label="Payout filter"
+          size="sm"
+          tabs={FILTER_TABS}
+          value={filter}
+          onChange={(v) => setFilter(v)}
+        />
+      </FilterBar>
 
       <DataTable
-        title={fetching ? "Loading…" : `${visible.length} payout${visible.length === 1 ? "" : "s"}`}
         columns={cols}
         data={visible}
         loading={fetching}
@@ -357,10 +373,17 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-ink-900/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-ink-100 bg-white shadow-2xl">
+      <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl ring-1 ring-ink-100 sm:my-3 sm:mr-3 sm:h-[calc(100%-1.5rem)] sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-          <h3 className="font-display text-lg font-semibold text-ink-900">Payout details</h3>
-          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Payout</p>
+            <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">Payout details</h3>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="grid h-9 w-9 place-items-center rounded-xl text-ink-500 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -370,65 +393,66 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : err ? (
-          <div className="p-5 text-sm text-rose-700">{err}</div>
+          <div className="m-5 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-inset ring-rose-100">{err}</div>
         ) : detail ? (
-          <div className="space-y-5 p-5">
-            <div className="flex items-center justify-between">
-              <Badge variant={STATUS_BADGE[detail.status]}>{STATUS_LABEL[detail.status]}</Badge>
-              <span className="font-mono text-xs text-ink-500">{detail.bulkpeReferenceId}</span>
+          <div className="space-y-4 p-5">
+            <div className="flex items-center justify-between gap-3">
+              <StatusChip status={detail.status} variant={STATUS_VARIANT[detail.status]} label={STATUS_LABEL[detail.status]} />
+              <span className="truncate font-mono text-xs text-ink-500">{detail.bulkpeReferenceId}</span>
             </div>
 
-            <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-4">
-              <Field label="Beneficiary" value={detail.beneficiaryName} />
-              <Field label="Account" value={detail.maskedAccount} mono />
-              {detail.ifsc && <Field label="IFSC" value={detail.ifsc} mono />}
-              <Field label="Mode" value={detail.mode} />
+            <div className="rounded-2xl bg-ink-50/60 p-4 ring-1 ring-inset ring-ink-100">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Beneficiary</p>
+              <KeyValueList
+                dense
+                items={[
+                  { label: "Beneficiary", value: detail.beneficiaryName },
+                  { label: "Account", value: detail.maskedAccount, mono: true },
+                  ...(detail.ifsc ? [{ label: "IFSC", value: detail.ifsc, mono: true }] : []),
+                  { label: "Mode", value: detail.mode },
+                ]}
+              />
             </div>
 
-            <div className="rounded-xl border border-ink-100 p-4">
-              <Row label="Amount to beneficiary" value={inr2(detail.amount)} />
-              <Row label="Service charge" value={inr2(detail.serviceCharge)} />
-              <Row label="GST" value={inr2(detail.gst)} />
-              <div className="mt-2 border-t border-ink-100 pt-2">
-                <Row label="Total debit" value={inr2(detail.totalDebit)} strong />
+            <div className="rounded-2xl p-4 ring-1 ring-inset ring-ink-100">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Breakdown</p>
+              <KeyValueList
+                dense
+                items={[
+                  { label: "Amount to beneficiary", value: inr2(detail.amount) },
+                  { label: "Service charge", value: inr2(detail.serviceCharge) },
+                  { label: "GST", value: inr2(detail.gst) },
+                ]}
+              />
+              <div className="mt-3 flex items-center justify-between border-t border-ink-100 pt-3">
+                <span className="text-sm font-semibold text-ink-900">Total debit</span>
+                <span className="font-display text-xl font-semibold tabular-nums tracking-[-0.02em] gradient-text">
+                  {inr2(detail.totalDebit)}
+                </span>
               </div>
             </div>
 
-            <div className="rounded-xl border border-ink-100 p-4">
-              <Field label="Maker (owner)" value={`${detail.user.name} · ${detail.user.email}`} />
-              {detail.checker && <Field label="Checker" value={detail.checker.name} />}
-              {detail.utr && <Field label="UTR" value={detail.utr} mono />}
-              {detail.bulkpeTxnId && <Field label="Provider txn" value={detail.bulkpeTxnId} mono />}
-              {detail.failureReason && (
-                <Field label="Failure reason" value={detail.failureReason} />
-              )}
-              {detail.remarks && <Field label="Remarks" value={detail.remarks} />}
-              <Field label="Created" value={new Date(detail.createdAt).toLocaleString("en-IN")} />
-              {detail.completedAt && (
-                <Field label="Completed" value={new Date(detail.completedAt).toLocaleString("en-IN")} />
-              )}
+            <div className="rounded-2xl p-4 ring-1 ring-inset ring-ink-100">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Trail</p>
+              <KeyValueList
+                dense
+                items={[
+                  { label: "Maker (owner)", value: `${detail.user.name} · ${detail.user.email}` },
+                  ...(detail.checker ? [{ label: "Checker", value: detail.checker.name }] : []),
+                  ...(detail.utr ? [{ label: "UTR", value: detail.utr, mono: true }] : []),
+                  ...(detail.bulkpeTxnId ? [{ label: "Provider txn", value: detail.bulkpeTxnId, mono: true }] : []),
+                  ...(detail.failureReason ? [{ label: "Failure reason", value: detail.failureReason }] : []),
+                  ...(detail.remarks ? [{ label: "Remarks", value: detail.remarks }] : []),
+                  { label: "Created", value: new Date(detail.createdAt).toLocaleString("en-IN") },
+                  ...(detail.completedAt
+                    ? [{ label: "Completed", value: new Date(detail.completedAt).toLocaleString("en-IN") }]
+                    : []),
+                ]}
+              />
             </div>
           </div>
         ) : null}
       </div>
-    </div>
-  );
-}
-
-function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-start justify-between gap-3 py-1.5 text-sm">
-      <span className="text-ink-500">{label}</span>
-      <span className={`text-right text-ink-900 ${mono ? "font-mono text-xs" : "font-medium"}`}>{value}</span>
-    </div>
-  );
-}
-
-function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <div className="flex items-center justify-between py-1 text-sm">
-      <span className={strong ? "font-semibold text-ink-900" : "text-ink-600"}>{label}</span>
-      <span className={strong ? "font-display text-base font-bold text-brand-700" : "text-ink-800"}>{value}</span>
     </div>
   );
 }

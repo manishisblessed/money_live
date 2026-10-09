@@ -2,18 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Layers,
   RefreshCw,
   Loader2,
-  AlertCircle,
   Info,
   CreditCard,
   Send,
-  Store,
 } from "lucide-react";
+import { Stack, Storefront, WarningCircle } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Select } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { EmptyState, SectionCard } from "@/components/dashboard/patterns";
 import { SERVICE_FAMILIES, familyOf, schemeAssignerLabel, type ServiceFamily } from "@/lib/scheme/constants";
 
 type RateType = "FLAT" | "PERCENT";
@@ -152,17 +153,18 @@ export default function MyAssignedSchemePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Your pricing"
-        title="My Scheme"
-        description="This is the rate-card assigned to you. Charges, commissions and POS MDR are set by your parent and applied to every transaction you process."
+        eyebrow="Account · Pricing"
+        title="My scheme"
+        description="The rate-card assigned to you. Charges, commissions and POS MDR are set by your parent and applied to every transaction you process."
         actions={
-          <div className="flex items-center gap-2">
+          <>
             {children.length > 0 && (
-              <select
+              <Select
                 value={viewUserId ?? ""}
                 onChange={(e) => setViewUserId(e.target.value || null)}
                 title="View a direct child's scheme"
-                className="rounded-lg border border-ink-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
+                aria-label="View a direct child's scheme"
+                className="w-56"
               >
                 <option value="">My scheme</option>
                 {children.map((c) => (
@@ -170,17 +172,17 @@ export default function MyAssignedSchemePage() {
                     {c.name} ({c.role})
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
-            <Button variant="outline" onClick={() => load(viewUserId)} disabled={loading}>
+            <Button variant="outline" onClick={() => load(viewUserId)} disabled={loading} aria-label="Refresh scheme">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
-          </div>
+          </>
         }
       />
 
       {viewingChild && (
-        <div className="flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm text-brand-800">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-brand-50 px-4 py-2.5 text-sm text-brand-800 ring-1 ring-inset ring-brand-200">
           <Info className="h-4 w-4 shrink-0" />
           Viewing the scheme of your direct child{" "}
           <span className="font-semibold">{viewingChild.name}</span>
@@ -189,70 +191,73 @@ export default function MyAssignedSchemePage() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center rounded-2xl border border-ink-100 bg-white py-16 text-ink-500">
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading scheme…
-        </div>
+        <SectionCard className="grid place-items-center py-16">
+          <span className="inline-flex items-center gap-2 text-sm text-ink-500">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-600" /> Loading scheme…
+          </span>
+        </SectionCard>
       ) : !scheme ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <div>
-            <p className="font-semibold">No scheme assigned to you yet</p>
-            <p className="mt-1">
-              Ask your {schemeAssignerLabel(role)} to assign one. Until then you cannot process
-              transactions.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          bordered
+          tone="amber"
+          icon={WarningCircle}
+          title="No scheme assigned to you yet"
+          description={`Ask your ${schemeAssignerLabel(role)} to assign one. Until then you cannot process transactions.`}
+        />
       ) : (
-        <section className="rounded-2xl border border-ink-100 bg-white p-5">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <Layers className="h-4 w-4 text-ink-400" />
-            <h3 className="font-display text-sm font-semibold text-ink-900">{scheme.name}</h3>
-            <Badge variant="success">Active</Badge>
-            {source === "DEFAULT_SCHEME" && <Badge variant="warning">Platform default</Badge>}
-            <Badge variant="brand">{scheme.slabCount} slabs</Badge>
-            {scheme.mdrSlabCount > 0 && <Badge variant="warning">{scheme.mdrSlabCount} MDR</Badge>}
-          </div>
-          {scheme.description && (
-            <p className="mb-3 text-xs text-ink-500">{scheme.description}</p>
-          )}
-          <p className="mb-4 flex items-center gap-1.5 text-xs text-ink-500">
-            <Info className="h-3.5 w-3.5" />
-            These are the charges, commissions and MDR rates that apply to your transactions.
-          </p>
-
-          <div className="space-y-4">
+        <SectionCard
+          icon={<IconTile icon={Stack} tone="royal" size="md" />}
+          eyebrow={source === "DEFAULT_SCHEME" ? "Platform default" : "Assigned rate-card"}
+          title={scheme.name}
+          description={
+            scheme.description ??
+            "These are the charges, commissions and MDR rates that apply to your transactions."
+          }
+          action={
+            <>
+              <Badge variant="success" dot>Active</Badge>
+              <Badge variant="brand">{scheme.slabCount} slabs</Badge>
+              {scheme.mdrSlabCount > 0 && <Badge variant="warning">{scheme.mdrSlabCount} MDR</Badge>}
+            </>
+          }
+        >
+          <div className="space-y-6">
             {grouped.map(([family, list]) => {
               const cfg = FAMILY_ICONS[family.key];
               const Icon = cfg?.icon ?? CreditCard;
               const cls = cfg?.className ?? "text-ink-600";
               return (
                 <div key={family.key}>
-                  <div className="mb-1.5 flex items-center gap-1.5">
-                    <Icon className={`h-4 w-4 ${cls}`} />
-                    <h4 className={`text-sm font-semibold ${cls}`}>
-                      {family.label} ({list.length})
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className={`grid h-7 w-7 place-items-center rounded-lg bg-ink-50 ${cls}`}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <h4 className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">
+                      {family.label}
                     </h4>
+                    <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[10px] font-bold text-ink-600">
+                      {list.length}
+                    </span>
                   </div>
-                  <div className="overflow-x-auto rounded-xl border border-ink-100">
+                  <div className="overflow-x-auto rounded-2xl ring-1 ring-inset ring-ink-100">
                     <table className="w-full min-w-max text-left text-sm">
-                      <thead className="bg-ink-50/60 text-[11px] uppercase tracking-wide text-ink-400">
+                      <thead className="bg-ink-50/70 text-[11px] uppercase tracking-wider text-ink-500">
                         <tr>
-                          <th className="px-3 py-2">Service</th>
-                          <th className="px-3 py-2">Provider</th>
-                          <th className="px-3 py-2">Band</th>
-                          <th className="px-3 py-2 text-right">Charge</th>
-                          <th className="px-3 py-2 text-right">Commission</th>
+                          <th className="px-4 py-2.5 font-semibold">Service</th>
+                          <th className="px-4 py-2.5 font-semibold">Provider</th>
+                          <th className="px-4 py-2.5 font-semibold">Band</th>
+                          <th className="px-4 py-2.5 text-right font-semibold">Charge</th>
+                          <th className="px-4 py-2.5 text-right font-semibold">Commission</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y divide-ink-100">
                         {list.map((s) => (
-                          <tr key={s.id} className="border-t border-ink-50">
-                            <td className="px-3 py-2 font-medium text-ink-900">{s.service.replace(/_/g, " ")}</td>
-                            <td className="px-3 py-2 text-xs text-ink-600">{s.provider ?? "All"}</td>
-                            <td className="px-3 py-2 text-ink-600">{fmtBand(s.minAmount, s.maxAmount)}</td>
-                            <td className="px-3 py-2 text-right text-ink-900">{fmtServiceRate(s.chargeType, s.chargeValue)}</td>
-                            <td className="px-3 py-2 text-right text-emerald-700 font-semibold">{fmtServiceRate(s.commissionType, s.commissionValue)}</td>
+                          <tr key={s.id} className="transition-colors hover:bg-brand-50/30">
+                            <td className="px-4 py-2.5 font-medium text-ink-900">{s.service.replace(/_/g, " ")}</td>
+                            <td className="px-4 py-2.5 text-xs text-ink-600">{s.provider ?? "All"}</td>
+                            <td className="px-4 py-2.5 tabular-nums text-ink-600">{fmtBand(s.minAmount, s.maxAmount)}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">{fmtServiceRate(s.chargeType, s.chargeValue)}</td>
+                            <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-emerald-700">{fmtServiceRate(s.commissionType, s.commissionValue)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -264,37 +269,40 @@ export default function MyAssignedSchemePage() {
 
             {mdrSlabs.length > 0 && (
               <div>
-                <div className="mb-1.5 flex items-center gap-1.5">
-                  <Store className="h-4 w-4 text-orange-600" />
-                  <h4 className="text-sm font-semibold text-orange-600">MDR rates ({mdrSlabs.length})</h4>
+                <div className="mb-2 flex items-center gap-2">
+                  <IconTile icon={Storefront} tone="amber" size="xs" />
+                  <h4 className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">MDR rates</h4>
+                  <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[10px] font-bold text-ink-600">
+                    {mdrSlabs.length}
+                  </span>
                 </div>
-                <div className="overflow-x-auto rounded-xl border border-ink-100">
+                <div className="overflow-x-auto rounded-2xl ring-1 ring-inset ring-ink-100">
                   <table className="w-full min-w-max text-left text-sm">
-                    <thead className="bg-ink-50/60 text-[11px] uppercase tracking-wide text-ink-400">
+                    <thead className="bg-ink-50/70 text-[11px] uppercase tracking-wider text-ink-500">
                       <tr>
-                        <th className="px-3 py-2">Rail</th>
-                        <th className="px-3 py-2">Company</th>
-                        <th className="px-3 py-2">Mode</th>
-                        <th className="px-3 py-2">Card / Brand</th>
-                        <th className="px-3 py-2 text-right">MDR T+1</th>
-                        <th className="px-3 py-2 text-right">MDR T+0</th>
-                        <th className="px-3 py-2 text-right">Commission</th>
+                        <th className="px-4 py-2.5 font-semibold">Rail</th>
+                        <th className="px-4 py-2.5 font-semibold">Company</th>
+                        <th className="px-4 py-2.5 font-semibold">Mode</th>
+                        <th className="px-4 py-2.5 font-semibold">Card / Brand</th>
+                        <th className="px-4 py-2.5 text-right font-semibold">MDR T+1</th>
+                        <th className="px-4 py-2.5 text-right font-semibold">MDR T+0</th>
+                        <th className="px-4 py-2.5 text-right font-semibold">Commission</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-ink-100">
                       {mdrSlabs.map((s) => (
-                        <tr key={s.id} className="border-t border-ink-50">
-                          <td className="px-3 py-2 font-medium text-ink-900">{s.serviceKind}</td>
-                          <td className="px-3 py-2 text-ink-600">{s.company ?? "All"}</td>
-                          <td className="px-3 py-2 text-ink-600">{s.paymentMode === "*" ? "Any" : s.paymentMode}</td>
-                          <td className="px-3 py-2 text-xs text-ink-600">
+                        <tr key={s.id} className="transition-colors hover:bg-brand-50/30">
+                          <td className="px-4 py-2.5 font-medium text-ink-900">{s.serviceKind}</td>
+                          <td className="px-4 py-2.5 text-ink-600">{s.company ?? "All"}</td>
+                          <td className="px-4 py-2.5 text-ink-600">{s.paymentMode === "*" ? "Any" : s.paymentMode}</td>
+                          <td className="px-4 py-2.5 text-xs text-ink-600">
                             {[s.cardType, s.brandType, s.classification].filter(Boolean).join(" / ") || "Any"}
                           </td>
-                          <td className="px-3 py-2 text-right text-ink-900">{fmtRate(s.mdrType, s.mdrValue)}</td>
-                          <td className="px-3 py-2 text-right text-ink-900">
+                          <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">{fmtRate(s.mdrType, s.mdrValue)}</td>
+                          <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">
                             {s.mdrValueT0 > 0 ? fmtRate(s.mdrType, s.mdrValueT0) : "= T+1"}
                           </td>
-                          <td className="px-3 py-2 text-right font-semibold text-emerald-700">
+                          <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-emerald-700">
                             {s.commission > 0 ? fmtRate(s.commissionType, s.commission) : "—"}
                           </td>
                         </tr>
@@ -306,10 +314,10 @@ export default function MyAssignedSchemePage() {
             )}
 
             {grouped.length === 0 && mdrSlabs.length === 0 && (
-              <p className="py-4 text-center text-sm text-ink-500">No slabs configured in this scheme yet.</p>
+              <EmptyState compact icon={Stack} title="No slabs configured yet" description="Your parent hasn't added any rates to this scheme." />
             )}
           </div>
-        </section>
+        </SectionCard>
       )}
     </div>
   );

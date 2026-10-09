@@ -5,10 +5,13 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Input, Label } from "@/components/ui/Input";
 import { StatSkeleton } from "@/components/ui/Skeleton";
 import { PageSpinner } from "@/components/ui/Spinner";
 import { formatINR, formatNumber } from "@/lib/utils";
 import { RefreshCw, Download } from "lucide-react";
+import { ChartBar } from "@phosphor-icons/react";
+import { EmptyState, FilterBar, SectionCard, Stagger, StaggerItem } from "@/components/dashboard/patterns";
 
 type ServiceRow = {
   service: string;
@@ -37,20 +40,44 @@ type Analytics = {
   topUsers: TopUser[];
 };
 
-const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
-
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "good" | "bad" }) {
+function Stat({
+  label,
+  value,
+  tone,
+  hero,
+  sub,
+}: {
+  label: string;
+  value: string;
+  tone?: "good" | "bad";
+  hero?: boolean;
+  sub?: string;
+}) {
+  if (hero) {
+    return (
+      <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-3xl bg-ink-950 p-5 text-white ring-1 ring-white/10 shadow-energy-sm">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-energy-gradient opacity-40 blur-3xl" aria-hidden />
+        <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">{label}</p>
+        <div className="relative">
+          <p className="font-display text-3xl font-semibold tabular-nums tracking-[-0.02em] sm:text-4xl">{value}</p>
+          {sub && <p className="mt-1 text-xs text-white/60">{sub}</p>}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">{label}</p>
-      <p
-        className={`mt-1 text-xl font-bold ${
-          tone === "good" ? "text-emerald-600" : tone === "bad" ? "text-rose-600" : "text-ink-900"
-        }`}
-      >
-        {value}
-      </p>
+    <div className="flex h-full flex-col justify-between rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
+      <div>
+        <p
+          className={`mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] ${
+            tone === "good" ? "text-emerald-600" : tone === "bad" ? "text-rose-600" : "text-ink-900"
+          }`}
+        >
+          {value}
+        </p>
+        {sub && <p className="mt-1 text-xs text-ink-500">{sub}</p>}
+      </div>
     </div>
   );
 }
@@ -135,39 +162,48 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Business Analytics"
+        eyebrow="Admin · Insights"
+        title="Business analytics"
         description="Service-wise transaction performance, daily volume trend, and top performers — read-only reporting."
         actions={
-          <div className="flex flex-wrap items-end gap-2">
-            <label className="text-xs text-ink-500">
-              From
-              <input type="date" className={`${inputCls} mt-1 block`} value={from} onChange={(e) => setFrom(e.target.value)} />
-            </label>
-            <label className="text-xs text-ink-500">
-              To
-              <input type="date" className={`${inputCls} mt-1 block`} value={to} onChange={(e) => setTo(e.target.value)} />
-            </label>
-            <Button onClick={load} isLoading={loading}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Apply
-            </Button>
+          <>
             <Button
               variant="outline"
               onClick={() => window.open(`/api/admin/analytics?${params()}&format=csv`, "_blank")}
             >
-              <Download className="mr-2 h-4 w-4" /> CSV
+              <Download className="h-4 w-4" /> CSV
             </Button>
             <Button
               variant="outline"
               onClick={() => window.open(`/api/admin/analytics?${params()}&format=zip`, "_blank")}
             >
-              <Download className="mr-2 h-4 w-4" /> ZIP
+              <Download className="h-4 w-4" /> ZIP
             </Button>
-          </div>
+          </>
         }
       />
 
+      <FilterBar
+        title="Date range"
+        hint={data ? `${data.range.from} → ${data.range.to}` : undefined}
+        actions={
+          <Button onClick={load} isLoading={loading}>
+            <RefreshCw className="h-4 w-4" /> Apply
+          </Button>
+        }
+      >
+        <div className="flex items-center gap-2">
+          <Label htmlFor="an-from" className="mb-0 text-xs">From</Label>
+          <Input id="an-from" type="date" className="h-10 w-40" value={from} onChange={(e) => setFrom(e.target.value)} />
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="an-to" className="mb-0 text-xs">To</Label>
+          <Input id="an-to" type="date" className="h-10 w-40" value={to} onChange={(e) => setTo(e.target.value)} />
+        </div>
+      </FilterBar>
+
       {error && (
-        <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div>
+        <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200">{error}</div>
       )}
 
       {loading && !data && (
@@ -183,25 +219,53 @@ export default function AnalyticsPage() {
 
       {data && (
         <>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            <Stat label="Transactions" value={formatNumber(data.totals.transactions)} />
-            <Stat label="Successful" value={formatNumber(data.totals.success)} tone="good" />
-            <Stat label="Failed" value={formatNumber(data.totals.failed)} tone={data.totals.failed > 0 ? "bad" : undefined} />
-            <Stat label="Success rate" value={`${data.totals.successRate}%`} tone={data.totals.successRate >= 95 ? "good" : undefined} />
-            <Stat label="Volume (success)" value={formatINR(data.totals.volume)} />
-          </div>
+          {/* KPI bento */}
+          <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
+            <StaggerItem className="col-span-2 row-span-2 xl:col-span-2">
+              <Stat
+                hero
+                label="Volume (success)"
+                value={formatINR(data.totals.volume)}
+                sub={`${formatNumber(data.totals.success)} successful transactions`}
+              />
+            </StaggerItem>
+            <StaggerItem className="xl:col-span-2">
+              <Stat label="Transactions" value={formatNumber(data.totals.transactions)} />
+            </StaggerItem>
+            <StaggerItem className="xl:col-span-2">
+              <Stat
+                label="Success rate"
+                value={`${data.totals.successRate}%`}
+                tone={data.totals.successRate >= 95 ? "good" : undefined}
+                sub={data.totals.successRate >= 95 ? "Healthy" : "Below the 95% target"}
+              />
+            </StaggerItem>
+            <StaggerItem className="xl:col-span-2">
+              <Stat label="Successful" value={formatNumber(data.totals.success)} tone="good" />
+            </StaggerItem>
+            <StaggerItem className="xl:col-span-2">
+              <Stat label="Failed" value={formatNumber(data.totals.failed)} tone={data.totals.failed > 0 ? "bad" : undefined} />
+            </StaggerItem>
+          </Stagger>
 
           {/* Daily volume trend — CSS bars */}
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <p className="mb-4 text-sm font-semibold text-ink-800">Daily success volume</p>
+          <SectionCard
+            title="Daily success volume"
+            description="Successful transaction value per day in the selected range."
+          >
             {data.daily.length === 0 ? (
-              <p className="text-sm text-ink-400">No successful transactions in this range.</p>
+              <EmptyState
+                compact
+                icon={ChartBar}
+                title="Nothing to chart yet"
+                description="No successful transactions in this range."
+              />
             ) : (
-              <div className="flex h-40 items-end gap-1 overflow-x-auto">
+              <div className="flex h-44 items-end gap-1 overflow-x-auto">
                 {data.daily.map((d) => (
                   <div key={d.day} className="group relative flex min-w-[14px] flex-1 flex-col items-center justify-end">
                     <div
-                      className="w-full rounded-t bg-brand-500 transition group-hover:bg-brand-600"
+                      className="w-full rounded-t-md bg-energy-gradient opacity-80 transition group-hover:opacity-100"
                       style={{ height: `${Math.max(3, (d.volume / maxVolume) * 100)}%` }}
                     />
                     <div className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded-lg bg-ink-900 px-2 py-1 text-[10px] text-white group-hover:block">
@@ -217,25 +281,23 @@ export default function AnalyticsPage() {
                 <span>{data.daily[data.daily.length - 1].day}</span>
               </div>
             )}
-          </div>
+          </SectionCard>
 
-          <div>
-            <p className="mb-3 text-sm font-semibold text-ink-800">Service-wise report</p>
-            <DataTable
-              columns={serviceColumns}
-              data={data.services}
-              loading={loading}
-            />
-          </div>
+          <DataTable
+            title="Service-wise report"
+            description="Volume, fees and commission by service."
+            columns={serviceColumns}
+            data={data.services}
+            loading={loading}
+          />
 
-          <div>
-            <p className="mb-3 text-sm font-semibold text-ink-800">Top 10 users by volume</p>
-            <DataTable
-              columns={topUserColumns}
-              data={data.topUsers}
-              loading={loading}
-            />
-          </div>
+          <DataTable
+            title="Top 10 users by volume"
+            description="Your biggest movers in this range."
+            columns={topUserColumns}
+            data={data.topUsers}
+            loading={loading}
+          />
         </>
       )}
     </div>

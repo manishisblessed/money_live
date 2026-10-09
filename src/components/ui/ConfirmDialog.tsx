@@ -1,14 +1,19 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { AlertTriangle, HelpCircle } from "lucide-react";
+import { Question, Warning } from "@phosphor-icons/react";
 import { Modal } from "./Modal";
 import { Button } from "./Button";
+import { Input, Label } from "./Input";
+import { IconTile } from "./Icon";
 import { cn } from "@/lib/utils";
 
 /**
  * Animated replacement for native `confirm()` / `prompt()` dialogs.
  * Pass `input` to collect an optional text value alongside the confirmation.
+ *
+ * v2 look: tone-tinted IconTile (coral for destructive, brand for info),
+ * Clash Display title, and the destructive action uses `Button variant="danger"`.
  */
 export function ConfirmDialog({
   open,
@@ -48,19 +53,15 @@ export function ConfirmDialog({
       size="sm"
       footer={
         <>
-          <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>
+          <Button variant="ghost" size="sm" onClick={onClose} disabled={busy}>
             {cancelLabel}
           </Button>
           <Button
-            variant="primary"
+            variant={danger ? "danger" : "primary"}
             size="sm"
             isLoading={busy}
             disabled={busy || (input?.required ? !value.trim() : false)}
             onClick={() => onConfirm(value.trim())}
-            className={cn(
-              danger &&
-                "from-rose-600 to-rose-500 focus-visible:ring-rose-500"
-            )}
           >
             {confirmLabel}
           </Button>
@@ -68,38 +69,42 @@ export function ConfirmDialog({
       }
     >
       <div className="flex items-start gap-4">
-        <div
-          className={cn(
-            "grid h-11 w-11 shrink-0 place-items-center rounded-full",
-            danger ? "bg-rose-50 text-rose-600" : "bg-brand-50 text-brand-600"
-          )}
-        >
-          {danger ? (
-            <AlertTriangle className="h-5 w-5" />
-          ) : (
-            <HelpCircle className="h-5 w-5" />
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="font-display text-base font-semibold text-ink-900">
+        <span className="relative shrink-0">
+          <span
+            aria-hidden
+            className={cn(
+              "absolute inset-0 rounded-2xl blur-lg opacity-50",
+              danger ? "bg-coral-200" : "bg-brand-200"
+            )}
+          />
+          <IconTile
+            icon={danger ? Warning : Question}
+            tone={danger ? "coral" : "brand"}
+            size="lg"
+            className="relative"
+          />
+        </span>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h3 className="font-display text-lg font-semibold leading-tight tracking-[-0.02em] text-ink-950">
             {title}
           </h3>
           {description && (
-            <div className="mt-1 text-sm text-ink-600">{description}</div>
+            <div className="mt-1.5 text-sm leading-relaxed text-ink-600">{description}</div>
           )}
           {input && (
             <div className="mt-4">
-              <label className="mb-1 block text-xs font-semibold text-ink-500">
+              <Label htmlFor="confirm-dialog-input" className="text-xs font-semibold text-ink-600">
                 {input.label}
-              </label>
-              <input
+                {input.required && <span className="ml-0.5 text-coral-500">*</span>}
+              </Label>
+              <Input
+                id="confirm-dialog-input"
                 autoFocus
                 type="text"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={input.placeholder}
                 disabled={busy}
-                className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
               />
             </div>
           )}

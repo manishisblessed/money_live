@@ -7,15 +7,20 @@ import {
   CircleDollarSign,
   Landmark,
   Clock,
-  RefreshCw,
-  CheckCircle2,
-  Hourglass,
-  XCircle,
-  Layers,
 } from "lucide-react";
+import { ChartPieSlice, Stack, WarningCircle } from "@phosphor-icons/react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { StatSkeleton } from "@/components/ui/Skeleton";
-import { formatINR, formatNumber, cn } from "@/lib/utils";
+import { SectionHeader } from "@/components/dashboard/shell/SectionHeader";
+import { EmptyState } from "@/components/dashboard/shell/EmptyState";
+import { Stagger, StaggerItem, FadeIn } from "@/components/dashboard/shell/Motion";
+import {
+  DateRangeControl,
+  RefreshPill,
+  StatusPill,
+  ServiceBreakdownList,
+} from "@/components/dashboard/shell/OverviewBits";
+import { formatINR, formatNumber } from "@/lib/utils";
 
 type ServiceToday = {
   amount: number;
@@ -93,181 +98,120 @@ export function RetailerBusinessOverview() {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-ink-900">
-            {isToday ? "Today's Business" : "Business Summary"}
-          </h2>
-          <p className="text-sm text-ink-500">
+      <SectionHeader
+        icon={ChartPieSlice}
+        tone="accent"
+        title={isToday ? "Today's Business" : "Business Summary"}
+        description={
+          <>
             Your transaction activity across all services. Volume is{" "}
-            <span className="font-semibold text-ink-600">completed</span> business; pending &amp;
+            <span className="font-semibold text-ink-700">completed</span> business; pending &amp;
             failed are counted separately.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full border border-ink-100 bg-white px-3 py-1.5">
-            <input
-              type="date"
-              value={from}
-              max={to}
-              onChange={(e) => setFrom(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-ink-700 outline-none"
-              aria-label="From date"
-            />
-            <span className="text-ink-300">→</span>
-            <input
-              type="date"
-              value={to}
-              min={from}
-              max={today}
-              onChange={(e) => setTo(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-ink-700 outline-none"
-              aria-label="To date"
-            />
-          </div>
-          {!isToday && (
-            <button
-              type="button"
-              onClick={() => {
+          </>
+        }
+        actions={
+          <>
+            <DateRangeControl
+              from={from}
+              to={to}
+              today={today}
+              isToday={isToday}
+              onFrom={setFrom}
+              onTo={setTo}
+              onReset={() => {
                 setFrom(today);
                 setTo(today);
               }}
-              className="rounded-full border border-ink-100 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 transition hover:border-brand-200 hover:text-brand-700"
-            >
-              Today
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={load}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-full border border-ink-100 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 transition hover:border-brand-200 hover:text-brand-700 disabled:opacity-60"
-          >
-            <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
-            Refresh
-          </button>
-        </div>
-      </div>
+            />
+            <RefreshPill onClick={load} loading={loading} />
+          </>
+        }
+      />
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <StatSkeleton key={i} />
+            <StatSkeleton key={i} className="rounded-3xl" />
           ))}
         </div>
       ) : error === "load" ? (
-        <div className="rounded-2xl border border-dashed border-rose-200 bg-rose-50/50 p-6 text-center text-sm text-rose-700">
-          Couldn&apos;t load your business summary.{" "}
-          <button onClick={load} className="font-semibold underline">
-            Try again
-          </button>
+        <div className="rounded-3xl border border-dashed border-coral-200 bg-coral-50/40">
+          <EmptyState
+            compact
+            icon={WarningCircle}
+            tone="coral"
+            title="Couldn't load your business summary"
+            body="Give it another go — nothing has been lost."
+            action={
+              <button onClick={load} className="text-sm font-semibold text-coral-700 underline-offset-4 hover:underline">
+                Try again
+              </button>
+            }
+          />
         </div>
       ) : data ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <StatCard
-              label="Total Business"
-              value={formatINR(data.summary.totalVolume)}
-              icon={IndianRupee}
-              accent="brand"
-            />
-            <StatCard
-              label="Transactions"
-              value={formatNumber(data.total.count)}
-              icon={Activity}
-              accent="violet"
-            />
-            <StatCard
-              label="Commission Earned"
-              value={formatINR(data.summary.totalCommission)}
-              icon={CircleDollarSign}
-              accent="emerald"
-            />
-            <StatCard
-              label="Pending Settlement"
-              value={formatINR(data.summary.pendingSettlement)}
-              icon={Clock}
-              accent="accent"
-            />
-            <StatCard
-              label="Payouts (outflow)"
-              value={formatINR(data.summary.payout.amount)}
-              icon={Landmark}
-              accent="accent"
-            />
-          </div>
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <StaggerItem>
+              <StatCard
+                label="Total Business"
+                value={formatINR(data.summary.totalVolume)}
+                icon={IndianRupee}
+                accent="brand"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Transactions"
+                value={formatNumber(data.total.count)}
+                icon={Activity}
+                accent="violet"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Commission Earned"
+                value={formatINR(data.summary.totalCommission)}
+                icon={CircleDollarSign}
+                accent="emerald"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Pending Settlement"
+                value={formatINR(data.summary.pendingSettlement)}
+                icon={Clock}
+                accent="accent"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Payouts (outflow)"
+                value={formatINR(data.summary.payout.amount)}
+                icon={Landmark}
+                accent="accent"
+              />
+            </StaggerItem>
+          </Stagger>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <StatusPill icon={CheckCircle2} tone="emerald" n={data.summary.successCount} label="Success" />
-            <StatusPill icon={Hourglass} tone="amber" n={data.summary.pendingCount} label="Pending" />
-            <StatusPill icon={XCircle} tone="rose" n={data.summary.failedCount} label="Failed" />
+            <StatusPill tone="emerald" n={data.summary.successCount} label="Success" />
+            <StatusPill tone="amber" n={data.summary.pendingCount} label="Pending" />
+            <StatusPill tone="rose" n={data.summary.failedCount} label="Failed" />
           </div>
 
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <Layers className="h-4 w-4 text-brand-600" />
-              <h3 className="font-display text-base font-semibold text-ink-900">
-                Service-wise breakdown
-              </h3>
+          <FadeIn delay={0.08}>
+            <div className="rounded-3xl border border-ink-100 bg-white p-6 shadow-sm">
+              <SectionHeader size="sm" icon={Stack} tone="brand" title="Service-wise breakdown" className="mb-4" />
+              <ServiceBreakdownList
+                rows={data.serviceBreakdown}
+                columns={2}
+                emptyText="No transactions yet — your first customer is one tap away."
+              />
             </div>
-            {data.serviceBreakdown.length === 0 ? (
-              <p className="py-6 text-center text-sm text-ink-500">
-                No transactions in this period.
-              </p>
-            ) : (
-              <ul className="grid gap-2 sm:grid-cols-2">
-                {data.serviceBreakdown.map((s) => (
-                  <li
-                    key={s.service}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-ink-50/50 px-3 py-2"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-ink-800">{s.label}</p>
-                      <p className="text-[11px] text-ink-500">
-                        {formatNumber(s.count)} txn · {formatNumber(s.success)} ok
-                        {s.pending > 0 ? ` · ${formatNumber(s.pending)} pending` : ""}
-                        {s.failed > 0 ? ` · ${formatNumber(s.failed)} failed` : ""}
-                      </p>
-                    </div>
-                    <span className="shrink-0 font-display text-sm font-bold text-ink-900">
-                      {formatINR(s.amount)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          </FadeIn>
         </>
       ) : null}
     </section>
-  );
-}
-
-function StatusPill({
-  icon: Icon,
-  tone,
-  n,
-  label,
-}: {
-  icon: typeof CheckCircle2;
-  tone: "emerald" | "amber" | "rose";
-  n: number;
-  label: string;
-}) {
-  const tones: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700",
-    amber: "bg-amber-50 text-amber-700",
-    rose: "bg-rose-50 text-rose-700",
-  };
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
-        tones[tone]
-      )}
-    >
-      <Icon className="h-3.5 w-3.5" />
-      {formatNumber(n)} {label}
-    </span>
   );
 }

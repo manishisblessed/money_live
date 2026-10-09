@@ -2,14 +2,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { Input, Label } from "@/components/ui/Input";
+import { CreditCard, Lightning, ShieldCheck } from "@phosphor-icons/react";
 import { OperatorSelect } from "@/components/ui/OperatorSelect";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { BankLogo } from "@/components/dashboard/BankLogo";
 import {
   TransactionResult,
   type TxnResult,
 } from "@/components/dashboard/TransactionResult";
 import { TxnPinDialog } from "@/components/security/TxnPinDialog";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+  SecureFootnote,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips, InfoChip } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { StepHeader } from "@/components/dashboard/services/StepHeader";
+import { ChargeBreakdown, BillCard } from "@/components/dashboard/services/ChargeBreakdown";
 import { generateRefId, formatINR } from "@/lib/utils";
 
 /**
@@ -215,181 +229,227 @@ export function CreditCardBillForm({ route }: { route?: string } = {}) {
     }
   }
 
+  const issuerName = billers.find((b) => b.code === billerCode)?.name;
+  const stage: "card" | "fetch" | "pay" = !inputsValid ? "card" : !bill ? "fetch" : "pay";
+  const amountNum = Number(amount) || 0;
+
   return (
     <>
-      <form
-        onSubmit={pay}
-        className="grid gap-4 rounded-2xl border border-ink-100 bg-white p-6 sm:grid-cols-2"
-      >
-        <div className="sm:col-span-2">
-          <Label htmlFor="biller">Card issuer</Label>
-          <OperatorSelect
-            id="biller"
-            value={billerCode}
-            onChange={(code) => {
-              setBillerCode(code);
-              resetBill();
-            }}
-            options={billers.map((b) => ({ value: b.code, label: b.name }))}
-            loading={billers.length === 0}
-            loadingText="Loading billers…"
-            placeholder="Select card issuer"
-            emptyText="No issuers found"
-          />
-          {billersSource && billersSource !== "CATALOG" && (
-            <p className="mt-1 text-[11px] text-ink-400">
-              Live biller list · {billers.length} issuers
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="card4">Card number — last 4 digits</Label>
-          <Input
-            id="card4"
-            required
-            inputMode="numeric"
-            maxLength={4}
-            placeholder="e.g. 5008"
-            value={cardLast4}
-            onChange={(e) => {
-              setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4));
-              resetBill();
-            }}
-          />
-        </div>
-        <div>
-          <Label htmlFor="mobile">Registered mobile number</Label>
-          <Input
-            id="mobile"
-            required
-            inputMode="numeric"
-            maxLength={10}
-            placeholder="10-digit mobile linked to the card"
-            value={mobile}
-            onChange={(e) => {
-              setMobile(e.target.value.replace(/\D/g, "").slice(0, 10));
-              resetBill();
-            }}
-          />
-        </div>
-
-        {error && (
-          <div className="sm:col-span-2 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <div className="sm:col-span-2">
-          {!bill ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={fetchBill}
-              disabled={fetching || !inputsValid}
-              isLoading={fetching}
-            >
-              Fetch bill
-            </Button>
-          ) : (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-              <p className="font-semibold text-ink-900">{bill.customerName}</p>
-              {bill.dueDate && (
-                <p className="text-xs text-ink-600">Bill due {bill.dueDate}</p>
-              )}
-              <p className="mt-2 font-display text-xl font-bold text-emerald-700">
-                {formatINR(bill.amount)}
-              </p>
-              {bill.minAmount !== undefined && (
-                <p className="mt-1 text-xs text-ink-600">
-                  Minimum due {formatINR(bill.minAmount)}
-                  {bill.maxAmount !== undefined && (
-                    <> · Max payable {formatINR(bill.maxAmount)}</>
-                  )}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {bill && (
+      <ServiceLayout
+        aside={
           <>
-            <div className="sm:col-span-2">
-              <Label htmlFor="amount">Amount to pay (₹)</Label>
-              <Input
-                id="amount"
-                required
-                type="number"
-                min={1}
-                max={bill.maxAmount ?? 500000}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-              <div className="mt-2 flex flex-wrap gap-2">
-                {bill.minAmount !== undefined && (
-                  <button
-                    type="button"
-                    onClick={() => setAmount(String(bill.minAmount))}
-                    className="rounded-full border border-ink-200 px-3 py-1 text-xs font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700"
-                  >
-                    Minimum due — {formatINR(bill.minAmount)}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setAmount(String(bill.amount))}
-                  className="rounded-full border border-ink-200 px-3 py-1 text-xs font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700"
-                >
-                  Total due — {formatINR(bill.amount)}
-                </button>
-              </div>
-            </div>
-            {quote && Number(amount) > 0 && (
-              <div className="sm:col-span-2 rounded-xl border border-ink-200 bg-ink-50/50 p-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-ink-600">Bill amount</span>
-                  <span className="font-medium text-ink-900">{formatINR(Number(amount))}</span>
-                </div>
-                <div className="mt-1 flex justify-between">
-                  <span className="text-ink-600">Service charge</span>
-                  <span className="font-medium text-ink-900">{formatINR(quote.serviceCharge)}</span>
-                </div>
-                {quote.gst > 0 && (
-                  <div className="mt-1 flex justify-between">
-                    <span className="text-ink-600">GST (18%)</span>
-                    <span className="font-medium text-ink-900">{formatINR(quote.gst)}</span>
-                  </div>
-                )}
-                <hr className="my-2 border-ink-200" />
-                <div className="flex justify-between font-semibold">
-                  <span className="text-ink-700">Total debit from wallet</span>
-                  <span className="text-ink-900">{formatINR(quote.totalDebit)}</span>
-                </div>
-                {quote.commission > 0 && (
-                  <p className="mt-2 text-xs text-emerald-600">
-                    Commission earned: {formatINR(quote.commission)} (net of 2% TDS)
-                  </p>
-                )}
-              </div>
-            )}
-            {quoteLoading && Number(amount) > 0 && (
-              <p className="sm:col-span-2 text-center text-xs text-ink-400 animate-pulse">
-                Calculating charges…
-              </p>
-            )}
-            <div className="sm:col-span-2">
-              <Button type="submit" size="lg" className="w-full" disabled={paying || !amount} isLoading={paying}>
-                Pay {quote ? formatINR(quote.totalDebit) : amount ? formatINR(Number(amount)) : "bill"}
-              </Button>
-              <p className="mt-2 text-center text-[11px] text-ink-400">
-                Confirmed with your transaction PIN. Debited from your wallet — failed payments are auto-refunded.
-              </p>
-            </div>
+            <SummaryPanel
+              title="Credit card bill"
+              status={
+                bill
+                  ? { label: "Bill fetched", variant: "accent", dot: true }
+                  : { label: "Awaiting bill", variant: "default" }
+              }
+              rows={[
+                {
+                  label: "Issuer",
+                  value: issuerName ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <BankLogo name={issuerName} size={18} />
+                      {issuerName}
+                    </span>
+                  ) : (
+                    "—"
+                  ),
+                  muted: !issuerName,
+                },
+                { label: "Card", value: cardLast4 ? `•••• ${cardLast4}` : "—", mono: true, muted: !cardLast4 },
+                { label: "Mobile", value: mobile || "—", mono: true, muted: !mobile },
+                ...(bill?.customerName ? [{ label: "Cardholder", value: bill.customerName }] : []),
+                ...(bill?.dueDate ? [{ label: "Due", value: bill.dueDate }] : []),
+                ...(bill ? [{ label: "Bill amount", value: formatINR(bill.amount) }] : []),
+                ...(quote && amountNum > 0
+                  ? [
+                      { label: "Service charge", value: formatINR(quote.serviceCharge) },
+                      ...(quote.gst > 0 ? [{ label: "GST (18%)", value: formatINR(quote.gst) }] : []),
+                    ]
+                  : []),
+              ]}
+              total={bill ? formatINR(quote && amountNum > 0 ? quote.totalDebit : amountNum) : undefined}
+              totalLabel="Debit from wallet"
+              totalHint={quoteLoading && amountNum > 0 ? "Calculating charges…" : undefined}
+              footer={
+                quote && quote.commission > 0 && amountNum > 0 ? (
+                  <InfoChip
+                    tone="accent"
+                    icon={<Lightning weight="duotone" />}
+                    label="Commission on this txn"
+                    value={formatINR(quote.commission)}
+                  />
+                ) : undefined
+              }
+            />
+            <AsideTips
+              items={[
+                { icon: <CreditCard weight="duotone" />, text: "Only the last 4 digits and the registered mobile are needed to fetch the bill." },
+                { icon: <ShieldCheck weight="duotone" />, text: "Same Day BBPS — failed payments auto-refund to your wallet." },
+              ]}
+            />
           </>
-        )}
-      </form>
+        }
+      >
+        <ServiceCard
+          as="form"
+          onSubmit={pay}
+          icon={<IconTile icon={CreditCard} tone="energy" size="lg" />}
+          eyebrow="Same Day BBPS"
+          title="Pay credit card bill"
+          description="Pick the issuer, fetch the live bill, then pay — PIN confirms it."
+        >
+          <div className="grid gap-5">
+            <StepHeader
+              layoutId="cc-bill-steps"
+              steps={[
+                { key: "card", label: "Card details" },
+                { key: "fetch", label: "Fetch bill" },
+                { key: "pay", label: "Pay" },
+              ]}
+              current={stage}
+            />
+
+            <Field
+              label="Card issuer"
+              htmlFor="biller"
+              hint={
+                billersSource && billersSource !== "CATALOG"
+                  ? `Live biller list · ${billers.length} issuers`
+                  : undefined
+              }
+            >
+              <OperatorSelect
+                id="biller"
+                value={billerCode}
+                onChange={(code) => {
+                  setBillerCode(code);
+                  resetBill();
+                }}
+                options={billers.map((b) => ({ value: b.code, label: b.name }))}
+                loading={billers.length === 0}
+                loadingText="Loading billers…"
+                placeholder="Select card issuer"
+                emptyText="No issuers found"
+              />
+            </Field>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <FloatField
+                id="card4"
+                label="Card number — last 4 digits"
+                required
+                mono
+                inputMode="numeric"
+                maxLength={4}
+                hint="e.g. 5008"
+                value={cardLast4}
+                onChange={(e) => {
+                  setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4));
+                  resetBill();
+                }}
+              />
+              <FloatField
+                id="mobile"
+                label="Registered mobile number"
+                required
+                mono
+                inputMode="numeric"
+                maxLength={10}
+                hint="10-digit mobile linked to the card"
+                value={mobile}
+                onChange={(e) => {
+                  setMobile(e.target.value.replace(/\D/g, "").slice(0, 10));
+                  resetBill();
+                }}
+              />
+            </div>
+
+            {error && (
+              <Notice tone="danger" icon={<AlertCircle className="h-4 w-4" />}>
+                {error}
+              </Notice>
+            )}
+
+            {!bill ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={fetchBill}
+                disabled={fetching || !inputsValid}
+                isLoading={fetching}
+              >
+                Fetch bill
+              </Button>
+            ) : (
+              <BillCard
+                customerName={bill.customerName}
+                dueDate={bill.dueDate}
+                amount={bill.amount}
+                minAmount={bill.minAmount}
+                maxAmount={bill.maxAmount}
+                onChange={resetBill}
+              />
+            )}
+
+            {bill && (
+              <>
+                <div>
+                  <FloatField
+                    id="amount"
+                    label="Amount to pay (₹)"
+                    required
+                    display
+                    type="number"
+                    min={1}
+                    max={bill.maxAmount ?? 500000}
+                    inputMode="numeric"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <AmountChips
+                    className="mt-3"
+                    amounts={[
+                      ...(bill.minAmount !== undefined ? [bill.minAmount] : []),
+                      bill.amount,
+                    ].filter((v, i, arr) => arr.indexOf(v) === i)}
+                    value={amount}
+                    onPick={(v) => setAmount(String(v))}
+                    render={(v) =>
+                      v === bill.amount
+                        ? `Total due — ${formatINR(v)}`
+                        : `Minimum due — ${formatINR(v)}`
+                    }
+                  />
+                </div>
+                {quote && amountNum > 0 && (
+                  <ChargeBreakdown
+                    amount={amountNum}
+                    serviceCharge={quote.serviceCharge}
+                    gst={quote.gst}
+                    totalDebit={quote.totalDebit}
+                    commission={quote.commission}
+                    loading={quoteLoading}
+                  />
+                )}
+                {quoteLoading && !quote && amountNum > 0 && (
+                  <p className="text-center text-xs text-ink-400 animate-pulse">Calculating charges…</p>
+                )}
+                <div>
+                  <Button type="submit" size="xl" className="w-full" disabled={paying || !amount} isLoading={paying}>
+                    Pay {quote ? formatINR(quote.totalDebit) : amount ? formatINR(Number(amount)) : "bill"}
+                  </Button>
+                  <SecureFootnote />
+                </div>
+              </>
+            )}
+          </div>
+        </ServiceCard>
+      </ServiceLayout>
       <TxnPinDialog
         open={pinOpen}
         title="Pay credit card bill"

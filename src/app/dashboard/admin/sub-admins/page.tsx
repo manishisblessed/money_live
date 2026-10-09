@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Label } from "@/components/ui/Input";
 import { ReportActions } from "@/components/dashboard/ReportActions";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { Stagger, StaggerItem } from "@/components/dashboard/patterns";
 import { generateRandomPassword } from "@/lib/utils";
 import { ASSIGNABLE_SUB_ADMIN_TABS } from "@/lib/roles";
 
@@ -200,21 +202,21 @@ export default function AdminSubAdminsPage() {
         <div className="flex justify-end gap-1">
           <button
             onClick={() => setTabsFor(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-violet-700 hover:bg-violet-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-violet-700 hover:bg-violet-50"
             title="Assign tabs"
           >
             <ListChecks className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleResetPassword(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-700 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-700 hover:bg-amber-50"
             title="Reset password"
           >
             <KeyRound className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleReset2fa(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-700 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-700 hover:bg-amber-50"
             title="Reset 2FA"
           >
             <Smartphone className="h-4 w-4" />
@@ -229,7 +231,7 @@ export default function AdminSubAdminsPage() {
                 });
                 refresh();
               }}
-              className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
               title="Suspend"
             >
               <ShieldOff className="h-4 w-4" />
@@ -244,7 +246,7 @@ export default function AdminSubAdminsPage() {
                 });
                 refresh();
               }}
-              className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-emerald-700 hover:bg-emerald-50"
               title="Reactivate"
             >
               <ShieldCheck className="h-4 w-4" />
@@ -252,7 +254,7 @@ export default function AdminSubAdminsPage() {
           ) : null}
           <button
             onClick={() => setDeleteTarget(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
             title="Delete"
           >
             <Trash2 className="h-4 w-4" />
@@ -265,7 +267,7 @@ export default function AdminSubAdminsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · People"
         title="Sub-admins"
         description="Create operations users delegated by you. Each sub-admin signs in at /sub-admin with 2FA enforced."
         actions={
@@ -299,11 +301,11 @@ export default function AdminSubAdminsPage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Total sub-admins" value={stats.total} tone="brand" />
-        <Stat label="Active" value={stats.active} tone="success" />
-        <Stat label="2FA enabled" value={stats.with2FA} tone="warning" />
-      </div>
+      <Stagger className="grid gap-4 sm:grid-cols-3">
+        <StaggerItem><StatCard label="Total sub-admins" value={String(stats.total)} icon={UserCog} accent="brand" /></StaggerItem>
+        <StaggerItem><StatCard label="Active" value={String(stats.active)} icon={ShieldCheck} accent="emerald" /></StaggerItem>
+        <StaggerItem><StatCard label="2FA enabled" value={String(stats.with2FA)} icon={Smartphone} accent="violet" /></StaggerItem>
+      </Stagger>
 
       {showNew && (
         <NewSubAdminForm
@@ -529,13 +531,13 @@ function TabsDialog({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 px-4">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl">
+      <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100">
         <div className="flex items-start justify-between gap-4 bg-gradient-to-br from-violet-50 to-white px-6 py-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-violet-700">
               Assign tabs
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
               {record.name}
             </h3>
             <p className="mt-1 text-xs text-ink-600">
@@ -545,7 +547,7 @@ function TabsDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -629,7 +631,7 @@ function CredentialsDialog({
             <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
               Sub-admin created
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
               {record.name}
             </h3>
             <p className="mt-1 text-xs text-ink-600">
@@ -639,7 +641,7 @@ function CredentialsDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -655,7 +657,7 @@ function CredentialsDialog({
               <button
                 type="button"
                 onClick={() => copy(record.email, "email")}
-                className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                 title="Copy email"
               >
                 {copied === "email" ? (
@@ -675,7 +677,7 @@ function CredentialsDialog({
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title={showPwd ? "Hide" : "Show"}
                 >
                   {showPwd ? (
@@ -687,7 +689,7 @@ function CredentialsDialog({
                 <button
                   type="button"
                   onClick={() => copy(password, "pwd")}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title="Copy password"
                 >
                   {copied === "pwd" ? (
@@ -700,7 +702,7 @@ function CredentialsDialog({
             }
           />
 
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+          <div className="rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-4 py-3 text-xs text-amber-900">
             For security, this password will{" "}
             <strong>not be shown again</strong>. Copy it now and send it to the
             sub-admin via a secure channel.
@@ -753,7 +755,7 @@ function ResetPasswordDialog({
             <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">
               Password reset
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">{name}</h3>
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{name}</h3>
             <p className="mt-1 text-xs text-ink-600">
               A new password was generated for this sub-admin. All existing sessions
               have been signed out.
@@ -761,7 +763,7 @@ function ResetPasswordDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -778,7 +780,7 @@ function ResetPasswordDialog({
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title={showPwd ? "Hide" : "Show"}
                 >
                   {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -786,7 +788,7 @@ function ResetPasswordDialog({
                 <button
                   type="button"
                   onClick={copy}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title="Copy password"
                 >
                   {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
@@ -794,7 +796,7 @@ function ResetPasswordDialog({
               </div>
             }
           />
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+          <div className="rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-4 py-3 text-xs text-amber-900">
             For security, this password will <strong>not be shown again</strong>. Copy it
             now and send it to the sub-admin via a secure channel.
           </div>
@@ -825,7 +827,7 @@ function Field({
 }) {
   return (
     <div className="rounded-xl border border-ink-100 bg-white px-4 py-3">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
         {label}
       </p>
       <div className="mt-1 flex items-center justify-between gap-3">
@@ -840,28 +842,3 @@ function Field({
   );
 }
 
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "brand" | "success" | "warning";
-}) {
-  const map = {
-    brand: "from-brand-500 to-brand-700 text-brand-50",
-    success: "from-emerald-500 to-emerald-700 text-emerald-50",
-    warning: "from-amber-500 to-amber-700 text-amber-50",
-  };
-  return (
-    <div
-      className={`rounded-2xl bg-gradient-to-br ${map[tone]} p-5 shadow-soft`}
-    >
-      <p className="text-xs font-bold uppercase tracking-widest opacity-90">
-        {label}
-      </p>
-      <p className="mt-2 font-display text-3xl font-bold">{value}</p>
-    </div>
-  );
-}

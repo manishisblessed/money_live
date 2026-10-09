@@ -25,7 +25,7 @@ import { formatINR } from "@/lib/utils";
 import { type ReportColumn } from "@/lib/reports";
 import { ReportActions } from "@/components/dashboard/ReportActions";
 
-// ── API contract (mirrors src/lib/qr/settlementReport.ts) ──
+// â”€â”€ API contract (mirrors src/lib/qr/settlementReport.ts) â”€â”€
 
 type QrClaimStatus =
   | "PENDING"
@@ -133,7 +133,7 @@ function defaultDateRange() {
 }
 
 function fmtTime(iso: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "â€”";
   return new Date(iso).toLocaleString("en-IN", {
     day: "2-digit",
     month: "short",
@@ -150,7 +150,7 @@ function statusBadge(status: QrClaimStatus, label: string) {
 }
 
 function retailerCell(r: { retailer: ReportRetailer | null }) {
-  if (!r.retailer) return <span className="text-xs text-ink-400">—</span>;
+  if (!r.retailer) return <span className="text-xs text-ink-400">â€”</span>;
   return (
     <div className="flex flex-col">
       <span className="max-w-[150px] truncate text-xs font-semibold text-ink-900">
@@ -240,7 +240,7 @@ export function QrSettlementReportTab({
     const d = await res.json();
     if (d.truncated) {
       toast.warning(
-        `Report capped at ${Number(d.returned).toLocaleString("en-IN")} rows — narrow the date range for the rest.`
+        `Report capped at ${Number(d.returned).toLocaleString("en-IN")} rows â€” narrow the date range for the rest.`
       );
     }
     return (d.rows as ReportRow[]) ?? [];
@@ -278,26 +278,26 @@ export function QrSettlementReportTab({
       key: "utr",
       header: "UTR / Card",
       render: (r) => (
-        <span className="font-mono text-xs">{r.utr ?? (r.cardLast4 ? `•••• ${r.cardLast4}` : "—")}</span>
+        <span className="font-mono text-xs">{r.utr ?? (r.cardLast4 ? `â€¢â€¢â€¢â€¢ ${r.cardLast4}` : "â€”")}</span>
       ),
     },
     {
       key: "qrLabel",
       header: "QR",
-      render: (r) => (r.qrLabel ? <span className="text-xs">{r.qrLabel}</span> : "—"),
+      render: (r) => (r.qrLabel ? <span className="text-xs">{r.qrLabel}</span> : "â€”"),
     },
     { key: "grossAmount", header: "Amount", align: "right", render: (r) => <span className="font-semibold text-ink-900">{formatINR(r.grossAmount)}</span> },
     {
       key: "mdrAmount",
       header: "MDR",
       align: "right",
-      render: (r) => (r.mdrAmount != null ? <span className="text-rose-600">−{formatINR(r.mdrAmount)}</span> : <span className="text-xs text-ink-400">—</span>),
+      render: (r) => (r.mdrAmount != null ? <span className="text-rose-600">âˆ’{formatINR(r.mdrAmount)}</span> : <span className="text-xs text-ink-400">â€”</span>),
     },
     {
       key: "netSettled",
       header: "Settled",
       align: "right",
-      render: (r) => (r.netSettled != null ? <span className="font-semibold text-emerald-700">{formatINR(r.netSettled)}</span> : <span className="text-xs text-ink-400">—</span>),
+      render: (r) => (r.netSettled != null ? <span className="font-semibold text-emerald-700">{formatINR(r.netSettled)}</span> : <span className="text-xs text-ink-400">â€”</span>),
     },
     { key: "status", header: "Status", render: (r) => statusBadge(r.status, r.statusLabel) },
     ...(showCommission
@@ -329,7 +329,7 @@ export function QrSettlementReportTab({
     },
     { key: "txnCount", header: "Claims", align: "right", render: (r) => <span className="font-semibold">{r.txnCount.toLocaleString("en-IN")}</span> },
     { key: "grossAmount", header: "Volume", align: "right", render: (r) => <span className="font-semibold text-ink-900">{formatINR(r.grossAmount)}</span> },
-    { key: "mdrAmount", header: "MDR", align: "right", render: (r) => <span className="text-rose-600">−{formatINR(r.mdrAmount)}</span> },
+    { key: "mdrAmount", header: "MDR", align: "right", render: (r) => <span className="text-rose-600">âˆ’{formatINR(r.mdrAmount)}</span> },
     { key: "netSettled", header: "Settled", align: "right", render: (r) => <span className="font-semibold text-emerald-700">{formatINR(r.netSettled)}</span> },
     ...(showCommission
       ? [
@@ -382,7 +382,7 @@ export function QrSettlementReportTab({
       </div>
 
       {/* Filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-4">
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-xs font-semibold text-ink-500">From</label>
@@ -473,7 +473,7 @@ export function QrSettlementReportTab({
       ) : view === "transactions" ? (
         <>
           <DataTable
-            title="QR Settlement — per transaction"
+            title="QR Settlement â€” per transaction"
             description={
               pagination
                 ? `${pagination.total.toLocaleString("en-IN")} claim${pagination.total === 1 ? "" : "s"} · page ${pagination.page} of ${pagination.totalPages}`
@@ -499,7 +499,7 @@ export function QrSettlementReportTab({
         </>
       ) : (
         <DataTable
-          title="Settlement rollup — by merchant / downline"
+          title="Settlement rollup â€” by merchant / downline"
           description={
             rollup.length
               ? `${rollup.length} merchant${rollup.length === 1 ? "" : "s"} with QR activity in this period`

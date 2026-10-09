@@ -14,6 +14,7 @@ import { PageTransition } from "@/components/motion/PageTransition";
 import { DashboardShellSkeleton } from "@/components/ui/Skeleton";
 import { StepUpProvider } from "@/components/security/StepUpProvider";
 import { AdminActivityTracker } from "@/components/security/AdminActivityTracker";
+import { cn } from "@/lib/utils";
 
 const SIDEBAR_KEY = "ngp-sidebar-collapsed";
 
@@ -78,7 +79,7 @@ export default function DashboardLayout({
   return (
     <StepUpProvider>
     <AdminActivityTracker />
-    <div className="flex min-h-screen bg-ink-50/40">
+    <div className="min-h-screen bg-[#f6f7fb] text-ink-900">
       <Toaster
         position="top-right"
         richColors
@@ -92,10 +93,17 @@ export default function DashboardLayout({
         <NavigationProgress />
       </Suspense>
       <Sidebar open={open} onClose={() => setOpen(false)} collapsed={collapsed} onToggleCollapse={toggleCollapsed} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      {/* Sidebar is fixed on desktop — this wrapper carries the matching left
+          offset and eases it alongside the rail's width animation. */}
+      <div
+        className={cn(
+          "flex min-h-screen min-w-0 flex-col transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+          collapsed ? "lg:pl-[76px]" : "lg:pl-[272px]"
+        )}
+      >
         <Topbar onOpenSidebar={() => setOpen(true)} collapsed={collapsed} onToggleCollapse={toggleCollapsed} />
-        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-10">
-          <div className="mx-auto w-full max-w-[1400px] min-w-0">
+        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
+          <div className="mx-auto w-full min-w-0 max-w-[1440px]">
             <SliderSurface />
             <SchemeGateBanner />
             <PageTransition>{children}</PageTransition>

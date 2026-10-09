@@ -7,18 +7,19 @@ import {
   Plus,
   Trash2,
   KeyRound,
-  ShieldCheck,
   Webhook,
   RefreshCw,
   AlertCircle,
   CheckCircle2,
   Power,
 } from "lucide-react";
+import { Key as KeyPh, LockKey, ShieldCheck, Plugs } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Input, Label } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { FloatingInput, Label } from "@/components/ui/Input";
+import { EmptyState, FadeIn, SectionCard, StatusChip } from "@/components/dashboard/patterns";
 
 type Scope = { id: string; label: string };
 type ApiKeyRow = {
@@ -60,8 +61,9 @@ function CopyButton({ text }: { text: string }) {
           setTimeout(() => setCopied(false), 1500);
         });
       }}
-      className="rounded p-1 text-ink-500 hover:bg-ink-100"
+      className="rounded-lg p-1 text-ink-500 transition hover:bg-ink-100 focus-energy"
       title="Copy"
+      aria-label="Copy"
     >
       {copied ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
     </button>
@@ -217,65 +219,84 @@ export default function ApiKeysPage() {
   if (forbidden) {
     return (
       <div className="space-y-6">
-        <PageHeader eyebrow="Platform" title="API keys & webhooks" description="Programmatic access to the platform." />
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-          API keys and webhooks are available to <strong>Master Distributor</strong> and <strong>Super Distributor</strong> accounts.
-          Contact your upline to upgrade.
-        </div>
+        <PageHeader eyebrow="Platform · Developers" title="API keys & webhooks" description="Programmatic access to the platform." />
+        <EmptyState
+          bordered
+          icon={LockKey}
+          tone="amber"
+          title="API access is for Master & Super Distributors"
+          description={
+            <>
+              API keys and webhooks are available to <strong>Master Distributor</strong> and <strong>Super Distributor</strong> accounts.
+              Contact your upline to upgrade.
+            </>
+          }
+        />
       </div>
     );
   }
 
+  const chipClass = (active: boolean) =>
+    `rounded-full px-3 py-1.5 text-xs font-semibold transition focus-energy ${
+      active ? "pill-active" : "bg-white text-ink-600 ring-1 ring-inset ring-ink-200 hover:ring-ink-300"
+    }`;
+
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Platform"
+        eyebrow="Platform · Developers"
         title="API keys & webhooks"
         description="Issue scoped keys for the partner API and receive signed event notifications on your servers."
         actions={
-          <Button variant="secondary" onClick={load} disabled={loading}>
+          <Button variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
         }
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-inset ring-rose-200">
           <AlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
 
       {/* One-time secret banners */}
       {newSecret && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-sm font-semibold text-emerald-900">Key created — copy the secret now. It will never be shown again.</p>
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-white px-4 py-3 font-mono text-xs text-ink-800">
-            <span className="truncate">Authorization: Bearer {newSecret.keyId}.{newSecret.secret}</span>
-            <CopyButton text={`${newSecret.keyId}.${newSecret.secret}`} />
-          </div>
-          <Button variant="secondary" className="mt-3" onClick={() => setNewSecret(null)}>Done, I saved it</Button>
-        </div>
+        <FadeIn>
+          <SectionCard tone="accent" title="Key created — copy the secret now" description="It will never be shown again.">
+            <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 font-mono text-xs text-ink-800 ring-1 ring-inset ring-ink-100">
+              <span className="truncate">Authorization: Bearer {newSecret.keyId}.{newSecret.secret}</span>
+              <CopyButton text={`${newSecret.keyId}.${newSecret.secret}`} />
+            </div>
+            <Button variant="secondary" className="mt-3" onClick={() => setNewSecret(null)}>Done, I saved it</Button>
+          </SectionCard>
+        </FadeIn>
       )}
       {newEpSecret && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-sm font-semibold text-emerald-900">
-            Endpoint added — save this signing secret. Verify the <code className="font-mono">X-NGP-Signature</code> header (HMAC-SHA256 of the raw body) with it.
-          </p>
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-white px-4 py-3 font-mono text-xs text-ink-800">
-            <span className="truncate">{newEpSecret}</span>
-            <CopyButton text={newEpSecret} />
-          </div>
-          <Button variant="secondary" className="mt-3" onClick={() => setNewEpSecret(null)}>Done, I saved it</Button>
-        </div>
+        <FadeIn>
+          <SectionCard
+            tone="accent"
+            title="Endpoint added — save this signing secret"
+            description={
+              <>
+                Verify the <code className="font-mono">X-NGP-Signature</code> header (HMAC-SHA256 of the raw body) with it.
+              </>
+            }
+          >
+            <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 font-mono text-xs text-ink-800 ring-1 ring-inset ring-ink-100">
+              <span className="truncate">{newEpSecret}</span>
+              <CopyButton text={newEpSecret} />
+            </div>
+            <Button variant="secondary" className="mt-3" onClick={() => setNewEpSecret(null)}>Done, I saved it</Button>
+          </SectionCard>
+        </FadeIn>
       )}
 
-      <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-5">
+      <SectionCard tone="brand" padding="sm">
         <div className="flex items-start gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-600 text-white">
-            <ShieldCheck className="h-5 w-5" />
-          </span>
+          <IconTile icon={ShieldCheck} tone="energy" size="md" />
           <div>
-            <h3 className="font-display text-base font-semibold text-ink-900">How it works</h3>
+            <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">How it works</h3>
             <p className="mt-1 text-sm text-ink-600">
               Authenticate with <code className="font-mono text-xs">Authorization: Bearer &lt;keyId&gt;.&lt;secret&gt;</code>.
               Secrets are hashed at rest and shown only once. Payouts created via API still pass maker-checker approval.
@@ -283,263 +304,285 @@ export default function ApiKeysPage() {
             </p>
           </div>
         </div>
-      </div>
+      </SectionCard>
 
       {/* ── API keys ── */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-ink-900">API keys</h2>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <IconTile icon={KeyPh} tone="brand" size="sm" />
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">API keys</h2>
+            <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-bold tabular-nums text-ink-600">{keys.length}</span>
+          </div>
           <Button onClick={() => setShowKeyForm((v) => !v)}>
             <Plus className="h-4 w-4" /> New key
           </Button>
         </div>
 
         {showKeyForm && (
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Label</Label>
-                <Input value={keyLabel} onChange={(e) => setKeyLabel(e.target.value)} placeholder="e.g. Production backend" />
-              </div>
-              <div>
-                <Label>Scopes</Label>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {scopes.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() =>
-                        setKeyScopes((cur) => (cur.includes(s.id) ? cur.filter((x) => x !== s.id) : [...cur, s.id]))
-                      }
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                        keyScopes.includes(s.id)
-                          ? "border-brand-600 bg-brand-50 text-brand-700"
-                          : "border-ink-200 text-ink-600 hover:border-ink-300"
-                      }`}
-                      title={s.label}
-                    >
-                      {s.id}
-                    </button>
-                  ))}
+          <FadeIn>
+            <SectionCard title="New API key" description="Give it a clear label and pick only the scopes it needs.">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FloatingInput label="Label" value={keyLabel} onChange={(e) => setKeyLabel(e.target.value)} placeholder="e.g. Production backend" />
+                <div>
+                  <Label>Scopes</Label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {scopes.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        aria-pressed={keyScopes.includes(s.id)}
+                        onClick={() =>
+                          setKeyScopes((cur) => (cur.includes(s.id) ? cur.filter((x) => x !== s.id) : [...cur, s.id]))
+                        }
+                        className={chipClass(keyScopes.includes(s.id))}
+                        title={s.label}
+                      >
+                        {s.id}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button onClick={createKey} disabled={creatingKey || keyLabel.trim().length < 3 || keyScopes.length === 0}>
-                {creatingKey ? "Creating…" : "Create key"}
-              </Button>
-              <Button variant="secondary" onClick={() => setShowKeyForm(false)}>Cancel</Button>
-            </div>
-          </div>
+              <div className="mt-4 flex gap-2">
+                <Button onClick={createKey} disabled={creatingKey || keyLabel.trim().length < 3 || keyScopes.length === 0}>
+                  {creatingKey ? "Creating…" : "Create key"}
+                </Button>
+                <Button variant="outline" onClick={() => setShowKeyForm(false)}>Cancel</Button>
+              </div>
+            </SectionCard>
+          </FadeIn>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-          <table className="w-full text-sm">
-            <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Label</th>
-                <th className="px-5 py-3 font-semibold">Key ID</th>
-                <th className="px-5 py-3 font-semibold">Scopes</th>
-                <th className="px-5 py-3 font-semibold">Last used</th>
-                <th className="px-5 py-3 font-semibold">Status</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100 text-ink-800">
-              {keys.length === 0 && !loading && (
+        <SectionCard padding="none">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-ink-500">
-                    No API keys yet. Create one to start integrating.
-                  </td>
+                  <th className="px-5 py-3 font-semibold">Label</th>
+                  <th className="px-5 py-3 font-semibold">Key ID</th>
+                  <th className="px-5 py-3 font-semibold">Scopes</th>
+                  <th className="px-5 py-3 font-semibold">Last used</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3"></th>
                 </tr>
-              )}
-              {keys.map((k) => (
-                <tr key={k.id} className="hover:bg-ink-50/40">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2 font-semibold text-ink-900">
-                      <KeyRound className="h-4 w-4 text-ink-400" /> {k.label}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2 font-mono text-xs">
-                      {k.keyId}
-                      <CopyButton text={k.keyId} />
-                    </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {k.scopes.map((s) => (
-                        <span key={s} className="rounded-full bg-ink-100 px-2 py-0.5 font-mono text-[10px] text-ink-600">{s}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-ink-500">{fmtDate(k.lastUsedAt)}</td>
-                  <td className="px-5 py-3">
-                    {k.revokedAt ? <Badge variant="danger">Revoked</Badge> : <Badge variant="success">Active</Badge>}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    {!k.revokedAt && (
-                      <button
-                        onClick={() => setRevokeTarget(k)}
-                        className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
-                        title="Revoke"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-ink-100 text-ink-800">
+                {keys.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={6} className="p-0">
+                      <EmptyState
+                        compact
+                        icon={KeyPh}
+                        title="No API keys yet"
+                        description="Create one to start integrating."
+                      />
+                    </td>
+                  </tr>
+                )}
+                {keys.map((k) => (
+                  <tr key={k.id} className="transition-colors hover:bg-ink-50/40">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2 font-semibold text-ink-900">
+                        <KeyRound className="h-4 w-4 text-ink-400" /> {k.label}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2 font-mono text-xs">
+                        {k.keyId}
+                        <CopyButton text={k.keyId} />
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {k.scopes.map((s) => (
+                          <span key={s} className="rounded-full bg-ink-100 px-2 py-0.5 font-mono text-[10px] text-ink-600">{s}</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-ink-500">{fmtDate(k.lastUsedAt)}</td>
+                    <td className="px-5 py-3">
+                      <StatusChip status={k.revokedAt ? "REVOKED" : "ACTIVE"} size="sm" />
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      {!k.revokedAt && (
+                        <button
+                          onClick={() => setRevokeTarget(k)}
+                          className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 ring-1 ring-inset ring-rose-100 transition hover:bg-rose-50 focus-energy"
+                          title="Revoke"
+                          aria-label="Revoke key"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
       </section>
 
       {/* ── Webhooks ── */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-ink-900">Webhook endpoints</h2>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <IconTile icon={Plugs} tone="royal" size="sm" />
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">Webhook endpoints</h2>
+            <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-bold tabular-nums text-ink-600">{endpoints.length}</span>
+          </div>
           <Button onClick={() => setShowEpForm((v) => !v)}>
             <Plus className="h-4 w-4" /> Add endpoint
           </Button>
         </div>
 
         {showEpForm && (
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>HTTPS URL</Label>
-                <Input value={epUrl} onChange={(e) => setEpUrl(e.target.value)} placeholder="https://api.yourdomain.in/ngp/webhook" />
-              </div>
-              <div>
-                <Label>Events</Label>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {events.map((ev) => (
-                    <button
-                      key={ev.id}
-                      onClick={() =>
-                        setEpEvents((cur) => (cur.includes(ev.id) ? cur.filter((x) => x !== ev.id) : [...cur, ev.id]))
-                      }
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                        epEvents.includes(ev.id)
-                          ? "border-brand-600 bg-brand-50 text-brand-700"
-                          : "border-ink-200 text-ink-600 hover:border-ink-300"
-                      }`}
-                      title={ev.label}
-                    >
-                      {ev.id}
-                    </button>
-                  ))}
+          <FadeIn>
+            <SectionCard title="New endpoint" description="HTTPS only. Pick the events you want delivered.">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FloatingInput label="HTTPS URL" value={epUrl} onChange={(e) => setEpUrl(e.target.value)} placeholder="https://api.yourdomain.in/ngp/webhook" />
+                <div>
+                  <Label>Events</Label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {events.map((ev) => (
+                      <button
+                        key={ev.id}
+                        type="button"
+                        aria-pressed={epEvents.includes(ev.id)}
+                        onClick={() =>
+                          setEpEvents((cur) => (cur.includes(ev.id) ? cur.filter((x) => x !== ev.id) : [...cur, ev.id]))
+                        }
+                        className={chipClass(epEvents.includes(ev.id))}
+                        title={ev.label}
+                      >
+                        {ev.id}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button onClick={createEndpoint} disabled={creatingEp || !epUrl.startsWith("https://") || epEvents.length === 0}>
-                {creatingEp ? "Adding…" : "Add endpoint"}
-              </Button>
-              <Button variant="secondary" onClick={() => setShowEpForm(false)}>Cancel</Button>
-            </div>
-          </div>
+              <div className="mt-4 flex gap-2">
+                <Button onClick={createEndpoint} disabled={creatingEp || !epUrl.startsWith("https://") || epEvents.length === 0}>
+                  {creatingEp ? "Adding…" : "Add endpoint"}
+                </Button>
+                <Button variant="outline" onClick={() => setShowEpForm(false)}>Cancel</Button>
+              </div>
+            </SectionCard>
+          </FadeIn>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-          <table className="w-full text-sm">
-            <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
-              <tr>
-                <th className="px-5 py-3 font-semibold">URL</th>
-                <th className="px-5 py-3 font-semibold">Events</th>
-                <th className="px-5 py-3 font-semibold">Status</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100 text-ink-800">
-              {endpoints.length === 0 && !loading && (
-                <tr>
-                  <td colSpan={4} className="px-5 py-8 text-center text-ink-500">
-                    No endpoints yet. Add one to receive txn / payout / top-up events.
-                  </td>
-                </tr>
-              )}
-              {endpoints.map((ep) => (
-                <tr key={ep.id} className="hover:bg-ink-50/40">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2 font-mono text-xs text-ink-900">
-                      <Webhook className="h-4 w-4 shrink-0 text-ink-400" />
-                      <span className="max-w-[320px] truncate">{ep.url}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {ep.events.map((e) => (
-                        <span key={e} className="rounded-full bg-ink-100 px-2 py-0.5 font-mono text-[10px] text-ink-600">{e}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    {ep.active ? <Badge variant="success">Active</Badge> : <Badge variant="default">Paused</Badge>}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => toggleEndpoint(ep)}
-                        className="grid h-8 w-8 place-items-center rounded-lg text-ink-600 hover:bg-ink-100"
-                        title={ep.active ? "Pause" : "Resume"}
-                      >
-                        <Power className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setRemoveEpTarget(ep)}
-                        className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {deliveries.length > 0 && (
-          <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-            <div className="border-b border-ink-100 px-5 py-3 text-xs font-bold uppercase tracking-widest text-ink-500">
-              Recent deliveries
-            </div>
+        <SectionCard padding="none">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
+              <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Event</th>
+                  <th className="px-5 py-3 font-semibold">URL</th>
+                  <th className="px-5 py-3 font-semibold">Events</th>
                   <th className="px-5 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 font-semibold">HTTP</th>
-                  <th className="px-5 py-3 font-semibold">Attempts</th>
-                  <th className="px-5 py-3 font-semibold">Time</th>
+                  <th className="px-5 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100 text-ink-800">
-                {deliveries.map((d) => (
-                  <tr key={d.id}>
-                    <td className="px-5 py-3 font-mono text-xs">{d.event}</td>
-                    <td className="px-5 py-3">
-                      <Badge variant={d.status === "SUCCESS" ? "success" : d.status === "FAILED" ? "danger" : "warning"}>
-                        {d.status}
-                      </Badge>
-                      {d.lastError && d.status !== "SUCCESS" && (
-                        <span className="ml-2 text-xs text-ink-400">{d.lastError.slice(0, 60)}</span>
-                      )}
+                {endpoints.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={4} className="p-0">
+                      <EmptyState
+                        compact
+                        icon={Plugs}
+                        tone="royal"
+                        title="No endpoints yet"
+                        description="Add one to receive txn / payout / top-up events."
+                      />
                     </td>
-                    <td className="px-5 py-3 text-ink-500">{d.responseCode ?? "—"}</td>
-                    <td className="px-5 py-3 text-ink-500">{d.attempts}</td>
-                    <td className="px-5 py-3 text-ink-500">{fmtDate(d.deliveredAt ?? d.createdAt)}</td>
+                  </tr>
+                )}
+                {endpoints.map((ep) => (
+                  <tr key={ep.id} className="transition-colors hover:bg-ink-50/40">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2 font-mono text-xs text-ink-900">
+                        <Webhook className="h-4 w-4 shrink-0 text-ink-400" />
+                        <span className="max-w-[320px] truncate">{ep.url}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {ep.events.map((e) => (
+                          <span key={e} className="rounded-full bg-ink-100 px-2 py-0.5 font-mono text-[10px] text-ink-600">{e}</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <StatusChip status={ep.active ? "ACTIVE" : "PAUSED"} size="sm" />
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => toggleEndpoint(ep)}
+                          className="grid h-8 w-8 place-items-center rounded-xl text-ink-600 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
+                          title={ep.active ? "Pause" : "Resume"}
+                          aria-label={ep.active ? "Pause endpoint" : "Resume endpoint"}
+                        >
+                          <Power className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setRemoveEpTarget(ep)}
+                          className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 ring-1 ring-inset ring-rose-100 transition hover:bg-rose-50 focus-energy"
+                          title="Delete"
+                          aria-label="Delete endpoint"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </SectionCard>
+
+        {deliveries.length > 0 && (
+          <SectionCard padding="none" title="Recent deliveries" description="Latest attempts across all endpoints.">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
+                  <tr>
+                    <th className="px-5 py-3 font-semibold">Event</th>
+                    <th className="px-5 py-3 font-semibold">Status</th>
+                    <th className="px-5 py-3 font-semibold">HTTP</th>
+                    <th className="px-5 py-3 font-semibold">Attempts</th>
+                    <th className="px-5 py-3 font-semibold">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-100 text-ink-800">
+                  {deliveries.map((d) => (
+                    <tr key={d.id}>
+                      <td className="px-5 py-3 font-mono text-xs">{d.event}</td>
+                      <td className="px-5 py-3">
+                        <StatusChip
+                          status={d.status}
+                          variant={d.status === "SUCCESS" ? "success" : d.status === "FAILED" ? "danger" : "warning"}
+                          label={d.status}
+                          size="sm"
+                        />
+                        {d.lastError && d.status !== "SUCCESS" && (
+                          <span className="ml-2 text-xs text-ink-400">{d.lastError.slice(0, 60)}</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 tabular-nums text-ink-500">{d.responseCode ?? "—"}</td>
+                      <td className="px-5 py-3 tabular-nums text-ink-500">{d.attempts}</td>
+                      <td className="px-5 py-3 text-ink-500">{fmtDate(d.deliveredAt ?? d.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </SectionCard>
         )}
       </section>
 
-      <div className="rounded-2xl border border-ink-100 bg-ink-900 p-6 font-mono text-xs text-ink-100">
+      <div className="overflow-x-auto rounded-3xl bg-ink-950 p-6 font-mono text-xs text-ink-100 ring-1 ring-white/10">
         <div className="mb-2 text-ink-300"># Example: check wallet balance</div>
         <div className="text-emerald-300">curl {typeof window !== "undefined" ? window.location.origin : ""}/api/v1/wallet \</div>
         <div>  -H &quot;Authorization: Bearer ngp_live_xxxx.your_secret&quot;</div>

@@ -92,7 +92,7 @@ function fmtCutoffHour(h: number): string {
 }
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 function fmtRate(type: string, value: number) {
   return type === "PERCENT" ? `${(value * 100).toFixed(2)}%` : formatINR(value);

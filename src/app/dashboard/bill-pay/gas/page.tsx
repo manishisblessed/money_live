@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default function GasBillPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Flame}
         title="Gas Bill Payment"

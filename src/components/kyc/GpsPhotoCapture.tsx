@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Loader2, CheckCircle2, RefreshCw, MapPin, FileText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
+import { Notice } from "@/components/dashboard/services/ServiceLayout";
 import { CameraPermissionGuide } from "@/components/kyc/CameraPermissionGuide";
 import { extractGpsFromFile } from "@/lib/gps";
 import {
@@ -389,35 +392,33 @@ export function GpsPhotoCapture({
 
   return (
     <div
-      className={`rounded-xl border p-4 ${
-        uploaded ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"
+      className={`rounded-3xl p-5 ring-1 transition ${
+        uploaded ? "bg-accent-50/70 ring-accent-200" : "bg-white ring-ink-200"
       }`}
     >
-      <div className="mb-1 flex items-center gap-2">
-        {uploaded ? (
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
-        ) : (
-          <FileText className="h-5 w-5 shrink-0 text-ink-400" />
-        )}
-        <p className="text-sm font-medium text-ink-900">
-          {label}{" "}
+      <div className="mb-1 flex items-center gap-3">
+        <IconTile tone={uploaded ? "accent" : "brand"} size="sm">
+          {uploaded ? <CheckCircle2 className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+        </IconTile>
+        <p className="flex flex-wrap items-center gap-1.5 font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
+          {label}
           {required ? (
-            <span className="text-rose-500">*</span>
+            <span className="text-coral-500">*</span>
           ) : (
-            <span className="text-xs text-ink-400">(Optional)</span>
+            <span className="text-xs font-normal text-ink-400">(Optional)</span>
           )}
-          <span className="ml-1 inline-flex items-center gap-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+          <Badge variant="warning" size="sm">
             <MapPin className="h-2.5 w-2.5" /> GPS
-          </span>
+          </Badge>
         </p>
       </div>
       {description && !uploaded && (
-        <p className="mb-2 pl-7 text-xs text-ink-500">{description}</p>
+        <p className="mb-2 pl-11 text-xs text-ink-500">{description}</p>
       )}
 
       {/* Viewport / preview */}
       {(showCameraViewport || showPreviewImage) && (
-        <div className="relative mx-auto my-3 aspect-[3/4] w-full max-w-xs overflow-hidden rounded-2xl border border-ink-200 bg-ink-900/90">
+        <div className="relative mx-auto my-3 aspect-[3/4] w-full max-w-xs overflow-hidden rounded-3xl bg-ink-950 shadow-energy-sm ring-1 ring-ink-200">
           {showCameraViewport && (
             <video
               ref={videoRef}
@@ -456,27 +457,26 @@ export function GpsPhotoCapture({
 
       {/* Captured location proof */}
       {gpsFix && (phase === "captured" || uploaded) && (
-        <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
-          <span>
+        <Notice tone="success" icon={<MapPin className="h-3.5 w-3.5" />} className="mb-3 text-xs">
+          <span className="font-mono">
             Location captured: {gpsFix.latitude.toFixed(5)}, {gpsFix.longitude.toFixed(5)}
             {gpsFix.accuracy ? ` (±${gpsFix.accuracy}m)` : ""}
           </span>
-        </div>
+        </Notice>
       )}
 
       {error && (
-        <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+        <Notice tone="danger" className="mb-3 text-xs">
           {error}
-        </div>
+        </Notice>
       )}
 
       {((phase === "error" && errorKind === "permission") ||
         (phase === "idle" && permState === "denied")) && (
         <div className="mb-3 space-y-3">
           {/* Zero-permission escape hatch — works even in WebViews. */}
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-            <p className="mb-2 text-xs text-emerald-800">
+          <div className="rounded-2xl bg-accent-50 p-3 ring-1 ring-accent-200">
+            <p className="mb-2 text-xs text-accent-800">
               <strong>No problem —</strong> you can take the photo with your
               phone&apos;s camera app instead. Location must still be enabled.
             </p>
@@ -500,15 +500,12 @@ export function GpsPhotoCapture({
 
       {/* Priming: set expectations before the permission prompts. */}
       {!uploaded && phase === "idle" && permState !== "denied" && (
-        <div className="mb-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50/60 p-3 text-xs text-ink-600">
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-ink-400" />
-          <span>
-            This photo must be taken <strong>live</strong>. Your browser will ask
-            for <strong>camera</strong> and <strong>location</strong> access —
-            please tap <strong>Allow</strong> for both. Your location is recorded
-            at the moment you take the photo.
-          </span>
-        </div>
+        <Notice tone="info" icon={<MapPin className="h-4 w-4" />} className="mb-3 text-xs">
+          This photo must be taken <strong>live</strong>. Your browser will ask
+          for <strong>camera</strong> and <strong>location</strong> access —
+          please tap <strong>Allow</strong> for both. Your location is recorded
+          at the moment you take the photo.
+        </Notice>
       )}
 
       {/* Native camera-app input. */}
@@ -524,13 +521,13 @@ export function GpsPhotoCapture({
       {/* Controls */}
       {uploaded ? (
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-emerald-700">Uploaded successfully</p>
+          <p className="text-xs font-medium text-accent-700">Uploaded successfully</p>
           {onRemove && (
             <button
               type="button"
               onClick={handleRemove}
               disabled={removing || uploading}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-rose-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-coral-600 ring-1 ring-coral-200 transition hover:bg-coral-50 disabled:opacity-50 focus-energy"
             >
               {removing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

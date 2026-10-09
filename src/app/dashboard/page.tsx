@@ -70,7 +70,7 @@ export default function DashboardHomePage() {
   if (!canSeeBusinessOverview && !isNetworkTier && !isRetailer) return overview;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {canSeeBusinessOverview && <TodaysBusinessOverview />}
       {isNetworkTier && <NetworkOverview />}
       {overview}

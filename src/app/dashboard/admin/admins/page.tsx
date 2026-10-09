@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Label } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { PillTabs, Stagger, StaggerItem } from "@/components/dashboard/patterns";
 import { ASSIGNABLE_ADMIN_TABS } from "@/lib/roles";
 import { generateRandomPassword } from "@/lib/utils";
 
@@ -240,21 +242,21 @@ export default function ManageAdminsPage() {
         <div className="flex justify-end gap-1">
           <button
             onClick={() => setEditingAdmin(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-brand-700 hover:bg-brand-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-brand-700 hover:bg-brand-50"
             title="Edit permissions"
           >
             <Settings2 className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleResetPassword(r, false)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-700 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-700 hover:bg-amber-50"
             title="Reset password"
           >
             <KeyRound className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleReset2fa(r, false)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-700 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-700 hover:bg-amber-50"
             title="Reset 2FA"
           >
             <Smartphone className="h-4 w-4" />
@@ -262,7 +264,7 @@ export default function ManageAdminsPage() {
           {r.status === "ACTIVE" ? (
             <button
               onClick={() => handleAction(r.id, "suspend")}
-              className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
               title="Suspend"
             >
               <ShieldOff className="h-4 w-4" />
@@ -270,7 +272,7 @@ export default function ManageAdminsPage() {
           ) : (
             <button
               onClick={() => handleAction(r.id, "activate")}
-              className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-emerald-700 hover:bg-emerald-50"
               title="Reactivate"
             >
               <ShieldCheck className="h-4 w-4" />
@@ -278,7 +280,7 @@ export default function ManageAdminsPage() {
           )}
           <button
             onClick={() => setDeleteTarget(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
             title="Delete"
           >
             <Trash2 className="h-4 w-4" />
@@ -334,14 +336,14 @@ export default function ManageAdminsPage() {
         <div className="flex justify-end gap-1">
           <button
             onClick={() => handleResetPassword(r, true)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-700 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-700 hover:bg-amber-50"
             title="Reset password"
           >
             <KeyRound className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleReset2fa(r, true)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-700 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-700 hover:bg-amber-50"
             title="Reset 2FA"
           >
             <Smartphone className="h-4 w-4" />
@@ -349,7 +351,7 @@ export default function ManageAdminsPage() {
           {r.status === "ACTIVE" ? (
             <button
               onClick={() => handleMasterAction(r.id, "suspend")}
-              className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
               title="Suspend"
             >
               <ShieldOff className="h-4 w-4" />
@@ -357,7 +359,7 @@ export default function ManageAdminsPage() {
           ) : (
             <button
               onClick={() => handleMasterAction(r.id, "activate")}
-              className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-emerald-700 hover:bg-emerald-50"
               title="Reactivate"
             >
               <ShieldCheck className="h-4 w-4" />
@@ -365,7 +367,7 @@ export default function ManageAdminsPage() {
           )}
           <button
             onClick={() => setDeleteMasterTarget(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
             title="Delete"
           >
             <Trash2 className="h-4 w-4" />
@@ -378,7 +380,7 @@ export default function ManageAdminsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Master Admin"
+        eyebrow="Admin · People"
         title="Manage Admins"
         description="Create and manage admin accounts. Master admins have full platform access; regular admins can be scoped to specific tabs."
         actions={
@@ -395,38 +397,23 @@ export default function ManageAdminsPage() {
       />
 
       {/* Tab switcher */}
-      <div className="flex gap-1 rounded-xl border border-ink-100 bg-white p-1 w-fit">
-        <button
-          onClick={() => setTab("admins")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-            tab === "admins"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "text-ink-600 hover:bg-ink-50"
-          }`}
-        >
-          Admins ({rows.length})
-        </button>
-        <button
-          onClick={() => setTab("master-admins")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-            tab === "master-admins"
-              ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm"
-              : "text-ink-600 hover:bg-ink-50"
-          }`}
-        >
-          <span className="flex items-center gap-1.5">
-            <Star className="h-3.5 w-3.5" /> Master Admins ({masterRows.length})
-          </span>
-        </button>
-      </div>
+      <PillTabs
+        aria-label="Admin type"
+        value={tab}
+        onChange={(v) => setTab(v)}
+        tabs={[
+          { value: "admins", label: "Admins", count: rows.length },
+          { value: "master-admins", label: "Master admins", icon: Star, count: masterRows.length },
+        ]}
+      />
 
       {tab === "admins" ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Stat label="Total admins" value={stats.total} tone="brand" />
-            <Stat label="Active" value={stats.active} tone="success" />
-            <Stat label="Suspended" value={stats.suspended} tone="warning" />
-          </div>
+          <Stagger className="grid gap-4 sm:grid-cols-3">
+            <StaggerItem><StatCard label="Total admins" value={String(stats.total)} icon={Settings2} accent="violet" /></StaggerItem>
+            <StaggerItem><StatCard label="Active" value={String(stats.active)} icon={ShieldCheck} accent="emerald" /></StaggerItem>
+            <StaggerItem><StatCard label="Suspended" value={String(stats.suspended)} icon={ShieldOff} accent="accent" /></StaggerItem>
+          </Stagger>
 
           {showNew && (
             <NewAdminForm
@@ -461,10 +448,10 @@ export default function ManageAdminsPage() {
         </>
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Stat label="Total master admins" value={masterStats.total} tone="brand" />
-            <Stat label="Active" value={masterStats.active} tone="success" />
-          </div>
+          <Stagger className="grid gap-4 sm:grid-cols-2">
+            <StaggerItem><StatCard label="Total master admins" value={String(masterStats.total)} icon={Crown} accent="violet" /></StaggerItem>
+            <StaggerItem><StatCard label="Active" value={String(masterStats.active)} icon={ShieldCheck} accent="emerald" /></StaggerItem>
+          </Stagger>
 
           {showNewMaster && (
             <NewMasterAdminForm
@@ -823,7 +810,7 @@ function NewMasterAdminForm({
         </div>
       </div>
 
-      <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+      <div className="mt-5 rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-4 py-3 text-xs text-amber-900">
         <strong>Note:</strong> Master admins always have full access to every tab and can
         create other admins and manage users. Only grant this level to fully trusted personnel.
       </div>
@@ -976,7 +963,7 @@ function CredentialsDialog({
             <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
               {isMaster ? "Master admin created" : "Admin created"}
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
               {admin.name}
             </h3>
             <p className="mt-1 text-xs text-ink-600">
@@ -985,7 +972,7 @@ function CredentialsDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -1001,7 +988,7 @@ function CredentialsDialog({
               <button
                 type="button"
                 onClick={() => copy(admin.email, "email")}
-                className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                 title="Copy email"
               >
                 {copied === "email" ? (
@@ -1021,7 +1008,7 @@ function CredentialsDialog({
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title={showPwd ? "Hide" : "Show"}
                 >
                   {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -1029,7 +1016,7 @@ function CredentialsDialog({
                 <button
                   type="button"
                   onClick={() => copy(password, "pwd")}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title="Copy password"
                 >
                   {copied === "pwd" ? (
@@ -1041,7 +1028,7 @@ function CredentialsDialog({
               </div>
             }
           />
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+          <div className="rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-4 py-3 text-xs text-amber-900">
             For security, this password will{" "}
             <strong>not be shown again</strong>. Copy it now and send it to the
             {" "}{roleLabel} via a secure channel.
@@ -1094,7 +1081,7 @@ function ResetPasswordDialog({
             <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">
               Password reset
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">{name}</h3>
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{name}</h3>
             <p className="mt-1 text-xs text-ink-600">
               A new password was generated for this {roleLabel}. All existing sessions
               have been signed out.
@@ -1102,7 +1089,7 @@ function ResetPasswordDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -1119,7 +1106,7 @@ function ResetPasswordDialog({
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title={showPwd ? "Hide" : "Show"}
                 >
                   {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -1127,7 +1114,7 @@ function ResetPasswordDialog({
                 <button
                   type="button"
                   onClick={copy}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
                   title="Copy password"
                 >
                   {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
@@ -1135,7 +1122,7 @@ function ResetPasswordDialog({
               </div>
             }
           />
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+          <div className="rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-4 py-3 text-xs text-amber-900">
             For security, this password will <strong>not be shown again</strong>. Copy it
             now and share it with the {roleLabel} via a secure channel.
           </div>
@@ -1168,7 +1155,7 @@ function Field({
 }) {
   return (
     <div className="rounded-xl border border-ink-100 bg-white px-4 py-3">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
         {label}
       </p>
       <div className="mt-1 flex items-center justify-between gap-3">
@@ -1181,24 +1168,3 @@ function Field({
   );
 }
 
-function Stat({
-  label,
-  value,
-  tone
-}: {
-  label: string;
-  value: number;
-  tone: "brand" | "success" | "warning";
-}) {
-  const map = {
-    brand: "from-violet-600 to-violet-800 text-violet-50",
-    success: "from-emerald-500 to-emerald-700 text-emerald-50",
-    warning: "from-amber-500 to-amber-700 text-amber-50"
-  };
-  return (
-    <div className={`rounded-2xl bg-gradient-to-br ${map[tone]} p-5 shadow-soft`}>
-      <p className="text-xs font-bold uppercase tracking-widest opacity-90">{label}</p>
-      <p className="mt-2 font-display text-3xl font-bold">{value}</p>
-    </div>
-  );
-}

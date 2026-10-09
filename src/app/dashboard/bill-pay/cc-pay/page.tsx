@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default function RechargekitCCPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={CreditCard}
         title="Credit Card Bill Payment-2"
-        description="Pay credit card bills directly — enter the full card number, bank details, and amount. Charges are shown before confirmation."
+        description="Pay credit card bills directly â€” enter the full card number, bank details, and amount. Charges are shown before confirmation."
       />
       <RechargekitCCForm />
     </div>

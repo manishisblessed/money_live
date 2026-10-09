@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { PillTabs, Stagger, StaggerItem } from "@/components/dashboard/patterns";
 import { formatINR, formatNumber } from "@/lib/utils";
 import {
   RefreshCw,
@@ -119,7 +120,7 @@ const LIEN_REASON_CODES = [
 ] as const;
 
 const inputCls =
-  "w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "w-full rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 /* ---------------------------------------------------------------- page */
 
@@ -179,34 +180,39 @@ export default function WalletOpsPage() {
       />
 
       {/* Cumulative liability */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-transparent bg-gradient-to-br from-brand-600 to-violet-600 p-4 text-white shadow-soft">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
-            System liability (all wallets)
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold">
-            {money(cumulative?.systemTotal ?? 0)}
-          </p>
-          <p className="text-[11px] text-white/70">
-            across {formatNumber(cumulative?.walletCount ?? 0)} user wallets
-          </p>
-        </div>
-        <MiniStat label="Primary wallets" value={money(cumulative?.primaryTotal ?? 0)} />
-        <MiniStat label="AEPS wallets" value={money(cumulative?.aepsTotal ?? 0)} />
-        <MiniStat label="On hold (in-flight)" value={money(cumulative?.heldTotal ?? 0)} />
-        <MiniStat label="Frozen (liens)" value={money(cumulative?.lienTotal ?? 0)} />
-      </div>
+      <Stagger className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <StaggerItem className="sm:col-span-2 xl:col-span-2 xl:row-span-2">
+          <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-3xl bg-ink-950 p-5 text-white ring-1 ring-white/10 shadow-energy-sm">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-energy-gradient opacity-40 blur-3xl" aria-hidden />
+            <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">
+              System liability (all wallets)
+            </p>
+            <div className="relative mt-6">
+              <p className="font-display text-3xl font-semibold tabular-nums tracking-[-0.02em] sm:text-4xl">
+                {money(cumulative?.systemTotal ?? 0)}
+              </p>
+              <p className="mt-1 text-xs text-white/60">
+                across {formatNumber(cumulative?.walletCount ?? 0)} user wallets
+              </p>
+            </div>
+          </div>
+        </StaggerItem>
+        <StaggerItem className="xl:col-span-2"><MiniStat label="Primary wallets" value={money(cumulative?.primaryTotal ?? 0)} /></StaggerItem>
+        <StaggerItem className="xl:col-span-2"><MiniStat label="AEPS wallets" value={money(cumulative?.aepsTotal ?? 0)} /></StaggerItem>
+        <StaggerItem className="xl:col-span-2"><MiniStat label="On hold (in-flight)" value={money(cumulative?.heldTotal ?? 0)} /></StaggerItem>
+        <StaggerItem className="xl:col-span-2"><MiniStat label="Frozen (liens)" value={money(cumulative?.lienTotal ?? 0)} /></StaggerItem>
+      </Stagger>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {(cumulative?.tiers ?? []).map((t) => (
-          <div key={t.role} className="rounded-2xl border border-ink-100 bg-white p-4">
+          <div key={t.role} className="rounded-3xl bg-white p-4 ring-1 ring-ink-100 shadow-sm">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
                 {ROLE_LABEL[t.role] ?? t.role}
               </p>
-              <Badge>{formatNumber(t.users)}</Badge>
+              <Badge size="sm">{formatNumber(t.users)}</Badge>
             </div>
-            <p className="mt-1 font-display text-lg font-bold text-ink-900">{money(t.total)}</p>
+            <p className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{money(t.total)}</p>
             <p className="text-[11px] text-ink-500">
               Primary {money(t.primary)} · AEPS {money(t.aeps)}
             </p>
@@ -215,29 +221,20 @@ export default function WalletOpsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-ink-100">
-        {(
-          [
-            ["balances", "User-wise balances"],
-            ["payin", "Live payin"],
-            ["topups", "Wallet top-ups"],
-            ["operate", "Push / Pull"],
-            ["liens", "Liens"],
-            ["history", "Operations history"],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold transition ${
-              tab === key
-                ? "border-brand-600 text-brand-700"
-                : "border-transparent text-ink-500 hover:text-ink-800"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="overflow-x-auto pb-1">
+        <PillTabs
+          aria-label="Wallet operations sections"
+          value={tab}
+          onChange={(v) => setTab(v)}
+          tabs={[
+            { value: "balances", label: "User-wise balances" },
+            { value: "payin", label: "Live payin" },
+            { value: "topups", label: "Wallet top-ups" },
+            { value: "operate", label: "Push / Pull" },
+            { value: "liens", label: "Liens" },
+            { value: "history", label: "Operations history" },
+          ]}
+        />
       </div>
 
       {tab === "balances" && <UserBalancesTab money={money} />}
@@ -267,9 +264,9 @@ export default function WalletOpsPage() {
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">{label}</p>
-      <p className="mt-1 font-display text-2xl font-bold text-ink-900">{value}</p>
+    <div className="flex h-full flex-col justify-between rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
+      <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{value}</p>
     </div>
   );
 }
@@ -381,21 +378,18 @@ function PayinTab({ money }: { money: (n: number) => string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex gap-1 rounded-xl border border-ink-100 bg-white p-1">
-          {PAYIN_PERIODS.map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setPeriod(key)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                period === key ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-800"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <PillTabs
+          aria-label="Payin period"
+          size="sm"
+          value={period}
+          onChange={(v) => setPeriod(v)}
+          tabs={PAYIN_PERIODS.map(([key, label]) => ({ value: key as string, label }))}
+        />
         <div className="ml-auto flex items-center gap-2 text-xs text-ink-400">
-          <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping-soft" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
           Live · auto-refreshes every 30s
         </div>
         <Button variant="outline" size="sm" onClick={load} disabled={loading}>
@@ -405,14 +399,14 @@ function PayinTab({ money }: { money: (n: number) => string }) {
 
       {/* Headline cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-2xl border border-transparent bg-gradient-to-br from-brand-600 to-violet-600 p-4 text-white shadow-soft">
+        <div className="rounded-3xl bg-ink-950 p-5 text-white ring-1 ring-white/10 shadow-energy-sm">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-white/80" />
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
               Business {periodLabel}
             </p>
           </div>
-          <p className="mt-1 font-display text-2xl font-bold">{money(data?.totalAmount ?? 0)}</p>
+          <p className="mt-1 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em]">{money(data?.totalAmount ?? 0)}</p>
           <p className="text-[11px] text-white/70">
             {formatNumber(data?.totalCount ?? 0)} inbound transactions
           </p>
@@ -434,7 +428,7 @@ function PayinTab({ money }: { money: (n: number) => string }) {
           const share =
             data && data.totalAmount > 0 ? Math.round((r.amount / data.totalAmount) * 100) : 0;
           return (
-            <div key={r.rail} className="rounded-2xl border border-ink-100 bg-white p-4">
+            <div key={r.rail} className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
               <div className="flex items-center justify-between">
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${accent} text-white`}
@@ -443,10 +437,10 @@ function PayinTab({ money }: { money: (n: number) => string }) {
                 </div>
                 <Badge>{formatNumber(r.count)}</Badge>
               </div>
-              <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-ink-500">
+              <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
                 {r.label}
               </p>
-              <p className="mt-0.5 font-display text-xl font-bold text-ink-900">{money(r.amount)}</p>
+              <p className="mt-0.5 font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">{money(r.amount)}</p>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-100">
                 <div
                   className={`h-full rounded-full bg-gradient-to-r ${accent}`}
@@ -504,7 +498,7 @@ function TopupsTab({ money }: { money: (n: number) => string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex gap-1 rounded-xl border border-ink-100 bg-white p-1">
+        <div className="flex gap-1 rounded-2xl bg-white p-1 ring-1 ring-ink-100 shadow-sm">
           {PAYIN_PERIODS.map(([key, label]) => (
             <button
               key={key}
@@ -531,7 +525,7 @@ function TopupsTab({ money }: { money: (n: number) => string }) {
               Wallet top-ups {periodLabel}
             </p>
           </div>
-          <p className="mt-1 font-display text-2xl font-bold">{money(data?.totalAmount ?? 0)}</p>
+          <p className="mt-1 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em]">{money(data?.totalAmount ?? 0)}</p>
           <p className="text-[11px] text-white/70">{formatNumber(data?.totalCount ?? 0)} top-ups</p>
         </div>
         <MiniStat label="Agents topped up" value={formatNumber(data?.byUser.length ?? 0)} />
@@ -542,7 +536,7 @@ function TopupsTab({ money }: { money: (n: number) => string }) {
       </div>
 
       {/* By user */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-bold text-ink-900">Top-ups {periodLabel} · by user</p>
           {(data?.rows.length ?? 0) > 0 && (
@@ -874,14 +868,14 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
 
   return (
     <div className="grid gap-4 lg:grid-cols-5">
-      <div className="space-y-4 rounded-2xl border border-ink-100 bg-white p-5 lg:col-span-3">
+      <div className="space-y-4 rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm lg:col-span-3">
         {/* Target user */}
         <div>
-          <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+          <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
             Target user
           </label>
           {selected ? (
-            <div className="mt-1.5 flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-3 py-2.5">
+            <div className="mt-1.5 flex items-center justify-between rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200 px-3 py-2.5">
               <div>
                 <p className="text-sm font-semibold text-ink-900">
                   {selected.name}
@@ -951,7 +945,7 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
         {/* Direction + wallet */}
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Operation
             </label>
             <div className="mt-1.5 grid grid-cols-2 gap-2">
@@ -978,7 +972,7 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Wallet
             </label>
             <select
@@ -994,7 +988,7 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Amount (₹)
             </label>
             <input
@@ -1008,7 +1002,7 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
             />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Reason code
             </label>
             <select
@@ -1026,7 +1020,7 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
         </div>
 
         <div>
-          <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+          <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
             Remarks (mandatory, audit-logged)
           </label>
           <textarea
@@ -1045,7 +1039,7 @@ function OperateTab({ onDone }: { onDone: (msg: string, ok: boolean) => void }) 
       </div>
 
       <div className="space-y-3 lg:col-span-2">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <div className="rounded-3xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-5">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-amber-600" />
             <p className="text-sm font-bold text-amber-800">Money-safety rules</p>
@@ -1495,13 +1489,13 @@ function LiensTab({
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-5">
-        <div className="space-y-4 rounded-2xl border border-ink-100 bg-white p-5 lg:col-span-3">
+        <div className="space-y-4 rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm lg:col-span-3">
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Target user
             </label>
             {selected ? (
-              <div className="mt-1.5 flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-3 py-2.5">
+              <div className="mt-1.5 flex items-center justify-between rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200 px-3 py-2.5">
                 <div>
                   <p className="text-sm font-semibold text-ink-900">
                     {selected.name}
@@ -1564,7 +1558,7 @@ function LiensTab({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+              <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
                 Lien amount (₹)
               </label>
               <input
@@ -1578,7 +1572,7 @@ function LiensTab({
               />
             </div>
             <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+              <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
                 Reason code
               </label>
               <select
@@ -1594,7 +1588,7 @@ function LiensTab({
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Transaction ID (optional — links the lien to a transaction)
             </label>
             <input
@@ -1606,7 +1600,7 @@ function LiensTab({
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Remarks (mandatory, audit-logged)
             </label>
             <textarea
@@ -1629,7 +1623,7 @@ function LiensTab({
         </div>
 
         <div className="space-y-3 lg:col-span-2">
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <div className="rounded-3xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-5">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-amber-600" />
               <p className="text-sm font-bold text-amber-800">How liens work</p>

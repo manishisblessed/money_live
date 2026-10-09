@@ -25,7 +25,7 @@ type Agreement = {
 };
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 function prettyBytes(n: number | null): string {
   if (!n) return "—";
@@ -152,7 +152,7 @@ export default function AgreementsVaultPage() {
       />
 
       {error && (
-        <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div>
+        <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200">{error}</div>
       )}
 
       <div className="flex gap-2">

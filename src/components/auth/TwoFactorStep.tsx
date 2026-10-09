@@ -3,9 +3,18 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { ShieldCheck, ArrowRight, AlertCircle, KeyRound, RotateCcw } from "lucide-react";
+import {
+  ShieldCheck,
+  ArrowRight,
+  Key,
+  ArrowCounterClockwise,
+  DeviceMobile,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { FloatingInput } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { PinInput } from "@/components/security/PinInput";
+import { AuthAlert, AuthCardHeader, AuthLinksRow } from "@/components/auth/AuthCard";
 
 interface TwoFactorStepProps {
   tempToken: string;
@@ -87,99 +96,125 @@ export function TwoFactorStep({ tempToken, userName, userEmail, onBack }: TwoFac
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-600 text-white">
-          <ShieldCheck className="h-5 w-5" />
-        </span>
-        <div>
-          <h2 className="heading-md">Two-factor authentication</h2>
-          <p className="text-sm text-ink-500">
-            Hi {userName}, enter the code from your authenticator app.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AuthCardHeader
+        as="h2"
+        eyebrow="Verify it's you"
+        title="Two-factor check"
+        description={
+          <>
+            Hi {userName || "there"} —{" "}
+            {useBackup
+              ? "enter one of your saved backup codes."
+              : "enter the 6-digit code from your authenticator app."}
+            {userEmail ? (
+              <>
+                {" "}
+                Signing in as <span className="font-semibold text-ink-700">{userEmail}</span>.
+              </>
+            ) : null}
+          </>
+        }
+        icon={<IconTile icon={ShieldCheck} tone="accent" size="lg" />}
+      />
 
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{error}</span>
-          {remaining !== null && remaining > 0 && (
-            <span className="ml-auto text-xs font-medium">
-              {remaining} attempt{remaining !== 1 ? "s" : ""} left
-            </span>
-          )}
-        </div>
-      )}
+      <AuthAlert
+        message={error || null}
+        aside={
+          remaining !== null && remaining > 0
+            ? `${remaining} attempt${remaining !== 1 ? "s" : ""} left`
+            : undefined
+        }
+      />
 
-      {remaining === 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Too many failed attempts. Please start over.
-          <button
-            onClick={onBack}
-            className="ml-2 font-semibold underline"
-          >
-            Back to login
-          </button>
-        </div>
-      )}
+      <AuthAlert
+        tone="warning"
+        message={
+          remaining === 0 ? (
+            <>
+              Too many failed attempts. Please start over.{" "}
+              <button
+                type="button"
+                onClick={onBack}
+                className="font-semibold underline underline-offset-2"
+              >
+                Back to login
+              </button>
+            </>
+          ) : null
+        }
+      />
 
-      <form className="space-y-4" onSubmit={onSubmit}>
-        <div>
-          <Label htmlFor="2fa-code">
-            {useBackup ? "Backup code" : "6-digit code"}
-          </Label>
+      <form className="space-y-5" onSubmit={onSubmit}>
+        {useBackup ? (
           <div className="relative">
-            <Input
+            <FloatingInput
               ref={inputRef}
               id="2fa-code"
-              inputMode={useBackup ? "text" : "numeric"}
-              maxLength={useBackup ? 9 : 6}
-              placeholder={useBackup ? "xxxx-xxxx" : "000000"}
+              label="Backup code"
+              inputMode="text"
+              maxLength={9}
               value={code}
-              onChange={(e) => {
-                if (useBackup) {
-                  setCode(e.target.value);
-                } else {
-                  const val = e.target.value.replace(/\D/g, "");
-                  setCode(val);
-                  if (val.length === 6) verify(val);
-                }
-              }}
+              onChange={(e) => setCode(e.target.value)}
               disabled={loading}
               autoComplete="one-time-code"
-              className={useBackup ? "" : "text-center text-lg font-mono tracking-[0.3em]"}
+              hint="Format: xxxx-xxxx · each code works once"
               required
             />
-            {!loading && (
-              <KeyRound className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-            )}
-          </div>
-          {!useBackup && !loading && (
-            <p className="mt-1 text-[11px] text-ink-500">
-              Open Google Authenticator, Authy, or Microsoft Authenticator
-            </p>
-          )}
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center gap-2.5 py-3 text-sm font-medium text-brand-700">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
-            Verifying...
+            <Key
+              size={18}
+              weight="duotone"
+              className="pointer-events-none absolute right-4 top-7 -translate-y-1/2 text-ink-300"
+              aria-hidden
+            />
           </div>
         ) : (
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={remaining === 0 || (!useBackup && code.length !== 6)}
-          >
-            Verify & sign in <ArrowRight className="h-4 w-4" />
-          </Button>
+          <div>
+            <label
+              htmlFor="2fa-code"
+              className="mb-3 block text-center text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500"
+            >
+              6-digit code
+            </label>
+            <PinInput
+              id="2fa-code"
+              length={6}
+              masked={false}
+              value={code}
+              disabled={loading}
+              error={Boolean(error)}
+              onChange={(val) => {
+                setCode(val);
+                if (val.length === 6) verify(val);
+              }}
+            />
+            {!loading && (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-ink-400">
+                <DeviceMobile size={14} weight="duotone" aria-hidden />
+                Google Authenticator, Authy or Microsoft Authenticator
+              </p>
+            )}
+          </div>
         )}
+
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          isLoading={loading}
+          disabled={remaining === 0 || (!useBackup && code.length !== 6)}
+        >
+          {loading ? (
+            "Verifying…"
+          ) : (
+            <>
+              Verify &amp; sign in <ArrowRight size={16} weight="bold" aria-hidden />
+            </>
+          )}
+        </Button>
       </form>
 
-      <div className="flex items-center justify-between text-xs">
+      <AuthLinksRow>
         <button
           type="button"
           onClick={() => {
@@ -188,7 +223,7 @@ export function TwoFactorStep({ tempToken, userName, userEmail, onBack }: TwoFac
             setError("");
           }}
           disabled={loading}
-          className="font-medium text-brand-700 hover:underline disabled:opacity-50"
+          className="focus-energy rounded-lg font-semibold text-brand-700 transition hover:underline disabled:opacity-50"
         >
           {useBackup ? "Use authenticator app" : "Use a backup code"}
         </button>
@@ -197,12 +232,12 @@ export function TwoFactorStep({ tempToken, userName, userEmail, onBack }: TwoFac
           type="button"
           onClick={onBack}
           disabled={loading}
-          className="flex items-center gap-1 font-medium text-ink-500 hover:text-ink-900 disabled:opacity-50"
+          className="focus-energy inline-flex items-center gap-1.5 rounded-lg font-medium text-ink-500 transition hover:text-ink-900 disabled:opacity-50"
         >
-          <RotateCcw className="h-3 w-3" />
+          <ArrowCounterClockwise size={13} weight="bold" aria-hidden />
           Start over
         </button>
-      </div>
+      </AuthLinksRow>
     </div>
   );
 }

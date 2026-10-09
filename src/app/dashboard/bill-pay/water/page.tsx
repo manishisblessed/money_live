@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default function WaterBillPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Droplets}
         title="Water Bill Payment"

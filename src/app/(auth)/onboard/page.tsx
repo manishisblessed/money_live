@@ -26,12 +26,16 @@ import {
   Send,
   Clock,
   XCircle,
-  Camera,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { Input, Label } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { Badge } from "@/components/ui/Badge";
+import { PinInput } from "@/components/security/PinInput";
+import { AuthAlert, AuthCard } from "@/components/auth/AuthCard";
+import { StepPanels, StepRail } from "@/components/auth/StepRail";
 import { namesMatch } from "@/lib/utils";
 import { extractGpsFromFile } from "@/lib/gps";
 import { LivenessVideoCapture } from "@/components/kyc/LivenessVideoCapture";
@@ -112,15 +116,20 @@ const INDIAN_STATES = [
 // window.opener/postMessage are unreliable).
 const DIGILOCKER_STORAGE_KEY = "ngp_digilocker_pending";
 
+function LoadingCard() {
+  return (
+    <AuthCard size="lg" className="grid min-h-[18rem] place-items-center" aria-busy>
+      <div className="flex items-center gap-3 text-sm text-ink-500">
+        <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-energy-gradient" />
+        Loading your registration…
+      </div>
+    </AuthCard>
+  );
+}
+
 export default function OnboardPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-brand-50">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingCard />}>
       <OnboardContent />
     </Suspense>
   );
@@ -1218,57 +1227,63 @@ function OnboardContent() {
 
   // ----- Renders -----
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-brand-50">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-      </div>
-    );
+    return <LoadingCard />;
   }
 
   if (error && !invite) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-rose-50 p-4">
-        <div className="max-w-md rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-lg">
-          <AlertCircle className="mx-auto h-12 w-12 text-rose-500" />
-          <h2 className="mt-4 text-xl font-bold text-ink-900">Invalid Link</h2>
-          <p className="mt-2 text-ink-600">{error}</p>
-        </div>
-      </div>
+      <AuthCard className="text-center">
+        <IconTile tone="coral" size="xl" className="mx-auto rounded-3xl">
+          <AlertCircle className="h-7 w-7" />
+        </IconTile>
+        <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+          <span className="brand-dot" aria-hidden />
+          Registration
+        </p>
+        <h1 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+          This link isn&apos;t valid
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-500" aria-live="polite">
+          {error}
+        </p>
+      </AuthCard>
     );
   }
 
   if (done) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-emerald-50 p-4">
-        <div className="max-w-md rounded-2xl border border-emerald-200 bg-white p-8 text-center shadow-lg">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500 text-white">
-            <CheckCircle2 className="h-8 w-8" />
-          </div>
-          <h2 className="mt-4 text-xl font-bold text-ink-900">
-            Registration Complete!
-          </h2>
-          <p className="mt-2 text-ink-600">
-            {nameMismatch
-              ? "Your details have been submitted. Since some document names didn't match, your application will be reviewed by our team."
-              : "Your details have been submitted for admin approval."}
+      <AuthCard className="text-center">
+        <IconTile tone="accent" size="xl" className="mx-auto rounded-3xl">
+          <CheckCircle2 className="h-7 w-7" />
+        </IconTile>
+        <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+          <span className="brand-dot" aria-hidden />
+          Registration complete
+        </p>
+        <h1 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900 md:text-3xl">
+          You&apos;re all set — we&apos;re reviewing your details
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-ink-500">
+          {nameMismatch
+            ? "Your details have been submitted. Since some document names didn't match, your application will be reviewed by our team."
+            : "Your details have been submitted for admin approval."}
+        </p>
+        <div className="mt-5 rounded-2xl bg-amber-50 px-5 py-4 ring-1 ring-inset ring-amber-200">
+          <p className="font-display text-lg font-semibold tracking-[-0.01em] text-amber-800">
+            Approval within 48–72 working hours
           </p>
-          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-            <p className="text-lg font-bold text-amber-800">
-              Approval within 48–72 working hours
-            </p>
-            <p className="mt-1 text-sm text-amber-700">
-              You&apos;ll receive a notification once your account is approved.
-            </p>
-          </div>
-          <p className="mt-4 text-sm text-ink-500">
-            A confirmation email has been sent to <strong>{invite?.email}</strong> with
-            your login details.
+          <p className="mt-1 text-sm text-amber-700">
+            You&apos;ll receive a notification once your account is approved.
           </p>
-          <Button className="mt-6" onClick={() => router.push("/login")}>
-            Go to Login <ArrowRight className="h-4 w-4" />
-          </Button>
         </div>
-      </div>
+        <p className="mt-4 text-sm text-ink-500">
+          A confirmation email has been sent to{" "}
+          <strong className="text-ink-900">{invite?.email}</strong> with your login details.
+        </p>
+        <Button size="lg" className="mt-6 w-full" onClick={() => router.push("/login")}>
+          Go to login <ArrowRight className="h-4 w-4" />
+        </Button>
+      </AuthCard>
     );
   }
 
@@ -1287,52 +1302,36 @@ function OnboardContent() {
   const shopNameLocked = form.shopName.trim().length >= 2;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-brand-50 px-3 py-6 sm:px-4 sm:py-8">
-      <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <div className="mb-4 text-center sm:mb-6">
-          <h1 className="font-display text-xl font-bold text-ink-900 sm:text-2xl">
-            eMoney Registration
-          </h1>
-          <p className="mt-1 text-sm text-ink-600 sm:text-base">
-            Complete your onboarding as{" "}
-            <strong>{invite?.role.replace(/_/g, " ")}</strong>
-          </p>
-        </div>
-
-        {/* Stepper */}
-        <div className="mb-4 sm:mb-6">
-          <div className="flex items-center justify-center gap-0.5 overflow-x-auto px-1 sm:gap-1 sm:px-2">
-            {STEPS.map((s, i) => (
-              <div key={s.label} className="flex items-center gap-0.5 sm:gap-1">
-                <span
-                  className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-bold transition-colors sm:h-6 sm:w-6 sm:text-xs ${
-                    i < step
-                      ? "bg-emerald-500 text-white"
-                      : i === step
-                      ? "bg-brand-600 text-white"
-                      : "bg-ink-100 text-ink-500"
-                  }`}
-                >
-                  {i < step ? "\u2713" : i + 1}
-                </span>
-                {i < STEPS.length - 1 && (
-                  <span className="mx-0.5 h-px w-2 bg-ink-200 sm:w-3" />
-                )}
-              </div>
-            ))}
+    <div className="w-full max-w-2xl">
+      {/* Header */}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-center gap-3">
+          <IconTile tone="energy" size="lg">
+            <StepIcon className="h-5 w-5" />
+          </IconTile>
+          <div>
+            <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+              <span className="brand-dot" aria-hidden />
+              Registration
+            </p>
+            <h1 className="mt-0.5 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900 md:text-3xl">
+              {STEPS[step].label}
+            </h1>
           </div>
         </div>
+        <Badge variant="brand" className="w-fit capitalize">
+          Joining as {invite?.role.replace(/_/g, " ").toLowerCase()}
+        </Badge>
+      </div>
 
-        {error && (
-          <div className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700 sm:mb-4 sm:px-4 sm:py-3">
-            <AlertCircle className="mr-2 inline h-4 w-4" />
-            {error}
-          </div>
-        )}
+      {/* Stepper */}
+      <StepRail steps={STEPS} current={step} className="mb-5" />
 
-        {/* Form Card */}
-        <div className="rounded-2xl border border-ink-100 bg-white p-4 shadow-soft sm:p-6">
+      <AuthAlert className="mb-4" message={error || null} />
+
+      {/* Form Card */}
+      <AuthCard size="lg" className="max-w-none">
+        <StepPanels step={step}>
           {/* Step 0: Welcome */}
           {step === 0 && (
             <div className="space-y-4 text-center">
@@ -1341,27 +1340,38 @@ function OnboardContent() {
               <div className="text-left">
                 <InAppBrowserWarning />
               </div>
-              <ShieldCheck className="mx-auto h-12 w-12 text-brand-600" />
-              <h2 className="text-lg font-bold text-ink-900">Welcome!</h2>
-              <p className="text-ink-600">
+              <IconTile tone="energy" size="xl" className="mx-auto rounded-3xl">
+                <ShieldCheck className="h-7 w-7" />
+              </IconTile>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+                Welcome to eMoney
+              </h2>
+              <p className="text-sm text-ink-600">
                 You&apos;ve been invited to register as a{" "}
-                <strong>{invite?.role.replace(/_/g, " ")}</strong> on eMoney.
+                <strong className="capitalize text-ink-900">
+                  {invite?.role.replace(/_/g, " ").toLowerCase()}
+                </strong>
+                . It takes about 15 minutes — you can pause and come back any time.
               </p>
-              <div className="rounded-xl bg-ink-50 p-4 text-left text-sm">
-                <p>
-                  <strong>Email:</strong> {invite?.email}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {invite?.phone}
-                </p>
-                <p>
-                  <strong>Expires:</strong>{" "}
-                  {invite?.expiresAt
-                    ? new Date(invite.expiresAt).toLocaleDateString()
-                    : "\u2014"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-left text-sm text-amber-800">
+              <dl className="grid grid-cols-1 gap-3 rounded-2xl bg-[#f6f7fb] p-4 text-left text-sm ring-1 ring-inset ring-ink-100 sm:grid-cols-3">
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-ink-400">Email</dt>
+                  <dd className="mt-0.5 break-all font-medium text-ink-900">{invite?.email}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-ink-400">Phone</dt>
+                  <dd className="mt-0.5 font-medium text-ink-900">{invite?.phone}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-ink-400">Link expires</dt>
+                  <dd className="mt-0.5 font-medium text-ink-900">
+                    {invite?.expiresAt
+                      ? new Date(invite.expiresAt).toLocaleDateString()
+                      : "\u2014"}
+                  </dd>
+                </div>
+              </dl>
+              <div className="rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800 ring-1 ring-inset ring-amber-200">
                 <p className="mb-2 font-semibold">
                   Please keep the following ready to complete registration:
                 </p>
@@ -1387,16 +1397,18 @@ function OnboardContent() {
           {/* Step 1: Mobile OTP */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Phone className="h-5 w-5" />
-                <h2 className="font-bold">Mobile Number Verification</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Phone className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Mobile Number Verification</h2>
               </div>
               <p className="text-sm text-ink-600">
                 We&apos;ll send an OTP to your registered mobile number to verify
                 ownership.
               </p>
               {phoneVerified ? (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center">
                   <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" />
                   <p className="mt-2 font-semibold text-emerald-800">
                     Mobile Number Verified
@@ -1405,7 +1417,7 @@ function OnboardContent() {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-xl bg-ink-50 p-4">
+                  <div className="rounded-2xl bg-[#f6f7fb] p-4 ring-1 ring-inset ring-ink-100">
                     <p className="text-sm text-ink-600">Mobile Number</p>
                     <p className="text-lg font-bold text-ink-900">
                       {invite?.phone}
@@ -1427,14 +1439,19 @@ function OnboardContent() {
                   ) : (
                     <div className="space-y-3">
                       <div>
-                        <Label>Enter 6-digit OTP</Label>
-                        <Input
+                        <label
+                          htmlFor="otp-sms"
+                          className="mb-3 block text-center text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500"
+                        >
+                          Enter the 6-digit OTP
+                        </label>
+                        <PinInput
+                          id="otp-sms"
+                          length={6}
+                          masked={false}
                           value={otpCode}
-                          onChange={(e) => handleOtpChange(e.target.value, "SMS")}
-                          placeholder="000000"
-                          maxLength={6}
-                          autoFocus
-                          className="text-center text-lg tracking-widest"
+                          onChange={(v) => handleOtpChange(v, "SMS")}
+                          error={Boolean(error)}
                         />
                       </div>
                       {verifying && (
@@ -1463,15 +1480,17 @@ function OnboardContent() {
           {/* Step 2: Email OTP */}
           {step === 2 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Mail className="h-5 w-5" />
-                <h2 className="font-bold">Email Verification</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Mail className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Email Verification</h2>
               </div>
               <p className="text-sm text-ink-600">
                 We&apos;ll send an OTP to your registered email to verify ownership.
               </p>
               {emailVerified ? (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center">
                   <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" />
                   <p className="mt-2 font-semibold text-emerald-800">
                     Email Verified
@@ -1480,7 +1499,7 @@ function OnboardContent() {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-xl bg-ink-50 p-4">
+                  <div className="rounded-2xl bg-[#f6f7fb] p-4 ring-1 ring-inset ring-ink-100">
                     <p className="text-sm text-ink-600">Email Address</p>
                     <p className="text-lg font-bold text-ink-900">
                       {invite?.email}
@@ -1502,14 +1521,19 @@ function OnboardContent() {
                   ) : (
                     <div className="space-y-3">
                       <div>
-                        <Label>Enter 6-digit OTP</Label>
-                        <Input
+                        <label
+                          htmlFor="otp-email"
+                          className="mb-3 block text-center text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500"
+                        >
+                          Enter the 6-digit OTP
+                        </label>
+                        <PinInput
+                          id="otp-email"
+                          length={6}
+                          masked={false}
                           value={otpCode}
-                          onChange={(e) => handleOtpChange(e.target.value, "EMAIL")}
-                          placeholder="000000"
-                          maxLength={6}
-                          autoFocus
-                          className="text-center text-lg tracking-widest"
+                          onChange={(v) => handleOtpChange(v, "EMAIL")}
+                          error={Boolean(error)}
                         />
                       </div>
                       {verifying && (
@@ -1538,16 +1562,18 @@ function OnboardContent() {
           {/* Step 3: Aadhaar DigiLocker */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Fingerprint className="h-5 w-5" />
-                <h2 className="font-bold">Aadhaar Verification</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Fingerprint className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Aadhaar Verification</h2>
               </div>
               <p className="text-sm text-ink-600">
                 Verify your Aadhaar through DigiLocker. You&apos;ll be redirected to
                 the DigiLocker portal to authorize access to your Aadhaar details.
               </p>
               {aadhaarVerified && aadhaarResult ? (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     <p className="font-semibold text-emerald-800">
@@ -1604,7 +1630,7 @@ function OnboardContent() {
                 </div>
               ) : digilockerPending ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center">
                     <Loader2 className="mx-auto h-6 w-6 animate-spin text-amber-600" />
                     <p className="mt-2 text-sm font-medium text-amber-800">
                       Fetching your Aadhaar details...
@@ -1654,9 +1680,11 @@ function OnboardContent() {
           {/* Step 4: PAN Verification */}
           {step === 4 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <CreditCard className="h-5 w-5" />
-                <h2 className="font-bold">PAN Verification</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <CreditCard className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">PAN Verification</h2>
               </div>
               <p className="text-sm text-ink-600">
                 Enter your PAN number. We&apos;ll verify it and cross-check with
@@ -1694,7 +1722,7 @@ function OnboardContent() {
               </div>
               {panResult && (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-emerald-800">
                         PAN Verified
@@ -1702,7 +1730,7 @@ function OnboardContent() {
                       <button
                         type="button"
                         onClick={editPan}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
                       >
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
@@ -1738,7 +1766,7 @@ function OnboardContent() {
                   )}
                   {/* Hard block when PAN name doesn't match Aadhaar */}
                   {panAadhaarMismatch && (
-                    <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
                       <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
                       <strong>Name mismatch — Continue is blocked.</strong> The PAN must belong to
                       the same person as the verified Aadhaar. Please use the <strong>Edit</strong> button
@@ -1754,9 +1782,11 @@ function OnboardContent() {
           {/* Placed before Bank so the company name is available for bank-name matching */}
           {step === 5 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Building2 className="h-5 w-5" />
-                <h2 className="font-bold">GST &amp; MSME (Optional)</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Building2 className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">GST &amp; MSME (Optional)</h2>
               </div>
               <p className="text-sm text-ink-600">
                 If you have a GSTIN or Udyam (MSME) number, enter them here.
@@ -1796,7 +1826,7 @@ function OnboardContent() {
                   )}
                 </div>
                 {gstResult && (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-emerald-800">
                         GST Verified
@@ -1804,7 +1834,7 @@ function OnboardContent() {
                       <button
                         type="button"
                         onClick={editGst}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
                       >
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
@@ -1887,9 +1917,11 @@ function OnboardContent() {
           {/* Step 6: Bank Verification — after GST so company name is available for name matching */}
           {step === 6 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Building2 className="h-5 w-5" />
-                <h2 className="font-bold">Bank Account Verification</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Building2 className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Bank Account Verification</h2>
               </div>
               <p className="text-sm text-ink-600">
                 We&apos;ll verify your bank account via Penny Drop (₹1
@@ -1940,7 +1972,7 @@ function OnboardContent() {
               )}
               {bankResult && (
                 <div className="space-y-3">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-emerald-800">
                         Bank Account Verified
@@ -1948,7 +1980,7 @@ function OnboardContent() {
                       <button
                         type="button"
                         onClick={editBank}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
                       >
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
@@ -2000,7 +2032,7 @@ function OnboardContent() {
                   )}
                   {/* Hard block if name doesn't match any reference */}
                   {bankNameMismatch && (
-                    <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
                       <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
                       <strong>Name mismatch — Continue is blocked.</strong> The bank account holder name
                       must match your Aadhaar name{panResult?.registered_name ? ", PAN name" : ""}
@@ -2016,9 +2048,11 @@ function OnboardContent() {
           {/* Step 7: Selfie & 10-Second Video */}
           {step === 7 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <Upload className="h-5 w-5" />
-                <h2 className="font-bold">Retailer Live Photo &amp; Video</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Upload className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Retailer Live Photo &amp; Video</h2>
               </div>
               <p className="text-sm text-ink-600">
                 Take a live selfie photo and record a 10-second video for identity verification.
@@ -2038,7 +2072,7 @@ function OnboardContent() {
               />
 
               {/* 10-second Liveness Video */}
-              <div className={`rounded-xl border p-4 ${videoCompleted ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"}`}>
+              <div className={`rounded-2xl border p-4 ${videoCompleted ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"}`}>
                 <div className="flex items-center gap-2 mb-3">
                   {videoCompleted ? (
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -2055,7 +2089,7 @@ function OnboardContent() {
                     <button
                       type="button"
                       onClick={() => setVideoCompleted(false)}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
                     >
                       <Pencil className="h-3 w-3" /> Record again
                     </button>
@@ -2071,9 +2105,11 @@ function OnboardContent() {
           {/* Step 8: All Required Documents */}
           {step === 8 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <FileText className="h-5 w-5" />
-                <h2 className="font-bold">Documents Collection</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <FileText className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Documents Collection</h2>
               </div>
               <p className="text-sm text-ink-600">
                 Upload all the required documents listed below. GPS-tagged photos
@@ -2082,7 +2118,7 @@ function OnboardContent() {
               </p>
 
               {nameMismatch && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                   <AlertTriangle className="mr-1 inline h-4 w-4" />
                   Name mismatch detected — please ensure documents clearly show your legal name.
                 </div>
@@ -2111,7 +2147,7 @@ function OnboardContent() {
                     return (
                       <div
                         key={doc.type}
-                        className={`rounded-xl border p-4 ${
+                        className={`rounded-2xl border p-4 ${
                           pgUploaded ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"
                         }`}
                       >
@@ -2132,7 +2168,7 @@ function OnboardContent() {
                               href={`/api/onboard/${token}/pg-form/download`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors"
+                              className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors"
                             >
                               <ArrowDown className="h-4 w-4" /> Download Prefilled PG Form
                             </a>
@@ -2162,7 +2198,7 @@ function OnboardContent() {
                               type="button"
                               onClick={() => removeDocument("PG_FORM")}
                               disabled={removing === "PG_FORM"}
-                              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                             >
                               {removing === "PG_FORM" ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -2198,7 +2234,7 @@ function OnboardContent() {
                 })}
               </div>
 
-              <div className="mt-2 rounded-xl bg-ink-50 p-3 text-xs text-ink-500">
+              <div className="mt-2 rounded-2xl bg-[#f6f7fb] p-3 ring-1 ring-inset ring-ink-100 text-xs text-ink-500">
                 <strong>Note:</strong> GPS-tagged photos must be taken live with your
                 camera. Your browser will ask for camera and location access — your
                 location is recorded at the moment each photo is taken.
@@ -2210,9 +2246,11 @@ function OnboardContent() {
           {/* Step 9: Declaration */}
           {step === 9 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <FileSignature className="h-5 w-5" />
-                <h2 className="font-bold">Declaration & Undertaking</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <FileSignature className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Declaration & Undertaking</h2>
               </div>
               <p className="text-sm text-ink-600">
                 Download your prefilled <strong>self-declaration</strong>, sign it, and upload the signed copy.
@@ -2222,7 +2260,7 @@ function OnboardContent() {
               </p>
 
               {/* Self Declaration Download & Upload */}
-              <div className={`rounded-xl border p-4 ${selfDeclarationUploaded ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"}`}>
+              <div className={`rounded-2xl border p-4 ${selfDeclarationUploaded ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"}`}>
                 <div className="flex items-center gap-2 mb-3">
                   {selfDeclarationUploaded ? (
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -2240,7 +2278,7 @@ function OnboardContent() {
                       href={`/api/onboard/${token}/declaration/download`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors"
+                      className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors"
                     >
                       <ArrowDown className="h-4 w-4" /> Download Prefilled Self-Declaration
                     </a>
@@ -2274,7 +2312,7 @@ function OnboardContent() {
                         type="button"
                         onClick={() => removeDocument("SELF_DECLARATION")}
                         disabled={removing === "SELF_DECLARATION"}
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                       >
                         {removing === "SELF_DECLARATION" ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -2290,7 +2328,7 @@ function OnboardContent() {
 
               {/* Successor Approval Section */}
               {declarationStatus?.requiresApproval && (
-                <div className={`rounded-xl border p-4 ${
+                <div className={`rounded-2xl border p-4 ${
                   declarationStatus.approval?.status === "APPROVED"
                     ? "border-emerald-200 bg-emerald-50"
                     : declarationStatus.approval?.status === "REJECTED"
@@ -2323,7 +2361,7 @@ function OnboardContent() {
                         type="button"
                         onClick={sendForApproval}
                         disabled={declarationSending || !selfDeclarationUploaded}
-                        className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-energy-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-energy-sm transition hover:shadow-energy disabled:opacity-50"
                       >
                         {declarationSending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -2374,7 +2412,7 @@ function OnboardContent() {
                         type="button"
                         onClick={sendForApproval}
                         disabled={declarationSending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-energy-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-energy-sm transition hover:shadow-energy disabled:opacity-50"
                       >
                         {declarationSending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -2390,7 +2428,7 @@ function OnboardContent() {
 
               {/* Partner Agreement eSign (Leegality) — shown when the rail is live */}
               {agreement && (agreement.configured || agreement.sent) && (
-                <div className={`rounded-xl border p-4 ${
+                <div className={`rounded-2xl border p-4 ${
                   agreement.status === "Completed"
                     ? "border-emerald-200 bg-emerald-50"
                     : agreement.sent
@@ -2419,7 +2457,7 @@ function OnboardContent() {
                         type="button"
                         onClick={sendAgreement}
                         disabled={agreementSending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-energy-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-energy-sm transition hover:shadow-energy disabled:opacity-50"
                       >
                         {agreementSending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -2442,7 +2480,7 @@ function OnboardContent() {
                           href={agreement.signUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 transition-colors"
+                          className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 transition-colors"
                         >
                           Open signing page
                         </a>
@@ -2466,7 +2504,7 @@ function OnboardContent() {
                         type="button"
                         onClick={sendAgreement}
                         disabled={agreementSending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-energy-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-energy-sm transition hover:shadow-energy disabled:opacity-50"
                       >
                         {agreementSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         Request a new signing link
@@ -2481,9 +2519,11 @@ function OnboardContent() {
           {/* Step 10: Personal Details + Set Password */}
           {step === 10 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-brand-700">
-                <User className="h-5 w-5" />
-                <h2 className="font-bold">Business Details &amp; Password</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <User className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Business Details &amp; Password</h2>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -2571,9 +2611,11 @@ function OnboardContent() {
 
               <hr className="border-ink-100" />
 
-              <div className="flex items-center gap-2 text-brand-700">
-                <Lock className="h-5 w-5" />
-                <h2 className="font-bold">Set Your Password</h2>
+              <div className="flex items-center gap-3">
+                <IconTile tone="brand" size="md">
+                  <Lock className="h-5 w-5" />
+                </IconTile>
+                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Set Your Password</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -2634,7 +2676,7 @@ function OnboardContent() {
               </p>
 
               {/* Summary */}
-              <div className="mt-4 rounded-xl border border-ink-100 bg-ink-50 p-4">
+              <div className="mt-4 rounded-2xl border border-ink-100 bg-ink-50 p-4">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-ink-500">
                   Registration Summary
                 </p>
@@ -2705,46 +2747,45 @@ function OnboardContent() {
             </div>
           )}
 
-          {/* Navigation */}
-          <div className="mt-6 flex items-center justify-between">
+        </StepPanels>
+
+        {/* Navigation */}
+        <div className="mt-8 flex items-center justify-between gap-3 border-t border-ink-100 pt-5">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={handleBack}
+            disabled={step === 0}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          {step < STEPS.length - 1 ? (
             <Button
               type="button"
-              variant="outline"
-              onClick={handleBack}
-              disabled={step === 0}
+              size="lg"
+              onClick={handleNext}
+              isLoading={verifying && step === 5}
+              disabled={!canProceed() || verifying}
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back
+              {step === 0 ? "Get started" : "Continue"}{" "}
+              <ArrowRight className="h-4 w-4" />
             </Button>
-            {step < STEPS.length - 1 ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                disabled={!canProceed() || verifying}
-              >
-                {verifying && step === 5 ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : null}
-                {step === 0 ? "Get Started" : "Continue"}{" "}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={verifying || !canProceed()}
-              >
-                {verifying ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4" />
-                )}
-                Submit Registration
-              </Button>
-            )}
-          </div>
+          ) : (
+            <Button
+              type="button"
+              size="lg"
+              onClick={handleSubmit}
+              isLoading={verifying}
+              disabled={verifying || !canProceed()}
+            >
+              {!verifying && <CheckCircle2 className="h-4 w-4" />}
+              Submit registration
+            </Button>
+          )}
         </div>
-      </div>
+      </AuthCard>
 
       {showNameDeclaration && (
         <NameDeclarationModal
@@ -2789,18 +2830,26 @@ function NameDeclarationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-ink-900/50 px-4 py-6"
+      className="fixed inset-0 z-50 grid place-items-center bg-ink-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={submitting ? undefined : onCancel}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl"
+        role="dialog"
+        aria-modal
+        aria-labelledby="name-declaration-title"
+        className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-4xl bg-white shadow-energy ring-1 ring-ink-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start gap-3 border-b border-amber-100 bg-amber-50 px-6 py-5">
-          <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-amber-600" />
+          <IconTile tone="amber" size="md">
+            <AlertTriangle className="h-5 w-5" />
+          </IconTile>
           <div>
-            <h3 className="text-lg font-bold text-amber-900">
-              Name Difference Detected
+            <h3
+              id="name-declaration-title"
+              className="font-display text-xl font-semibold tracking-[-0.02em] text-amber-900"
+            >
+              Name difference detected
             </h3>
             <p className="mt-1 text-sm text-amber-800">
               The name on your documents does not match exactly. Please review
@@ -2813,7 +2862,7 @@ function NameDeclarationModal({
           {rows.map((r) => (
             <div
               key={r.label}
-              className="rounded-xl border border-ink-100 bg-ink-50/60 px-4 py-3"
+              className="rounded-2xl border border-ink-100 bg-ink-50/60 px-4 py-3"
             >
               <p className="text-[10px] font-bold uppercase tracking-widest text-ink-400">
                 {r.label}
@@ -2824,7 +2873,7 @@ function NameDeclarationModal({
             </div>
           ))}
 
-          <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-xl border border-ink-200 bg-white px-4 py-3 hover:border-brand-300">
+          <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-2xl border border-ink-200 bg-white px-4 py-3 hover:border-brand-300">
             <input
               type="checkbox"
               checked={checked}
@@ -2880,7 +2929,7 @@ function NameMatchBadge({
   const match = namesMatch(name1, name2);
   return (
     <div
-      className={`flex items-center gap-2 rounded-lg p-3 text-sm ${
+      className={`flex items-center gap-2 rounded-xl p-3 text-sm ${
         match
           ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
           : "border border-amber-200 bg-amber-50 text-amber-800"
@@ -2930,7 +2979,7 @@ function DocumentUploadField({
 }) {
   return (
     <div
-      className={`rounded-xl border p-4 ${
+      className={`rounded-2xl border p-4 ${
         uploaded
           ? "border-emerald-200 bg-emerald-50"
           : "border-ink-200 bg-white"

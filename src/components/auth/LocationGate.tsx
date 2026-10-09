@@ -1,8 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
-import { MapPin, MapPinOff, Loader2, RefreshCw } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  MapPin,
+  MapPinArea,
+  GpsFix,
+  ArrowCounterClockwise,
+  ShieldCheck,
+  Globe,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { AuthCard } from "@/components/auth/AuthCard";
 
 export type LocationData = {
   latitude: number;
@@ -42,9 +52,16 @@ async function fetchIpLocation(): Promise<LocationData | null> {
   return null;
 }
 
+const ENABLE_STEPS = [
+  { title: "Look for the location prompt", body: "It appears near the address bar — tap Allow." },
+  { title: "Blocked earlier?", body: "Open your browser's site settings for this page and set Location to Allow." },
+  { title: "Try again", body: "Come back here and hit the button below. We only check once per sign-in." },
+];
+
 export function LocationGate({ children }: LocationGateProps) {
   const [state, setState] = useState<GateState>({ status: "idle" });
   const resolved = useRef(false);
+  const reduce = useReducedMotion();
 
   const requestLocation = useCallback(() => {
     resolved.current = false;
@@ -134,68 +151,104 @@ export function LocationGate({ children }: LocationGateProps) {
     return <>{children(state.location)}</>;
   }
 
+  const pending = state.status === "idle" || state.status === "requesting";
+
   return (
-    <div className="flex min-h-[340px] flex-col items-center justify-center rounded-3xl border border-ink-100 bg-white p-8 text-center shadow-soft md:p-10">
-      {state.status === "idle" || state.status === "requesting" ? (
+    <AuthCard className="text-center" aria-busy={pending || undefined}>
+      {pending ? (
         <>
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-brand-50">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+          <div className="relative mx-auto grid h-20 w-20 place-items-center">
+            {!reduce && (
+              <>
+                <motion.span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full bg-brand-500/15"
+                  animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+                />
+                <motion.span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full bg-royal-500/15"
+                  animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay: 0.6 }}
+                />
+              </>
+            )}
+            <IconTile icon={GpsFix} tone="energy" size="xl" className="relative rounded-3xl" />
           </div>
-          <h2 className="mt-5 font-display text-xl font-bold text-ink-900">
-            Verifying your location
+          <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+            <span className="brand-dot" aria-hidden />
+            Quick security check
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+            Confirming your location
           </h2>
-          <p className="mt-2 max-w-xs text-sm text-ink-500">
-            Please allow location access when prompted. This is required for
-            security verification before login.
+          <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-ink-500">
+            Tap <span className="font-semibold text-ink-700">Allow</span> when your browser asks.
+            This keeps your shop&apos;s account safe from logins in unexpected places.
           </p>
         </>
       ) : state.status === "unavailable" ? (
         <>
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-red-50">
-            <MapPinOff className="h-8 w-8 text-red-500" />
-          </div>
-          <h2 className="mt-5 font-display text-xl font-bold text-ink-900">
-            Location not supported
-          </h2>
-          <p className="mt-2 max-w-xs text-sm text-ink-500">
-            Your browser does not support geolocation. Please use a modern
-            browser with location capabilities to sign in.
+          <IconTile icon={Globe} tone="coral" size="xl" className="mx-auto rounded-3xl" />
+          <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+            <span className="brand-dot" aria-hidden />
+            Browser not supported
           </p>
-          <Button size="md" className="mt-5" onClick={requestLocation}>
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+            Location isn&apos;t available here
+          </h2>
+          <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-ink-500">
+            Your browser doesn&apos;t support geolocation. Please open eMoney in a
+            modern browser like Chrome, Edge or Safari to sign in.
+          </p>
+          <Button size="lg" className="mt-6 w-full" onClick={requestLocation}>
+            <ArrowCounterClockwise size={16} weight="bold" aria-hidden />
             Try again
           </Button>
         </>
       ) : (
         <>
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-amber-50">
-            <MapPin className="h-8 w-8 text-amber-600" />
-          </div>
-          <h2 className="mt-5 font-display text-xl font-bold text-ink-900">
-            Location access required
+          <IconTile icon={MapPin} tone="amber" size="xl" className="mx-auto rounded-3xl" />
+          <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+            <span className="brand-dot" aria-hidden />
+            One small step
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+            We need your location to continue
           </h2>
-          <p className="mt-2 max-w-xs text-sm text-ink-500">
+          <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-ink-500" aria-live="polite">
             {state.reason}
           </p>
-          <p className="mt-2 max-w-xs text-xs text-ink-400">
-            Enable location permissions in your browser settings and try again.
-            Without location verification, login is not allowed.
-          </p>
-          <Button
-            size="md"
-            className="mt-5"
-            onClick={requestLocation}
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Try again
+
+          <ol className="mt-6 space-y-3 text-left">
+            {ENABLE_STEPS.map((s, i) => (
+              <li
+                key={s.title}
+                className="flex items-start gap-3 rounded-2xl bg-[#f6f7fb] p-3.5 ring-1 ring-inset ring-ink-100"
+              >
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-energy-gradient font-display text-xs font-semibold text-white shadow-energy-sm">
+                  {i + 1}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-ink-900">{s.title}</span>
+                  <span className="block text-xs leading-relaxed text-ink-500">{s.body}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <Button size="lg" className="mt-6 w-full" onClick={requestLocation}>
+            <MapPinArea size={16} weight="duotone" aria-hidden />
+            I&apos;ve enabled it — try again
           </Button>
         </>
       )}
 
-      <div className="mt-6 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-        <MapPin className="h-3.5 w-3.5 shrink-0" />
-        <span>Location verification is mandatory for all users.</span>
-      </div>
-    </div>
+      <p className="mt-6 flex items-center justify-center gap-2 text-xs text-ink-400">
+        <ShieldCheck size={14} weight="duotone" className="text-accent-600" aria-hidden />
+        Location verification is mandatory for every sign-in.
+      </p>
+    </AuthCard>
   );
 }

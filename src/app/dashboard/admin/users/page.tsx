@@ -33,6 +33,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ReportActions } from "@/components/dashboard/ReportActions";
 import { Pagination } from "@/components/ui/Pagination";
 import { UplineChain } from "@/components/dashboard/UplineChain";
+import { FilterBar, StatusChip } from "@/components/dashboard/patterns";
 import { formatINR } from "@/lib/utils";
 
 type UserRow = {
@@ -248,13 +249,16 @@ export default function AdminUsersPage() {
       key: "status",
       header: "Status",
       render: (r) => (
-        <Badge variant={r.status === "Active" ? "success" : r.status === "Pending KYC" ? "warning" : "danger"}>
-          {r.status}
-        </Badge>
+        <StatusChip
+          status={r.status}
+          variant={r.status === "Active" ? "success" : r.status === "Pending KYC" ? "warning" : "danger"}
+          label={r.status}
+          size="sm"
+        />
       ),
     },
-    { key: "walletBalance", header: "Wallet", align: "right", render: (r) => formatINR(r.walletBalance) },
-    { key: "monthlyTurnover", header: "MTD", align: "right", render: (r) => formatINR(r.monthlyTurnover) },
+    { key: "walletBalance", header: "Wallet", align: "right", render: (r) => <span className="tabular-nums">{formatINR(r.walletBalance)}</span> },
+    { key: "monthlyTurnover", header: "MTD", align: "right", render: (r) => <span className="tabular-nums">{formatINR(r.monthlyTurnover)}</span> },
     {
       key: "actions",
       header: "",
@@ -263,8 +267,9 @@ export default function AdminUsersPage() {
         <div className="flex justify-end gap-1">
           <button
             onClick={() => setServicesUser(r)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-violet-700 hover:bg-violet-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-royal-600 ring-1 ring-inset ring-royal-100 transition hover:bg-royal-50 focus-energy"
             title="Manage services"
+            aria-label={`Manage services for ${r.name}`}
           >
             <Power className="h-4 w-4" />
           </button>
@@ -273,16 +278,18 @@ export default function AdminUsersPage() {
           ) : r.status === "Active" ? (
             <button
               onClick={() => toggleStatus(r.id, r.status)}
-              className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 ring-1 ring-inset ring-rose-100 transition hover:bg-rose-50 focus-energy"
               title="Suspend"
+              aria-label={`Suspend ${r.name}`}
             >
               <ShieldOff className="h-4 w-4" />
             </button>
           ) : (
             <button
               onClick={() => toggleStatus(r.id, r.status)}
-              className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-emerald-700 ring-1 ring-inset ring-emerald-100 transition hover:bg-emerald-50 focus-energy"
               title="Reactivate"
+              aria-label={`Reactivate ${r.name}`}
             >
               <ShieldCheck className="h-4 w-4" />
             </button>
@@ -293,7 +300,7 @@ export default function AdminUsersPage() {
               e.stopPropagation();
               setMoreUser(r);
             }}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
             title="More"
             aria-label={`More actions for ${r.name}`}
           >
@@ -307,7 +314,7 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · People"
         title="Users & shops"
         description="Search, filter and manage every retailer, distributor and master across the platform."
         actions={
@@ -330,49 +337,65 @@ export default function AdminUsersPage() {
               ]}
               rows={users}
             />
-            <Button variant="outline" onClick={fetchUsers} disabled={loading}>
+            <Button variant="outline" onClick={fetchUsers} disabled={loading} aria-label="Refresh">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
           </>
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink-100 bg-white p-4">
+      <FilterBar
+        title="Find a user"
+        count={total}
+        actions={
+          <Button
+            variant="outline"
+            onClick={() => setBulkOpen(true)}
+            disabled={selected.length === 0}
+          >
+            <Power className="h-4 w-4" />
+            Bulk services ({selected.length})
+          </Button>
+        }
+      >
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
           <Input
-            placeholder="Search name, shop, city..."
+            placeholder="Search name, shop, city…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="pl-9"
+            className="h-10 pl-9"
+            aria-label="Search users"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-ink-400" />
-          <Select value={role} onChange={(e) => setRole(e.target.value)} className="h-10 w-44">
-            <option value="all">All roles</option>
-            <option value="retailer">Retailers</option>
-            <option value="distributor">Distributors</option>
-            <option value="master-distributor">Master distributors</option>
-            <option value="super-distributor">Super distributors</option>
-          </Select>
-          <Select value={status} onChange={(e) => setStatus(e.target.value)} className="h-10 w-44">
-            <option value="all">Any status</option>
-            <option value="Active">Active</option>
-            <option value="Pending KYC">Pending KYC</option>
-            <option value="Suspended">Suspended</option>
-          </Select>
-        </div>
-      </div>
+        <Filter className="hidden h-4 w-4 text-ink-400 sm:block" aria-hidden />
+        <Select value={role} onChange={(e) => setRole(e.target.value)} className="h-10 w-44" aria-label="Filter by role">
+          <option value="all">All roles</option>
+          <option value="retailer">Retailers</option>
+          <option value="distributor">Distributors</option>
+          <option value="master-distributor">Master distributors</option>
+          <option value="super-distributor">Super distributors</option>
+        </Select>
+        <Select value={status} onChange={(e) => setStatus(e.target.value)} className="h-10 w-44" aria-label="Filter by status">
+          <option value="all">Any status</option>
+          <option value="Active">Active</option>
+          <option value="Pending KYC">Pending KYC</option>
+          <option value="Suspended">Suspended</option>
+        </Select>
+      </FilterBar>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink-100 bg-white px-4 py-3">
-        <p className="text-sm text-ink-700">
-          <span className="font-semibold">{selected.length}</span> selected
+      <div
+        className={`flex flex-wrap items-center gap-3 rounded-2xl px-4 py-2.5 text-sm ring-1 ring-inset transition ${
+          selected.length > 0 ? "bg-brand-50 ring-brand-100" : "bg-white ring-ink-100"
+        }`}
+      >
+        <p className="text-ink-700">
+          <span className="font-display font-semibold tabular-nums text-ink-900">{selected.length}</span> selected
         </p>
         <button
           type="button"
           onClick={() => setSelected(users.map((u) => u.id))}
-          className="text-xs font-medium text-brand-700 hover:underline"
+          className="text-xs font-semibold text-brand-700 hover:underline disabled:opacity-40"
           disabled={users.length === 0}
         >
           Select all visible
@@ -380,21 +403,11 @@ export default function AdminUsersPage() {
         <button
           type="button"
           onClick={() => setSelected([])}
-          className="text-xs font-medium text-ink-500 hover:underline"
+          className="text-xs font-semibold text-ink-500 hover:underline disabled:opacity-40"
           disabled={selected.length === 0}
         >
           Clear
         </button>
-        <div className="ml-auto">
-          <Button
-            variant="outline"
-            onClick={() => setBulkOpen(true)}
-            disabled={selected.length === 0}
-          >
-            <Power className="mr-2 h-4 w-4" />
-            Bulk services ({selected.length})
-          </Button>
-        </div>
       </div>
 
       <DataTable
@@ -578,13 +591,13 @@ function UserMoreMenu({
       <div
         role="menu"
         aria-label={`More actions for ${user.name}`}
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl"
+        className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-ink-100 px-5 py-4">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">More actions</p>
-            <h3 className="mt-1 truncate font-display text-base font-bold text-ink-900">{user.name}</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">More actions</p>
+            <h3 className="mt-1 truncate font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{user.name}</h3>
             <p className="truncate text-xs text-ink-500">
               {user.shop} · {user.role}
             </p>
@@ -762,13 +775,13 @@ function ApprovalStatusDialog({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 px-4" onClick={onClose}>
       <div
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl"
+        className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-ink-100 px-5 py-4">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">Approval status</p>
-            <h3 className="mt-1 truncate font-display text-base font-bold text-ink-900">{user.name}</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Approval status</p>
+            <h3 className="mt-1 truncate font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{user.name}</h3>
             <p className="truncate text-xs text-ink-500">
               {user.role} · <span className="font-medium text-brand-600">{user.userCode}</span>
             </p>
@@ -868,21 +881,21 @@ function ResetPasswordResultDialog({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 px-4">
       <div
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl"
+        className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-ink-100 bg-gradient-to-br from-amber-50 to-white px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">
             Password reset
           </p>
-          <h3 className="mt-1 font-display text-base font-bold text-ink-900">{userName}</h3>
+          <h3 className="mt-1 font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{userName}</h3>
           <p className="mt-1 text-xs text-ink-500">
             Share this password securely. It will not be shown again.
           </p>
         </div>
 
         <div className="px-5 py-4">
-          <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+          <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
             New password
           </label>
           <div className="mt-2 flex items-center gap-2 rounded-xl border border-ink-200 bg-ink-50 px-3 py-2.5">
@@ -1018,13 +1031,13 @@ function UserServicesDialog({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 px-4">
-      <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl flex flex-col">
+      <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100 flex flex-col">
         <div className="flex items-start justify-between gap-4 bg-gradient-to-br from-violet-50 to-white px-6 py-5 shrink-0">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-violet-700">
               Manage services
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
               {userName}
             </h3>
             <p className="mt-1 text-xs text-ink-600">
@@ -1033,7 +1046,7 @@ function UserServicesDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -1072,7 +1085,7 @@ function UserServicesDialog({
               <div className="space-y-5">
                 {grouped.map(([kind, items]) => (
                   <div key={kind}>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-ink-500 mb-2">
+                    <h4 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400 mb-2">
                       {kind}
                     </h4>
                     <div className="grid gap-2 sm:grid-cols-2">
@@ -1195,13 +1208,13 @@ function BulkServicesDialog({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 px-4">
-      <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl flex flex-col">
+      <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100 flex flex-col">
         <div className="flex items-start justify-between gap-4 bg-gradient-to-br from-brand-50 to-white px-6 py-5 shrink-0">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-brand-700">
               Bulk manage services
             </p>
-            <h3 className="mt-1 font-display text-lg font-bold text-ink-900">
+            <h3 className="mt-1 font-display text-lg font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
               {userIds.length} user{userIds.length === 1 ? "" : "s"} selected
             </h3>
             <p className="mt-1 text-xs text-ink-600">
@@ -1210,7 +1223,7 @@ function BulkServicesDialog({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />

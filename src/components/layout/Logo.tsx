@@ -93,10 +93,19 @@ export function Logo({
     return (
       <Link
         href="/"
-        className={cn("group inline-flex items-center", className)}
+        className={cn("group relative inline-flex items-center", className)}
         aria-label="eMoney home"
       >
         <LogoMark size={34} />
+        {/* Live brand-dot — subtle pulse that signals "the Emoney platform is
+            on". The single detail users notice first versus the Nextgen logo. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5"
+        >
+          <span className="absolute inline-flex h-full w-full rounded-full bg-coral-400 opacity-70 animate-ping-soft" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-brand-500 to-coral-500 ring-2 ring-white" />
+        </span>
       </Link>
     );
   }
@@ -104,23 +113,43 @@ export function Logo({
   return (
     <Link
       href="/"
-      className={cn("group inline-flex items-center gap-3", className)}
+      className={cn("group relative inline-flex items-center gap-3", className)}
       aria-label="eMoney home"
     >
-      <Image
-        src="/emoney-logo.svg"
-        alt="eMoney"
-        width={1694}
-        height={699}
-        priority
-        unoptimized
-        className={cn(
-          "w-auto transition-transform duration-300 group-hover:scale-[1.03]",
-          sizeMap[size],
-          // Render the dark-text artwork as clean white on dark surfaces
-          variant === "light" && "brightness-0 invert"
-        )}
-      />
+      <span className="relative inline-flex">
+        <Image
+          src="/emoney-logo.svg"
+          alt="eMoney"
+          width={1694}
+          height={699}
+          priority
+          unoptimized
+          className={cn(
+            "w-auto transition-transform duration-300 group-hover:scale-[1.03]",
+            sizeMap[size],
+            // Render the dark-text artwork as clean white on dark surfaces
+            variant === "light" && "brightness-0 invert"
+          )}
+        />
+        {/* Live brand-dot — tucked at the top-right of the wordmark. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-1 -top-0.5 flex h-2.5 w-2.5"
+        >
+          <span
+            className={cn(
+              "absolute inline-flex h-full w-full rounded-full opacity-70 animate-ping-soft",
+              variant === "light" ? "bg-white" : "bg-coral-400"
+            )}
+          />
+          <span
+            className={cn(
+              "relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-brand-500 to-coral-500",
+              variant === "light" ? "ring-2 ring-white/70" : "ring-2 ring-white"
+            )}
+          />
+        </span>
+      </span>
 
       {tagline && (
         <span
@@ -129,7 +158,9 @@ export function Logo({
             variant === "light" ? "border-white/25" : "border-ink-200"
           )}
         >
-          <span className="gradient-text whitespace-nowrap bg-[length:200%_auto] text-[11px] font-bold uppercase leading-tight tracking-[0.14em]">
+          {/* The tagline carries the signature Emoney gradient-sweep (animated
+              purple→blue→coral) that `globals.css .gradient-text` applies. */}
+          <span className="gradient-text whitespace-nowrap text-[11px] font-bold uppercase leading-tight tracking-[0.14em]">
             {LOGO_TAGLINE}
           </span>
         </span>

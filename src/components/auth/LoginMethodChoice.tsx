@@ -1,6 +1,8 @@
 "use client";
 
-import { ShieldCheck, KeyRound, ChevronRight, RotateCcw } from "lucide-react";
+import { ShieldCheck, Key, CaretRight, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { IconTile } from "@/components/ui/Icon";
+import { AuthCardHeader, AuthLinksRow } from "@/components/auth/AuthCard";
 
 export type LoginMethod = "2fa" | "pinlogin";
 
@@ -19,69 +21,82 @@ interface LoginMethodChoiceProps {
  */
 export function LoginMethodChoice({ userName, onChoose, onBack }: LoginMethodChoiceProps) {
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-600 text-white">
-          <ShieldCheck className="h-5 w-5" />
-        </span>
-        <div>
-          <h2 className="heading-md">Choose how to verify</h2>
-          <p className="text-sm text-ink-500">
-            Hi {userName}, pick the second factor you&apos;d like to use.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AuthCardHeader
+        as="h2"
+        eyebrow="Step 2 of 2"
+        title="How do you want to verify?"
+        description={
+          <>
+            Hi {userName || "there"} — pick the second factor you&apos;d like to use
+            today. You can switch any time.
+          </>
+        }
+        icon={<IconTile icon={ShieldCheck} tone="energy" size="lg" />}
+      />
 
       <div className="space-y-3">
         <button
           type="button"
           onClick={() => onChoose("2fa")}
-          className="group flex w-full items-center gap-4 rounded-2xl border border-ink-100 p-4 text-left transition hover:border-emerald-400 hover:bg-emerald-50/60"
+          className="gradient-ring focus-energy group flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left ring-1 ring-ink-100 transition hover:-translate-y-0.5 hover:shadow-energy-sm"
         >
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-600 text-white">
-            <ShieldCheck className="h-5 w-5" />
-          </span>
+          <IconTile icon={ShieldCheck} tone="accent" size="lg" />
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-ink-900">
-              Authenticator app
+            <span className="flex items-center gap-2">
+              <span className="block text-sm font-semibold text-ink-900">Authenticator app</span>
+              <span className="rounded-full bg-accent-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-700 ring-1 ring-inset ring-accent-200">
+                Most secure
+              </span>
             </span>
-            <span className="block text-xs text-ink-500">
+            <span className="mt-0.5 block text-xs text-ink-500">
               Enter the 6-digit code from Google Authenticator, Authy, etc.
             </span>
           </span>
-          <ChevronRight className="h-5 w-5 shrink-0 text-ink-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600" />
+          <CaretRight
+            size={18}
+            weight="bold"
+            className="shrink-0 text-ink-300 transition group-hover:translate-x-0.5 group-hover:text-accent-600"
+            aria-hidden
+          />
         </button>
 
         <button
           type="button"
           onClick={() => onChoose("pinlogin")}
-          className="group flex w-full items-center gap-4 rounded-2xl border border-ink-100 p-4 text-left transition hover:border-brand-400 hover:bg-brand-50/60"
+          className="gradient-ring focus-energy group flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left ring-1 ring-ink-100 transition hover:-translate-y-0.5 hover:shadow-energy-sm"
         >
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-600 text-white">
-            <KeyRound className="h-5 w-5" />
-          </span>
+          <IconTile icon={Key} tone="brand" size="lg" />
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-ink-900">
-              Transaction PIN
+            <span className="flex items-center gap-2">
+              <span className="block text-sm font-semibold text-ink-900">Transaction PIN</span>
+              <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-700 ring-1 ring-inset ring-brand-200">
+                Quick
+              </span>
             </span>
-            <span className="block text-xs text-ink-500">
+            <span className="mt-0.5 block text-xs text-ink-500">
               Sign in with your TPIN instead of the authenticator.
             </span>
           </span>
-          <ChevronRight className="h-5 w-5 shrink-0 text-ink-400 transition group-hover:translate-x-0.5 group-hover:text-brand-600" />
+          <CaretRight
+            size={18}
+            weight="bold"
+            className="shrink-0 text-ink-300 transition group-hover:translate-x-0.5 group-hover:text-brand-600"
+            aria-hidden
+          />
         </button>
       </div>
 
-      <div className="flex justify-end text-xs">
+      <AuthLinksRow className="justify-end">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1 font-medium text-ink-500 hover:text-ink-900"
+          className="focus-energy inline-flex items-center gap-1.5 rounded-lg font-medium text-ink-500 transition hover:text-ink-900"
         >
-          <RotateCcw className="h-3 w-3" />
+          <ArrowCounterClockwise size={13} weight="bold" aria-hidden />
           Start over
         </button>
-      </div>
+      </AuthLinksRow>
     </div>
   );
 }

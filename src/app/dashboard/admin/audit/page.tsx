@@ -97,7 +97,7 @@ export default function AdminAuditPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Platform"
         title="Audit log"
         description="Immutable record of every privileged action across the platform."
         actions={
@@ -123,7 +123,7 @@ export default function AdminAuditPage() {
           </>
         }
       />
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search actor, action, target..." className="pl-9" />

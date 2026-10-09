@@ -7,11 +7,11 @@ export const dynamic = "force-dynamic";
 
 export default function CreditCardBillPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={CreditCard}
         title="Credit Card Bill Payment"
-        description="Pay credit card bills across all major banks via Same Day BBPS — fetch the live bill with the card's last 4 digits and registered mobile."
+        description="Pay credit card bills across all major banks via Same Day BBPS â€” fetch the live bill with the card's last 4 digits and registered mobile."
       />
       <CreditCardBillForm route={SERVICE_KEYS.BBPS_CREDIT_CARD} />
     </div>

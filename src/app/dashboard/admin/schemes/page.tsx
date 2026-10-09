@@ -18,6 +18,9 @@ import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Label, Select } from "@/components/ui/Input";
 import { AssignUserPicker, type PickerUser } from "@/components/ui/AssignUserPicker";
+import { IconTile } from "@/components/ui/Icon";
+import { EmptyState, FilterBar, StatusChip } from "@/components/dashboard/patterns";
+import { Stack } from "@phosphor-icons/react";
 import { SERVICE_FAMILIES, familyOf, type ServiceFamily } from "@/lib/scheme/constants";
 import { bbpsServicesForProvider } from "@/lib/services/priceScope";
 import {
@@ -311,8 +314,8 @@ export default function SchemeManagementPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
-        title="Scheme Management"
+        eyebrow="Admin · Pricing"
+        title="Scheme management"
         description="Create and manage schemes with charges, MDR rates, and commission values. Assign any scheme directly to any user. Commissions apply only to PG/POS/QR transactions."
         actions={
           <>
@@ -326,35 +329,45 @@ export default function SchemeManagementPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3">
+      <FilterBar
+        title={
+          <span className="inline-flex items-center gap-2">
+            <Layers className="h-4 w-4 text-brand-600" /> Schemes
+          </span>
+        }
+        count={visibleSchemes.length}
+      >
         <div className="w-full max-w-xs">
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search schemes…" />
+          <Input className="h-10" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search schemes…" aria-label="Search schemes" />
         </div>
         <Select
-          className="w-32"
+          className="h-10 w-32"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as "active" | "all")}
+          aria-label="Status filter"
         >
           <option value="active">Active</option>
           <option value="all">All</option>
         </Select>
-      </div>
+      </FilterBar>
 
       <section className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-brand-600" />
-          <h2 className="font-display text-sm font-semibold uppercase tracking-widest text-ink-600">
-            Schemes ({visibleSchemes.length})
-          </h2>
-        </div>
         {loading && schemes.length === 0 ? (
-          <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center text-sm text-ink-500">
+          <div className="rounded-3xl bg-white p-10 text-center text-sm text-ink-500 ring-1 ring-ink-100">
             Loading schemes…
           </div>
         ) : visibleSchemes.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-10 text-center text-sm text-ink-500">
-            No schemes found. Create one to configure charges and MDR.
-          </div>
+          <EmptyState
+            bordered
+            icon={Stack}
+            title="No schemes yet"
+            description="Create one to configure charges and MDR."
+            action={
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4" /> New scheme
+              </Button>
+            }
+          />
         ) : (
           <div className="space-y-3">
             {visibleSchemes.map((s) => (
@@ -506,27 +519,27 @@ function SchemeCard({
   }, [slabs]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
+    <div className={`overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ${scheme.active ? "ring-ink-100" : "ring-ink-100 opacity-80"}`}>
       {/* Card header */}
       <div className="flex flex-wrap items-center gap-3 px-5 py-4">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-sky-500 text-white">
+        <IconTile tone={scheme.isDefault ? "energy" : "brand"} size="md">
           <Settings2 className="h-5 w-5" />
-        </div>
+        </IconTile>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate font-display text-sm font-semibold text-ink-900">{scheme.name}</h3>
+            <h3 className="truncate font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{scheme.name}</h3>
             {scheme.isDefault && (
-              <Badge variant="accent">
+              <Badge variant="energy" size="sm">
                 <Star className="h-3 w-3" /> Default
               </Badge>
             )}
-            <Badge variant={scheme.active ? "success" : "danger"}>{scheme.active ? "active" : "inactive"}</Badge>
-            <Badge variant="brand">{scheme.slabCount} slabs</Badge>
-            <Badge variant="warning">{scheme.mdrSlabCount} MDR</Badge>
-            <Badge variant="default">
+            <StatusChip status={scheme.active ? "ACTIVE" : "INACTIVE"} size="sm" />
+            <Badge variant="brand" size="sm">{scheme.slabCount} slabs</Badge>
+            <Badge variant="warning" size="sm">{scheme.mdrSlabCount} MDR</Badge>
+            <Badge variant="default" size="sm">
               <Users className="h-3 w-3" /> {scheme.userCount} mapped
             </Badge>
-            <Badge variant="default">{scheme.ownerId ? "Derived" : "Admin"}</Badge>
+            <Badge variant="default" size="sm">{scheme.ownerId ? "Derived" : "Admin"}</Badge>
           </div>
           {scheme.description && <p className="mt-0.5 truncate text-xs text-ink-500">{scheme.description}</p>}
         </div>
@@ -544,7 +557,7 @@ function SchemeCard({
                   setSlabModal({ family: f, editing: null });
                   setExpanded(true);
                 }}
-                className={`grid h-8 w-8 place-items-center rounded-lg ${cfg.className} ${cfg.hover}`}
+                className={`grid h-8 w-8 place-items-center rounded-xl ${cfg.className} ${cfg.hover}`}
                 title={`Add ${f.label} slab`}
               >
                 <Icon className="h-4 w-4" />
@@ -556,7 +569,7 @@ function SchemeCard({
               setMdrModal({ editing: null });
               setExpanded(true);
             }}
-            className={`grid h-8 w-8 place-items-center rounded-lg ${POS_ICON.className} ${POS_ICON.hover}`}
+            className={`grid h-8 w-8 place-items-center rounded-xl ${POS_ICON.className} ${POS_ICON.hover}`}
             title="Add POS MDR rate"
           >
             <Store className="h-4 w-4" />
@@ -564,31 +577,36 @@ function SchemeCard({
           <span className="mx-1 h-5 w-px bg-ink-100" />
           <button
             onClick={() => setAssignOpen(true)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-violet-600 hover:bg-violet-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-royal-600 transition hover:bg-royal-50 focus-energy"
             title="Assign to users"
+            aria-label="Assign to users"
           >
             <Users className="h-4 w-4" />
           </button>
           <button
             onClick={toggleActive}
             disabled={busy}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-50 disabled:opacity-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 transition hover:bg-ink-50 disabled:opacity-50 focus-energy"
             title={scheme.active ? "Deactivate" : "Activate"}
+            aria-label={scheme.active ? "Deactivate scheme" : "Activate scheme"}
           >
             <Power className="h-4 w-4" />
           </button>
           <button
             onClick={() => setDeleteOpen(true)}
             disabled={busy}
-            className="grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-rose-50 disabled:opacity-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-rose-500 transition hover:bg-rose-50 disabled:opacity-50 focus-energy"
             title="Delete scheme"
+            aria-label="Delete scheme"
           >
             <Trash2 className="h-4 w-4" />
           </button>
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
             title={expanded ? "Collapse" : "Expand"}
+            aria-expanded={expanded}
+            aria-label={expanded ? "Collapse scheme" : "Expand scheme"}
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
@@ -597,7 +615,7 @@ function SchemeCard({
 
       {/* Expanded per-family slab sections + POS MDR */}
       {expanded && (
-        <div className="space-y-4 border-t border-ink-100 bg-ink-50/30 px-5 py-4">
+        <div className="space-y-4 border-t border-ink-100 bg-[#f6f7fb] px-5 py-4">
           {loadingDetail && slabs === null ? (
             <p className="py-4 text-center text-sm text-ink-500">Loading slabs…</p>
           ) : grouped.length === 0 && (!mdrSlabs || mdrSlabs.length === 0) ? (
@@ -619,7 +637,7 @@ function SchemeCard({
                     </div>
                     <div className="overflow-x-auto rounded-xl border border-ink-100 bg-white">
                       <table className="w-full min-w-max text-sm">
-                        <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-wider text-ink-500">
+                        <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                           <tr>
                             <th className="px-4 py-2 font-semibold">Service</th>
                             <th className="px-4 py-2 font-semibold">Provider</th>
@@ -699,7 +717,7 @@ function SchemeCard({
                   </div>
                   <div className="overflow-x-auto rounded-xl border border-ink-100 bg-white">
                     <table className="w-full min-w-max text-sm">
-                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-wider text-ink-500">
+                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                         <tr>
                           <th className="px-4 py-2 font-semibold">Company</th>
                           <th className="px-4 py-2 font-semibold">Mode</th>
@@ -802,7 +820,7 @@ function SchemeCard({
                   </div>
                   <div className="overflow-x-auto rounded-xl border border-ink-100 bg-white">
                     <table className="w-full min-w-max text-sm">
-                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-wider text-ink-500">
+                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                         <tr>
                           <th className="px-4 py-2 font-semibold">Name</th>
                           <th className="px-4 py-2 font-semibold">Email</th>
@@ -1090,7 +1108,7 @@ function SlabModal({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-ink-100 bg-white shadow-xl"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink-100 bg-white px-5 py-4">
@@ -1177,7 +1195,7 @@ function SlabModal({
           </div>
 
           <div className="rounded-xl border border-ink-100 bg-ink-50/40 p-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">Customer charge</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Customer charge</p>
             <div className="grid grid-cols-2 gap-3">
               <Select value={chargeType} onChange={(e) => setChargeType(e.target.value as RateType)}>
                 <option value="FLAT">Flat (₹)</option>
@@ -1544,7 +1562,7 @@ function MdrRateModal({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-ink-100 bg-white shadow-xl"
+        className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink-100 bg-white px-5 py-4">
@@ -1703,7 +1721,7 @@ function MdrRateModal({
           </div>
 
           <div className="rounded-xl border border-orange-100 bg-orange-50/40 p-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               {isPos ? "Service charge & minimum MDR" : "Service charge & vendor cost"}
             </p>
             <div className="grid grid-cols-3 gap-3">
@@ -1847,7 +1865,7 @@ function MdrRateModal({
           </div>
 
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">Commission (from Revenue Wallet)</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Commission (from Revenue Wallet)</p>
             <div className="grid grid-cols-4 gap-3">
               <div>
                 <Label>Type</Label>
@@ -2043,7 +2061,7 @@ function AssignModal({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-ink-100 bg-white shadow-xl"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink-100 bg-white px-5 py-4">
@@ -2064,7 +2082,7 @@ function AssignModal({
           {/* Available users — scoped to who can actually hold this scheme */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs font-bold uppercase tracking-widest text-ink-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
                 Available users
               </p>
               {visibleUsers.length > 0 && (
@@ -2092,7 +2110,7 @@ function AssignModal({
 
           {/* Currently assigned */}
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Currently assigned ({assigned.length})
             </p>
             {loadingAssigned ? (
@@ -2169,7 +2187,7 @@ function CreateSchemeModal({ onClose, onSaved }: { onClose: () => void; onSaved:
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <h3 className="font-display text-base font-semibold text-ink-900">Create scheme</h3>
           <button onClick={onClose} className="rounded-lg p-1 text-ink-500 hover:bg-ink-50">

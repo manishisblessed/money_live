@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  * so the artwork is never stretched or distorted.
  *
  * When no logo matches — or the asset fails to load — it degrades to the
- * generic purple credit-card icon (the app's existing service icon), exactly as
+ * generic credit-card glyph on the Emoney energy gradient, exactly as
  * required by the fallback spec.
  */
 export function BankLogo({
@@ -37,12 +37,14 @@ export function BankLogo({
   }, [src]);
 
   const showLogo = !!src && !failed;
+  const radius = size >= 40 ? "rounded-2xl" : size >= 28 ? "rounded-xl" : "rounded-lg";
 
   return (
     <span
       style={{ width: size, height: size }}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-ink-100 bg-white",
+        "inline-flex shrink-0 items-center justify-center overflow-hidden bg-white ring-1 ring-inset ring-ink-100 shadow-[0_1px_2px_rgba(14,22,38,0.06)]",
+        radius,
         className
       )}
       aria-hidden="true"
@@ -60,9 +62,9 @@ export function BankLogo({
           className="object-contain"
         />
       ) : (
-        // Generic fallback — matches the app's service-page credit-card icon.
-        <span className="grid h-full w-full place-items-center bg-gradient-to-br from-brand-600 to-accent-500 text-white">
-          <CreditCard style={{ width: size * 0.5, height: size * 0.5 }} />
+        // Generic fallback — Emoney energy gradient tile with a card glyph.
+        <span className="grid h-full w-full place-items-center bg-energy-gradient text-white">
+          <CreditCard style={{ width: size * 0.5, height: size * 0.5 }} strokeWidth={1.75} />
         </span>
       )}
     </span>

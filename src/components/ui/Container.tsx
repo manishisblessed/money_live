@@ -1,11 +1,20 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Container — the single horizontal rhythm for every marketing surface.
+ * `max-w-7xl` with responsive gutters (16 → 24 → 32px).
+ */
 export function Container({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("container-x", className)} {...props} />;
+  return (
+    <div
+      className={cn("mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8", className)}
+      {...props}
+    />
+  );
 }
 
 export function Section({

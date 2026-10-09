@@ -16,17 +16,34 @@ import {
   Activity as ActivityIcon,
   Layers,
   Info,
-  AlertCircle,
-  Store,
   CreditCard,
   Send,
   ClipboardCheck,
   FileText,
+  Mail,
+  Phone,
+  MapPin,
+  Store,
 } from "lucide-react";
+import { Stack, Storefront, TreeStructure, WarningCircle, Pulse, FileText as FileTextPh } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { UplineChain } from "@/components/dashboard/UplineChain";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
+import {
+  EmptyState,
+  KeyValueList,
+  MetaItem,
+  PillTabs,
+  ProfileHero,
+  SectionCard,
+  Stagger,
+  StaggerItem,
+  StatusChip,
+} from "@/components/dashboard/patterns";
 import { formatINR } from "@/lib/utils";
 import { SERVICE_FAMILIES, familyOf, type ServiceFamily } from "@/lib/scheme/constants";
 import {
@@ -150,27 +167,15 @@ function groupByFamily(slabs: Slab[]): Array<readonly [ServiceFamily, Slab[]]> {
 
 const FAMILY_ICONS: Record<string, typeof CreditCard> = { BBPS: CreditCard, PAYOUT: Send };
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  tint,
-}: {
-  icon: typeof Wallet;
-  label: string;
-  value: string;
-  tint: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-4">
-      <div className={`mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl ${tint}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">{label}</p>
-      <p className="mt-0.5 font-display text-lg font-bold text-ink-900">{value}</p>
-    </div>
-  );
-}
+const TABS: { value: Tab; label: string; icon: typeof History }[] = [
+  { value: "onboarding", label: "Onboarding", icon: ClipboardCheck },
+  { value: "kyc", label: "Documents & KYC", icon: FileText },
+  { value: "transactions", label: "Transactions", icon: History },
+  { value: "activity", label: "Activity", icon: ActivityIcon },
+  { value: "scheme", label: "Scheme", icon: Layers },
+];
+
+const prettyRole = (r: string) => r.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function NetworkMemberDetailPage() {
   const params = useParams<{ id: string }>();
@@ -316,21 +321,17 @@ export default function NetworkMemberDetailPage() {
   }, [tab, loadTxns, loadActs, loadScheme, loadOnboarding, loadKyc]);
 
   const cols: Column<Txn>[] = [
-    { key: "id", header: "Ref ID", render: (r) => <span className="font-medium text-brand-600">{r.id}</span> },
+    { key: "id", header: "Ref ID", render: (r) => <span className="font-mono text-xs font-medium text-brand-600">{r.id}</span> },
     { key: "service", header: "Service" },
     { key: "customer", header: "Customer" },
-    { key: "amount", header: "Amount", align: "right", render: (r) => formatINR(r.amount) },
-    { key: "commission", header: "Commission", align: "right", render: (r) => formatINR(r.commission) },
+    { key: "amount", header: "Amount", align: "right", render: (r) => <span className="font-semibold tabular-nums">{formatINR(r.amount)}</span> },
+    { key: "commission", header: "Commission", align: "right", render: (r) => <span className="tabular-nums text-emerald-700">{formatINR(r.commission)}</span> },
     {
       key: "status",
       header: "Status",
-      render: (r) => (
-        <Badge variant={r.status === "Success" ? "success" : r.status === "Pending" ? "warning" : "danger"}>
-          {r.status}
-        </Badge>
-      ),
+      render: (r) => <StatusChip status={r.status} label={r.status} />,
     },
-    { key: "date", header: "Date" },
+    { key: "date", header: "Date", render: (r) => <span className="text-xs text-ink-500">{r.date}</span> },
   ];
 
   const grouped = useMemo(() => groupByFamily(scheme?.slabs ?? []), [scheme]);
@@ -339,100 +340,204 @@ export default function NetworkMemberDetailPage() {
   const u = detail?.user;
   const s = detail?.stats;
 
+  const schemeTables = scheme ? (
+    <div className="space-y-6">
+      {grouped.map(([family, list]) => {
+        const Icon = FAMILY_ICONS[family.key] ?? CreditCard;
+        return (
+          <div key={family.key}>
+            <div className="mb-2 flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-ink-50 text-ink-600">
+                <Icon className="h-4 w-4" />
+              </span>
+              <h4 className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">{family.label}</h4>
+              <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[10px] font-bold text-ink-600">{list.length}</span>
+            </div>
+            <div className="overflow-x-auto rounded-2xl ring-1 ring-inset ring-ink-100">
+              <table className="w-full min-w-max text-left text-sm">
+                <thead className="bg-ink-50/70 text-[11px] uppercase tracking-wider text-ink-500">
+                  <tr>
+                    <th className="px-4 py-2.5 font-semibold">Service</th>
+                    <th className="px-4 py-2.5 font-semibold">Provider</th>
+                    <th className="px-4 py-2.5 font-semibold">Band</th>
+                    <th className="px-4 py-2.5 text-right font-semibold">Charge</th>
+                    <th className="px-4 py-2.5 text-right font-semibold">Commission</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-100">
+                  {list.map((sl) => (
+                    <tr key={sl.id} className="transition-colors hover:bg-brand-50/30">
+                      <td className="px-4 py-2.5 font-medium text-ink-900">{sl.service.replace(/_/g, " ")}</td>
+                      <td className="px-4 py-2.5 text-xs text-ink-600">{sl.provider ?? "All"}</td>
+                      <td className="px-4 py-2.5 tabular-nums text-ink-600">{fmtBand(sl.minAmount, sl.maxAmount)}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">{fmtServiceRate(sl.chargeType, sl.chargeValue)}</td>
+                      <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-emerald-700">{fmtServiceRate(sl.commissionType, sl.commissionValue)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })}
+
+      {mdrSlabs.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <IconTile icon={Storefront} tone="amber" size="xs" />
+            <h4 className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">POS MDR</h4>
+            <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[10px] font-bold text-ink-600">{mdrSlabs.length}</span>
+          </div>
+          <div className="overflow-x-auto rounded-2xl ring-1 ring-inset ring-ink-100">
+            <table className="w-full min-w-max text-left text-sm">
+              <thead className="bg-ink-50/70 text-[11px] uppercase tracking-wider text-ink-500">
+                <tr>
+                  <th className="px-4 py-2.5 font-semibold">Rail</th>
+                  <th className="px-4 py-2.5 font-semibold">Company</th>
+                  <th className="px-4 py-2.5 font-semibold">Mode</th>
+                  <th className="px-4 py-2.5 font-semibold">Card / Brand</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">MDR T+1</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">MDR T+0</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">Commission</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink-100">
+                {mdrSlabs.map((sl) => (
+                  <tr key={sl.id} className="transition-colors hover:bg-brand-50/30">
+                    <td className="px-4 py-2.5 font-medium text-ink-900">{sl.serviceKind}</td>
+                    <td className="px-4 py-2.5 text-ink-600">{sl.company ?? "All"}</td>
+                    <td className="px-4 py-2.5 text-ink-600">{sl.paymentMode === "*" ? "Any" : sl.paymentMode}</td>
+                    <td className="px-4 py-2.5 text-xs text-ink-600">
+                      {[sl.cardType, sl.brandType, sl.classification].filter(Boolean).join(" / ") || "Any"}
+                    </td>
+                    <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">{fmtRate(sl.mdrType, sl.mdrValue)}</td>
+                    <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">
+                      {sl.mdrValueT0 > 0 ? fmtRate(sl.mdrType, sl.mdrValueT0) : "= T+1"}
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-emerald-700">
+                      {sl.commission > 0 ? fmtRate(sl.commissionType, sl.commission) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {grouped.length === 0 && mdrSlabs.length === 0 && (
+        <EmptyState compact icon={Stack} title="No slabs configured yet" description="This scheme has no rates in it." />
+      )}
+    </div>
+  ) : null;
+
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Network member"
+        eyebrow="Network · Member"
         title={u?.name ?? "Member"}
         description={
           u
-            ? `${u.role.replace(/-/g, " ")} · ${u.userCode ?? u.id.slice(0, 8)} · ${u.shop}`
+            ? `${prettyRole(u.role)} · ${u.userCode ?? u.id.slice(0, 8)} · ${u.shop}`
             : "Loading member…"
         }
         actions={
-          <div className="flex items-center gap-2">
+          <>
             <Link href="/dashboard/network">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
             </Link>
-            <Button variant="outline" onClick={loadDetail} disabled={loading}>
+            <Button variant="outline" onClick={loadDetail} disabled={loading} aria-label="Refresh member">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
-          </div>
+          </>
         }
       />
 
       {error ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-800">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <div>
-            <p className="font-semibold">Can’t open this account</p>
-            <p className="mt-1">{error}</p>
-          </div>
-        </div>
+        <EmptyState
+          bordered
+          tone="coral"
+          icon={WarningCircle}
+          title="Can’t open this account"
+          description={error}
+        />
       ) : loading || !u || !s ? (
-        <div className="flex items-center justify-center rounded-2xl border border-ink-100 bg-white py-16 text-ink-500">
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading member…
-        </div>
+        <SectionCard className="grid place-items-center py-16">
+          <span className="inline-flex items-center gap-2 text-sm text-ink-500">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-600" /> Loading member…
+          </span>
+        </SectionCard>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={u.status === "Active" ? "success" : u.status === "Pending KYC" ? "warning" : "danger"}>
-              {u.status}
-            </Badge>
-            {u.schemeName ? (
-              <Badge variant="brand">
-                <Layers className="h-3.5 w-3.5" /> {u.schemeName}
-              </Badge>
-            ) : (
-              <Badge variant="warning">No scheme</Badge>
-            )}
-            <span className="text-xs text-ink-500">
-              {u.city}, {u.state} · Joined {u.joined}
-            </span>
-            {u.parent && (
-              <span className="text-xs text-ink-400">
-                Parent: <span className="font-medium text-ink-600">{u.parent.name}</span> ({u.parent.role.replace(/-/g, " ")})
-              </span>
-            )}
-          </div>
+          <ProfileHero
+            name={u.name}
+            subtitle={u.shop}
+            tone={u.status === "Active" ? "energy" : u.status === "Suspended" ? "ink" : "brand"}
+            chips={
+              <>
+                <Badge variant="brand">{prettyRole(u.role)}</Badge>
+                <Badge variant="default" className="font-mono">{u.userCode ?? u.id.slice(0, 8)}</Badge>
+                <StatusChip status={u.status} label={u.status} />
+                {u.schemeName ? (
+                  <Badge variant="royal">
+                    <Layers className="h-3 w-3" /> {u.schemeName}
+                  </Badge>
+                ) : (
+                  <Badge variant="warning">No scheme</Badge>
+                )}
+              </>
+            }
+            meta={
+              <>
+                {u.email && <MetaItem icon={<Mail className="h-3.5 w-3.5" />}>{u.email}</MetaItem>}
+                {u.phone && <MetaItem icon={<Phone className="h-3.5 w-3.5" />}>{u.phone}</MetaItem>}
+                <MetaItem icon={<MapPin className="h-3.5 w-3.5" />}>{u.city}, {u.state}</MetaItem>
+                <MetaItem icon={<Store className="h-3.5 w-3.5" />}>{u.shop}</MetaItem>
+                <MetaItem icon={<CalendarDays className="h-3.5 w-3.5" />} className="text-ink-400">Joined {u.joined}</MetaItem>
+              </>
+            }
+            aside={
+              <div className="rounded-2xl bg-ink-950 px-5 py-4 text-left text-white sm:text-right">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">Wallet balance</p>
+                <p className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] md:text-3xl">{formatINR(u.walletBalance)}</p>
+              </div>
+            }
+          >
+            <div className="relative mt-6 grid gap-4 border-t border-ink-100 pt-5 lg:grid-cols-2">
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink-500">Upline</p>
+                <UplineChain
+                  nodes={
+                    u.parent
+                      ? [{ role: u.parent.role.toUpperCase().replace(/-/g, "_"), name: u.parent.name }]
+                      : []
+                  }
+                />
+              </div>
+              <KeyValueList
+                dense
+                items={[
+                  { label: "Lifetime turnover", value: formatINR(s.turnoverLifetime) },
+                  { label: "Lifetime commission", value: formatINR(s.commissionLifetime) },
+                  { label: "Total transactions", value: s.txnCount.toLocaleString("en-IN") },
+                ]}
+              />
+            </div>
+          </ProfileHero>
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-            <StatCard icon={Wallet} label="Wallet" value={formatINR(u.walletBalance)} tint="bg-brand-100 text-brand-700" />
-            <StatCard icon={CalendarDays} label="Today" value={formatINR(s.turnoverToday)} tint="bg-blue-100 text-blue-700" />
-            <StatCard icon={TrendingUp} label="MTD Turnover" value={formatINR(s.turnoverMtd)} tint="bg-emerald-100 text-emerald-700" />
-            <StatCard icon={TrendingUp} label="Lifetime" value={formatINR(s.turnoverLifetime)} tint="bg-emerald-100 text-emerald-700" />
-            <StatCard icon={CircleDollarSign} label="Commission MTD" value={formatINR(s.commissionMtd)} tint="bg-amber-100 text-amber-700" />
-            <StatCard icon={Users} label="Downline" value={String(u.downline)} tint="bg-violet-100 text-violet-700" />
-          </div>
+          <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+            <StaggerItem><StatCard icon={Wallet} label="Wallet" value={formatINR(u.walletBalance)} accent="brand" /></StaggerItem>
+            <StaggerItem><StatCard icon={CalendarDays} label="Today" value={formatINR(s.turnoverToday)} accent="brand" /></StaggerItem>
+            <StaggerItem><StatCard icon={TrendingUp} label="MTD turnover" value={formatINR(s.turnoverMtd)} accent="emerald" /></StaggerItem>
+            <StaggerItem><StatCard icon={TrendingUp} label="Lifetime" value={formatINR(s.turnoverLifetime)} accent="emerald" /></StaggerItem>
+            <StaggerItem><StatCard icon={CircleDollarSign} label="Commission MTD" value={formatINR(s.commissionMtd)} accent="accent" /></StaggerItem>
+            <StaggerItem><StatCard icon={Users} label="Downline" value={String(u.downline)} accent="violet" /></StaggerItem>
+          </Stagger>
 
-          <div className="flex flex-wrap gap-1 border-b border-ink-100">
-            {([
-              { key: "onboarding", label: "Onboarding", icon: ClipboardCheck },
-              { key: "kyc", label: "Documents & KYC", icon: FileText },
-              { key: "transactions", label: "Transactions", icon: History },
-              { key: "activity", label: "Activity", icon: ActivityIcon },
-              { key: "scheme", label: "Scheme", icon: Layers },
-            ] as const).map((t) => {
-              const active = tab === t.key;
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-                    active
-                      ? "border-brand-600 text-brand-700"
-                      : "border-transparent text-ink-500 hover:text-ink-800"
-                  }`}
-                >
-                  <t.icon className="h-4 w-4" />
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
+          <PillTabs aria-label="Member sections" tabs={TABS} value={tab} onChange={setTab} />
 
           {tab === "onboarding" && (
             <OnboardingProgressView
@@ -445,32 +550,31 @@ export default function NetworkMemberDetailPage() {
           )}
 
           {tab === "kyc" && (
-            <div className="rounded-2xl border border-ink-100 bg-white">
+            <SectionCard padding="none">
               {kycLoading ? (
                 <div className="flex items-center justify-center py-16 text-ink-500">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading documents & KYC…
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin text-brand-600" /> Loading documents &amp; KYC…
                 </div>
               ) : kycError ? (
-                <div className="m-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="m-5 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-inset ring-amber-200">
                   <Info className="mt-0.5 h-5 w-5 shrink-0" />
                   <div>{kycError}</div>
                 </div>
               ) : !kyc ? (
-                <p className="py-16 text-center text-sm text-ink-500">
-                  No KYC record found for this member.
-                </p>
+                <EmptyState icon={FileTextPh} title="No KYC record yet" description="This member hasn't submitted KYC." />
               ) : (
                 <KycDetailView
                   kyc={kyc}
                   getDocHref={(docId) => `/api/network/${id}/documents/${docId}`}
                 />
               )}
-            </div>
+            </SectionCard>
           )}
 
           {tab === "transactions" && (
             <DataTable
-              title={`Transactions (${txns.length})`}
+              title="Transactions"
+              description={`${txns.length} most recent`}
               columns={cols}
               data={txns}
               loading={txnLoading}
@@ -479,26 +583,29 @@ export default function NetworkMemberDetailPage() {
           )}
 
           {tab === "activity" && (
-            <div className="rounded-2xl border border-ink-100 bg-white">
+            <SectionCard
+              icon={<IconTile icon={Pulse} tone="brand" size="sm" />}
+              title="Activity"
+              description="Logins, changes and actions on this account."
+              padding="none"
+            >
               {actLoading ? (
                 <div className="flex items-center justify-center py-14 text-ink-500">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading activity…
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin text-brand-600" /> Loading activity…
                 </div>
               ) : acts.length === 0 ? (
-                <p className="py-14 text-center text-sm text-ink-500">No recorded activity yet.</p>
+                <EmptyState compact icon={Pulse} title="No recorded activity yet" />
               ) : (
-                <ul className="divide-y divide-ink-50">
+                <ul className="divide-y divide-ink-100">
                   {acts.map((a) => (
-                    <li key={a.id} className="flex items-start gap-3 px-5 py-3">
-                      <div className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-500">
+                    <li key={a.id} className="flex items-start gap-3 px-5 py-3 md:px-6">
+                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-ink-50 text-ink-500 ring-1 ring-inset ring-ink-100">
                         <ActivityIcon className="h-4 w-4" />
-                      </div>
+                      </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-medium text-ink-900">{a.label}</span>
-                          {!a.bySelf && (
-                            <Badge variant="default">by parent/admin</Badge>
-                          )}
+                          {!a.bySelf && <Badge variant="default" size="sm">by parent/admin</Badge>}
                         </div>
                         <p className="text-xs text-ink-500">
                           {a.date}
@@ -509,130 +616,47 @@ export default function NetworkMemberDetailPage() {
                   ))}
                 </ul>
               )}
-            </div>
+            </SectionCard>
           )}
 
           {tab === "scheme" && (
-            <div className="rounded-2xl border border-ink-100 bg-white p-5">
+            <SectionCard
+              icon={<IconTile icon={Stack} tone="royal" size="sm" />}
+              title={scheme ? scheme.name : "Scheme"}
+              description={scheme?.description ?? "Charges, commissions and MDR that apply to this member."}
+              action={
+                scheme ? (
+                  <>
+                    <Badge variant="brand">{scheme.slabCount} slabs</Badge>
+                    {scheme.mdrSlabCount > 0 && <Badge variant="warning">{scheme.mdrSlabCount} MDR</Badge>}
+                  </>
+                ) : undefined
+              }
+            >
               {schemeLoading ? (
                 <div className="flex items-center justify-center py-10 text-ink-500">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading scheme…
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin text-brand-600" /> Loading scheme…
                 </div>
               ) : schemeError ? (
-                <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-inset ring-amber-200">
                   <Info className="mt-0.5 h-5 w-5 shrink-0" />
                   <div>{schemeError}</div>
                 </div>
               ) : !scheme ? (
-                <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-                  <div>
-                    <p className="font-semibold">No scheme assigned to this member</p>
-                    <p className="mt-1">They cannot process transactions until a scheme is assigned.</p>
-                  </div>
-                </div>
+                <EmptyState
+                  compact
+                  tone="amber"
+                  icon={TreeStructure}
+                  title="No scheme assigned to this member"
+                  description="They cannot process transactions until a scheme is assigned."
+                />
               ) : (
-                <>
-                  <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <Layers className="h-4 w-4 text-ink-400" />
-                    <h3 className="font-display text-sm font-semibold text-ink-900">{scheme.name}</h3>
-                    <Badge variant="brand">{scheme.slabCount} slabs</Badge>
-                    {scheme.mdrSlabCount > 0 && <Badge variant="warning">{scheme.mdrSlabCount} MDR</Badge>}
-                  </div>
-
-                  <div className="space-y-4">
-                    {grouped.map(([family, list]) => {
-                      const Icon = FAMILY_ICONS[family.key] ?? CreditCard;
-                      return (
-                        <div key={family.key}>
-                          <div className="mb-1.5 flex items-center gap-1.5">
-                            <Icon className="h-4 w-4 text-ink-600" />
-                            <h4 className="text-sm font-semibold text-ink-700">
-                              {family.label} ({list.length})
-                            </h4>
-                          </div>
-                          <div className="overflow-x-auto rounded-xl border border-ink-100">
-                            <table className="w-full min-w-max text-left text-sm">
-                              <thead className="bg-ink-50/60 text-[11px] uppercase tracking-wide text-ink-400">
-                                <tr>
-                                  <th className="px-3 py-2">Service</th>
-                                  <th className="px-3 py-2">Provider</th>
-                                  <th className="px-3 py-2">Band</th>
-                                  <th className="px-3 py-2 text-right">Charge</th>
-                                  <th className="px-3 py-2 text-right">Commission</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {list.map((sl) => (
-                                  <tr key={sl.id} className="border-t border-ink-50">
-                                    <td className="px-3 py-2 font-medium text-ink-900">{sl.service.replace(/_/g, " ")}</td>
-                                    <td className="px-3 py-2 text-xs text-ink-600">{sl.provider ?? "All"}</td>
-                                    <td className="px-3 py-2 text-ink-600">{fmtBand(sl.minAmount, sl.maxAmount)}</td>
-                                    <td className="px-3 py-2 text-right text-ink-900">{fmtServiceRate(sl.chargeType, sl.chargeValue)}</td>
-                                    <td className="px-3 py-2 text-right font-semibold text-emerald-700">{fmtServiceRate(sl.commissionType, sl.commissionValue)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {mdrSlabs.length > 0 && (
-                      <div>
-                        <div className="mb-1.5 flex items-center gap-1.5">
-                          <Store className="h-4 w-4 text-orange-600" />
-                          <h4 className="text-sm font-semibold text-orange-600">POS MDR ({mdrSlabs.length})</h4>
-                        </div>
-                        <div className="overflow-x-auto rounded-xl border border-ink-100">
-                          <table className="w-full min-w-max text-left text-sm">
-                            <thead className="bg-ink-50/60 text-[11px] uppercase tracking-wide text-ink-400">
-                              <tr>
-                                <th className="px-3 py-2">Rail</th>
-                                <th className="px-3 py-2">Company</th>
-                                <th className="px-3 py-2">Mode</th>
-                                <th className="px-3 py-2">Card / Brand</th>
-                                <th className="px-3 py-2 text-right">MDR T+1</th>
-                                <th className="px-3 py-2 text-right">MDR T+0</th>
-                                <th className="px-3 py-2 text-right">Commission</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {mdrSlabs.map((sl) => (
-                                <tr key={sl.id} className="border-t border-ink-50">
-                                  <td className="px-3 py-2 font-medium text-ink-900">{sl.serviceKind}</td>
-                                  <td className="px-3 py-2 text-ink-600">{sl.company ?? "All"}</td>
-                                  <td className="px-3 py-2 text-ink-600">{sl.paymentMode === "*" ? "Any" : sl.paymentMode}</td>
-                                  <td className="px-3 py-2 text-xs text-ink-600">
-                                    {[sl.cardType, sl.brandType, sl.classification].filter(Boolean).join(" / ") || "Any"}
-                                  </td>
-                                  <td className="px-3 py-2 text-right text-ink-900">{fmtRate(sl.mdrType, sl.mdrValue)}</td>
-                                  <td className="px-3 py-2 text-right text-ink-900">
-                                    {sl.mdrValueT0 > 0 ? fmtRate(sl.mdrType, sl.mdrValueT0) : "= T+1"}
-                                  </td>
-                                  <td className="px-3 py-2 text-right font-semibold text-emerald-700">
-                                    {sl.commission > 0 ? fmtRate(sl.commissionType, sl.commission) : "—"}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-
-                    {grouped.length === 0 && mdrSlabs.length === 0 && (
-                      <p className="py-4 text-center text-sm text-ink-500">No slabs configured in this scheme yet.</p>
-                    )}
-                  </div>
-                </>
+                schemeTables
               )}
-            </div>
+            </SectionCard>
           )}
         </>
       )}
     </div>
   );
 }
-

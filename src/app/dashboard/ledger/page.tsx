@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  BookOpenCheck,
   Search,
   ArrowDownLeft,
   ArrowUpRight,
@@ -12,12 +11,13 @@ import {
   Lock,
   Undo2,
 } from "lucide-react";
-import { ServicePageHeader } from "@/components/dashboard/ServicePage";
+import { Receipt } from "@phosphor-icons/react";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Input, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { BankLogo } from "@/components/dashboard/BankLogo";
-import { formatINR } from "@/lib/utils";
+import { EmptyState, FilterBar, SectionCard, StatusChip } from "@/components/dashboard/patterns";
+import { cn, formatINR } from "@/lib/utils";
 import { downloadCSV, downloadPDF, downloadZIP, type ReportColumn } from "@/lib/reports";
 
 type WalletTxn = {
@@ -134,159 +134,176 @@ export default function LedgerPage() {
     downloadZIP(`ledger-page-${page}`, data.txns, ledgerCols);
   }
 
+  const pager = (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+        disabled={loading || page <= 1}
+        aria-label="Previous page"
+      >
+        <ChevronLeft className="h-4 w-4" /> Prev
+      </Button>
+      <span className="min-w-[4.5rem] text-center text-xs font-medium tabular-nums text-ink-500">
+        {data ? `${data.page} / ${totalPages}` : "—"}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+        disabled={loading || page >= totalPages}
+        aria-label="Next page"
+      >
+        Next <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   return (
-    <div>
-      <ServicePageHeader
-        icon={BookOpenCheck}
-        title="Wallet Ledger"
-        description="Every credit and debit on your wallet — commissions, transactions, payouts, settlements and more."
+    <div className="min-w-0 space-y-6">
+      <PageHeader
+        eyebrow="Account"
+        title="Wallet ledger"
+        description="Every credit and debit on your wallet — commissions, transactions, payouts, settlements and holds."
+        actions={
+          <>
+            <Button variant="outline" size="md" onClick={exportCsv} disabled={!data?.txns.length}>
+              <FileDown className="h-4 w-4" />
+              CSV
+            </Button>
+            <Button variant="outline" size="md" onClick={exportPdf} disabled={!data?.txns.length}>
+              <FileDown className="h-4 w-4" />
+              PDF
+            </Button>
+            <Button variant="secondary" size="md" onClick={exportZip} disabled={!data?.txns.length}>
+              <FileDown className="h-4 w-4" />
+              ZIP
+            </Button>
+          </>
+        }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-ink-100 bg-white p-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+      <FilterBar
+        title="Entries"
+        count={data ? data.total : undefined}
+        hint={data ? `showing ${data.txns.length} on this page` : undefined}
+        actions={pager}
+      >
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by note or reference..."
-            className="pl-9"
+            placeholder="Search by note or reference…"
+            className="pl-10"
+            aria-label="Search ledger"
           />
         </div>
-        <Select value={direction} onChange={(e) => setDirection(e.target.value)} className="w-36">
+        <Select value={direction} onChange={(e) => setDirection(e.target.value)} className="w-36" aria-label="Type">
           {["All", "CREDIT", "DEBIT"].map((d) => (
             <option key={d} value={d}>
               {d === "All" ? "All types" : d}
             </option>
           ))}
         </Select>
-        <Select value={reason} onChange={(e) => setReason(e.target.value)} className="w-48">
+        <Select value={reason} onChange={(e) => setReason(e.target.value)} className="w-52" aria-label="Reason">
           {REASON_OPTIONS.map((r) => (
             <option key={r} value={r}>
               {r === "All" ? "All reasons" : REASON_LABELS[r] ?? r}
             </option>
           ))}
         </Select>
-        <Button variant="outline" size="md" onClick={exportCsv} disabled={!data?.txns.length}>
-          <FileDown className="h-4 w-4" />
-          CSV
-        </Button>
-        <Button variant="outline" size="md" onClick={exportPdf} disabled={!data?.txns.length}>
-          <FileDown className="h-4 w-4" />
-          PDF
-        </Button>
-        <Button variant="outline" size="md" onClick={exportZip} disabled={!data?.txns.length}>
-          <FileDown className="h-4 w-4" />
-          ZIP
-        </Button>
-      </div>
+      </FilterBar>
 
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-5 py-4">
-          <p className="text-xs text-ink-500">
-            {data
-              ? `${data.total.toLocaleString("en-IN")} total entries · showing ${data.txns.length} (page ${data.page} of ${totalPages})`
-              : "Loading…"}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={loading || page <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" /> Prev
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={loading || page >= totalPages}
-            >
-              Next <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Type</th>
-                <th className="px-5 py-3 font-semibold">Description</th>
-                <th className="px-5 py-3 font-semibold text-right">Amount</th>
-                <th className="px-5 py-3 font-semibold text-right">Balance after</th>
-                <th className="px-5 py-3 font-semibold">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100 text-ink-800">
-              {!data?.txns.length ? (
+      <SectionCard padding="none">
+        {!data?.txns.length ? (
+          loading ? (
+            <div className="px-5 py-14 text-center text-sm text-ink-500">Loading your ledger…</div>
+          ) : (
+            <EmptyState
+              icon={Receipt}
+              title="No entries match these filters"
+              description="Try widening the date range or clearing the type and reason filters."
+            />
+          )
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-max text-sm">
+              <thead className="bg-ink-50/70 text-left text-[11px] uppercase tracking-wider text-ink-500">
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-sm text-ink-500">
-                    {loading ? "Loading..." : "No ledger entries match your filters."}
-                  </td>
+                  <th className="px-5 py-3 font-semibold">Type</th>
+                  <th className="px-5 py-3 font-semibold">Description</th>
+                  <th className="px-5 py-3 text-right font-semibold">Amount</th>
+                  <th className="px-5 py-3 text-right font-semibold">Balance after</th>
+                  <th className="px-5 py-3 font-semibold">Date</th>
                 </tr>
-              ) : (
-                data.txns.map((t) => (
+              </thead>
+              <tbody className="divide-y divide-ink-100 text-ink-800">
+                {data.txns.map((t) => (
                   <tr
                     key={t.id}
-                    className={t.memo ? "bg-ink-50/30 hover:bg-ink-50/60" : "hover:bg-ink-50/40"}
+                    className={cn(
+                      "transition-colors",
+                      t.memo ? "bg-ink-50/40 hover:bg-ink-50/70" : "hover:bg-brand-50/30"
+                    )}
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
                         {t.memo ? (
                           <>
-                            <span className="grid h-7 w-7 place-items-center rounded-lg bg-amber-50 text-amber-600">
+                            <span className="grid h-8 w-8 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-100">
                               {t.direction === "DEBIT" ? (
                                 <Lock className="h-3.5 w-3.5" />
                               ) : (
                                 <Undo2 className="h-3.5 w-3.5" />
                               )}
                             </span>
-                            <Badge variant="warning">
-                              {t.direction === "DEBIT" ? "HELD" : "RELEASED"}
-                            </Badge>
+                            <StatusChip status={t.direction === "DEBIT" ? "HELD" : "RELEASED"} />
                           </>
                         ) : t.direction === "CREDIT" ? (
                           <>
-                            <span className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-50 text-emerald-600">
+                            <span className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100">
                               <ArrowDownLeft className="h-3.5 w-3.5" />
                             </span>
-                            <Badge variant="success">CREDIT</Badge>
+                            <StatusChip status="CREDIT" label="CREDIT" />
                           </>
                         ) : (
                           <>
-                            <span className="grid h-7 w-7 place-items-center rounded-lg bg-rose-50 text-rose-600">
+                            <span className="grid h-8 w-8 place-items-center rounded-xl bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100">
                               <ArrowUpRight className="h-3.5 w-3.5" />
                             </span>
-                            <Badge variant="danger">DEBIT</Badge>
+                            <StatusChip status="DEBIT" label="DEBIT" />
                           </>
                         )}
                       </div>
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         {t.logo && <BankLogo name={t.logo} size={32} />}
                         <div className="min-w-0">
                           <div className="font-medium text-ink-900">
                             {REASON_LABELS[t.reason] ?? t.reason}
                           </div>
                           {t.note && <div className="text-xs text-ink-500">{t.note}</div>}
-                          {t.refId && <div className="text-[11px] text-ink-400 font-mono">{t.refId}</div>}
+                          {t.refId && <div className="font-mono text-[11px] text-ink-400">{t.refId}</div>}
                         </div>
                       </div>
                     </td>
                     <td
-                      className={`px-5 py-3 text-right font-semibold ${
+                      className={cn(
+                        "px-5 py-3 text-right font-display text-base font-semibold tabular-nums tracking-[-0.01em]",
                         t.memo
                           ? "text-ink-400"
                           : t.direction === "CREDIT"
-                          ? "text-emerald-700"
-                          : "text-rose-700"
-                      }`}
+                            ? "text-emerald-700"
+                            : "text-rose-700"
+                      )}
                     >
                       {t.memo ? "" : t.direction === "CREDIT" ? "+" : "−"}
                       {formatINR(t.amount)}
                     </td>
-                    <td className="px-5 py-3 text-right text-ink-600">
+                    <td className="px-5 py-3 text-right tabular-nums text-ink-600">
                       {t.balanceAfter == null ? (
                         <span className="text-ink-300" title="A reservation does not change your balance">
                           —
@@ -295,19 +312,27 @@ export default function LedgerPage() {
                         formatINR(t.balanceAfter)
                       )}
                     </td>
-                    <td className="px-5 py-3 text-xs text-ink-500 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-5 py-3 text-xs text-ink-500">
                       {new Date(t.createdAt).toLocaleString("en-IN", {
                         dateStyle: "medium",
                         timeStyle: "short",
                       })}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {data && data.txns.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 px-5 py-3">
+            <p className="text-xs text-ink-500">
+              {data.total.toLocaleString("en-IN")} total entries · page {data.page} of {totalPages}
+            </p>
+            {pager}
+          </div>
+        )}
+      </SectionCard>
     </div>
   );
 }

@@ -108,7 +108,7 @@ export default function PosBookingPage() {
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(typeof d?.error === "string" ? d.error : "Cancellation failed");
-      toast.success(`Booking cancelled — ${formatINR(booking.amountPaid)} refunded to your wallet.`);
+      toast.success(`Booking cancelled â€” ${formatINR(booking.amountPaid)} refunded to your wallet.`);
       setCancelTarget(null);
       mutate();
     } catch (e) {
@@ -126,7 +126,7 @@ export default function PosBookingPage() {
       <PageHeader
         eyebrow="Point of Sale"
         title="Book a POS Machine"
-        description="Apply for a POS machine, confirm your delivery address and pay the rental charges — then track your order in real time from assignment to delivery."
+        description="Apply for a POS machine, confirm your delivery address and pay the rental charges â€” then track your order in real time from assignment to delivery."
         actions={
           <Button variant="outline" size="sm" onClick={() => mutate()}>
             <RefreshCw className="h-4 w-4" /> Refresh
@@ -141,7 +141,7 @@ export default function PosBookingPage() {
         <StatCard label="Machines Live" value={String(liveCount)} icon={PackageCheck} accent="emerald" />
       </div>
 
-      {/* ── Available plans ── */}
+      {/* â”€â”€ Available plans â”€â”€ */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <ShoppingCart className="h-4 w-4 text-brand-600" />
@@ -153,8 +153,8 @@ export default function PosBookingPage() {
             <XCircle className="h-4 w-4 shrink-0" /> {error instanceof Error ? error.message : "Failed to load plans."}
           </div>
         ) : isLoading ? (
-          <div className="flex items-center gap-2 rounded-2xl border border-ink-100 bg-white p-6 text-sm text-ink-500">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading plans…
+          <div className="flex items-center gap-2 rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-6 text-sm text-ink-500">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading plansâ€¦
           </div>
         ) : plans.length === 0 ? (
           <div className="rounded-2xl border border-ink-200 bg-ink-50 p-6 text-center text-sm text-ink-600">
@@ -163,7 +163,7 @@ export default function PosBookingPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {plans.map((p) => (
-              <div key={p.id} className="flex flex-col rounded-2xl border border-ink-100 bg-white p-5 shadow-sm transition hover:border-brand-200 hover:shadow-md">
+              <div key={p.id} className="flex flex-col rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-5 shadow-sm transition hover:border-brand-200 hover:shadow-md">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
                     <Monitor className="h-5 w-5" />
@@ -211,7 +211,7 @@ export default function PosBookingPage() {
         )}
       </section>
 
-      {/* ── My bookings ── */}
+      {/* â”€â”€ My bookings â”€â”€ */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <Truck className="h-4 w-4 text-brand-600" />
@@ -258,7 +258,7 @@ export default function PosBookingPage() {
   );
 }
 
-/* ───────────────────────────── Booking card + status stepper */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Booking card + status stepper */
 
 function BookingCard({ booking, onRequestCancel }: { booking: Booking; onRequestCancel: () => void }) {
   const cancelled = booking.status === "CANCELLED";
@@ -335,7 +335,7 @@ function BookingCard({ booking, onRequestCancel }: { booking: Booking; onRequest
       {booking.status === "APPLIED" && (
         <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-ink-100 bg-ink-50/60 px-4 py-3">
           <p className="text-xs text-ink-500">
-            Awaiting a machine — you can cancel now for a full refund of {formatINR(booking.amountPaid)}.
+            Awaiting a machine â€” you can cancel now for a full refund of {formatINR(booking.amountPaid)}.
           </p>
           <Button size="sm" variant="outline" onClick={onRequestCancel}>
             <XCircle className="h-4 w-4" /> Cancel & refund
@@ -395,7 +395,7 @@ function Stepper({ stepIndex }: { stepIndex: number }) {
   );
 }
 
-/* ───────────────────────────── Booking modal (apply + address + pay) */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Booking modal (apply + address + pay) */
 
 function BookingModal({
   plan, walletBalance, onClose, onBooked,
@@ -438,7 +438,7 @@ function BookingModal({
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(typeof d?.error === "string" ? d.error : "Booking failed");
-      toast.success(`Booked! ${formatINR(total)} charged — we'll assign & dispatch your machine soon.`);
+      toast.success(`Booked! ${formatINR(total)} charged â€” we'll assign & dispatch your machine soon.`);
       reset();
       onBooked();
     } catch (e) {
@@ -534,7 +534,7 @@ function BookingModal({
             </p>
             {insufficient && (
               <p className="mt-1 text-xs font-medium text-rose-600">
-                Insufficient balance — top up {formatINR(total - walletBalance)} more to book this machine.
+                Insufficient balance â€” top up {formatINR(total - walletBalance)} more to book this machine.
               </p>
             )}
           </div>

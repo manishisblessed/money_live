@@ -360,7 +360,7 @@ export default function AdminEarningsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Platform Earnings"
+        eyebrow="Admin · Revenue"
         title="Per-Transaction Earnings"
         description="What the company earns on every capture across all rails (POS / PG / QR / UPI), and the commission distributed to DT / MD / SD per transaction. Net earning = company MDR margin − commission distributed."
       />
@@ -377,7 +377,7 @@ export default function AdminEarningsPage() {
       </div>
 
       {/* Filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-xs font-semibold text-ink-500">From</label>
@@ -460,14 +460,14 @@ export default function AdminEarningsPage() {
       </div>
 
       {data?.truncated && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+        <div className="flex items-center gap-2 rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-3 text-xs text-amber-700">
           <AlertCircle className="h-4 w-4 shrink-0" />
           Showing the most recent 20,000 transactions for this range. Narrow the date range for exact full-period totals.
         </div>
       )}
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        <div className="flex items-center gap-2 rounded-3xl bg-rose-50 ring-1 ring-inset ring-rose-200 p-4 text-sm text-rose-700">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error instanceof Error ? error.message : "Failed to load the earnings report."}
         </div>

@@ -84,24 +84,26 @@ export function ProviderWalletsCard({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-white/10 p-5 text-white shadow-[0_25px_80px_-25px_rgba(9,13,37,0.55)]",
-        "bg-[radial-gradient(120%_120%_at_0%_100%,#1a1240_0%,#0b1030_45%,#070a1c_100%)]"
+        "grain relative overflow-hidden rounded-3xl border border-white/10 bg-ink-950 p-6 text-white shadow-[0_30px_80px_-30px_rgba(7,11,20,0.7)]"
       )}
     >
-      <div className="pointer-events-none absolute -top-16 -left-10 h-56 w-72 rounded-full bg-violet-500/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -right-16 h-56 w-72 rounded-full bg-fuchsia-500/15 blur-3xl" />
+      <div className="pointer-events-none absolute -top-16 -left-10 h-56 w-72 rounded-full bg-royal-500/25 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-16 h-56 w-72 rounded-full bg-coral-500/15 blur-3xl" />
 
-      <header className="relative flex flex-wrap items-start justify-between gap-3">
+      <header className="relative z-10 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="relative grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-400 to-violet-600 text-white shadow-lg shadow-violet-900/30">
+          <span className="relative grid h-11 w-11 place-items-center rounded-2xl bg-energy-gradient text-white shadow-energy-sm">
             <Radio className="h-5 w-5" strokeWidth={2.2} />
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-[#0b1030]" />
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-ping-soft" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-ink-950" />
+            </span>
           </span>
           <div>
-            <h2 className="font-display text-lg font-bold tracking-tight">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">
               Provider Wallets
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Live balances across all upstream API providers
             </p>
           </div>
@@ -128,7 +130,7 @@ export function ProviderWalletsCard({
             type="button"
             onClick={onRefreshAll}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-violet-900/30 transition hover:brightness-110 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-energy-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-energy-sm transition hover:brightness-110 disabled:opacity-60"
           >
             <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
             Refresh All
@@ -136,7 +138,7 @@ export function ProviderWalletsCard({
         </div>
       </header>
 
-      <div className="relative mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="relative z-10 mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {loading && !providers && (
           <>
             {Array.from({ length: 3 }).map((_, i) => (
@@ -169,7 +171,7 @@ export function ProviderWalletsCard({
         ))}
       </div>
 
-      <footer className="relative mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+      <footer className="relative z-10 mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
         <Link
           href="/dashboard/admin/services"
           className="inline-flex items-center gap-1 font-semibold text-brand-200 transition hover:text-white"
@@ -227,7 +229,7 @@ function ProviderTile({
             <Icon className="h-4 w-4" />
           </span>
           <div className="min-w-0">
-            <p className="truncate font-display text-sm font-bold text-white">
+            <p className="truncate font-display text-sm font-semibold tracking-[-0.01em] text-white">
               {p.name}
             </p>
             <p className="truncate text-[11px] text-slate-400">

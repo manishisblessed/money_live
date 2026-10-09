@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
+import { FilterBar, Stagger, StaggerItem, StatusChip } from "@/components/dashboard/patterns";
 import { formatINR, formatNumber } from "@/lib/utils";
 import { RefreshCw, Download, Search, Lock } from "lucide-react";
 
@@ -54,7 +55,7 @@ const WALLET_REASONS = [
 ];
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "h-10 rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm px-3 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 export default function LedgerExplorerPage() {
   const { session } = useAuth();
@@ -167,9 +168,9 @@ export default function LedgerExplorerPage() {
       header: "Type",
       render: (r) =>
         r.memo ? (
-          <Badge variant="warning">{r.direction === "DEBIT" ? "HELD" : "RELEASED"}</Badge>
+          <StatusChip status={r.direction === "DEBIT" ? "HELD" : "RELEASED"} size="sm" />
         ) : (
-          <Badge variant={r.direction === "CREDIT" ? "success" : "danger"}>{r.direction}</Badge>
+          <StatusChip status={r.direction} label={r.direction} size="sm" />
         ),
     },
     { key: "reason", header: "Reason", render: (r) => r.reason.replace(/_/g, " ") },
@@ -260,30 +261,36 @@ export default function LedgerExplorerPage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">
-            Credits (filtered)
-          </p>
-          <p className="mt-1 font-display text-xl font-bold text-emerald-700">
-            {formatINR(sums.credit)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600">
-            Debits (filtered)
-          </p>
-          <p className="mt-1 font-display text-xl font-bold text-rose-700">{formatINR(sums.debit)}</p>
-        </div>
-        <div className="rounded-2xl border border-ink-100 bg-white p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">Entries</p>
-          <p className="mt-1 font-display text-xl font-bold text-ink-900">{formatNumber(total)}</p>
-        </div>
-      </div>
+      <Stagger className="grid gap-4 sm:grid-cols-3">
+        <StaggerItem>
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-emerald-200 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">
+              Credits (filtered)
+            </p>
+            <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-emerald-700">
+              {formatINR(sums.credit)}
+            </p>
+          </div>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-rose-200 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-600">
+              Debits (filtered)
+            </p>
+            <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-rose-700">{formatINR(sums.debit)}</p>
+          </div>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Entries</p>
+            <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{formatNumber(total)}</p>
+          </div>
+        </StaggerItem>
+      </Stagger>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <FilterBar title="Filters" count={total} hint={pages > 1 ? `Page ${page} of ${pages}` : undefined}>
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-ink-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
           <input
             value={q}
             onChange={(e) => {
@@ -293,19 +300,20 @@ export default function LedgerExplorerPage() {
             }}
             placeholder="Search user / shop / email…"
             className={`${inputCls} w-64 pl-9`}
+            aria-label="Search ledger"
           />
         </div>
-        <select value={walletType} onChange={(e) => { setWalletType(e.target.value); setPage(1); }} className={inputCls}>
+        <select value={walletType} onChange={(e) => { setWalletType(e.target.value); setPage(1); }} className={inputCls} aria-label="Wallet type">
           <option value="all">Both wallets</option>
           <option value="PRIMARY">Primary</option>
           <option value="AEPS">AEPS</option>
         </select>
-        <select value={direction} onChange={(e) => { setDirection(e.target.value); setPage(1); }} className={inputCls}>
+        <select value={direction} onChange={(e) => { setDirection(e.target.value); setPage(1); }} className={inputCls} aria-label="Direction">
           <option value="all">Credit + Debit</option>
           <option value="CREDIT">Credits</option>
           <option value="DEBIT">Debits</option>
         </select>
-        <select value={reason} onChange={(e) => { setReason(e.target.value); setPage(1); }} className={inputCls}>
+        <select value={reason} onChange={(e) => { setReason(e.target.value); setPage(1); }} className={inputCls} aria-label="Reason">
           <option value="all">All reasons</option>
           {WALLET_REASONS.map((r) => (
             <option key={r} value={r}>
@@ -313,15 +321,16 @@ export default function LedgerExplorerPage() {
             </option>
           ))}
         </select>
-        <input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} className={inputCls} />
+        <input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} className={inputCls} aria-label="From date" />
         <span className="text-xs text-ink-400">to</span>
-        <input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} className={inputCls} />
-      </div>
+        <input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} className={inputCls} aria-label="To date" />
+      </FilterBar>
 
       <DataTable
         columns={columns}
         data={entries}
         loading={loading}
+        empty="No ledger entries match these filters."
       />
 
       {pages > 1 && (
@@ -329,7 +338,7 @@ export default function LedgerExplorerPage() {
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             Previous
           </Button>
-          <span className="text-ink-500">
+          <span className="tabular-nums text-ink-500">
             Page {page} / {pages}
           </span>
           <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
@@ -409,7 +418,7 @@ function PlaceLienModal({
   };
 
   const fieldCls =
-    "w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+    "w-full rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm px-3 py-2.5 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
   return (
     <Modal
@@ -436,7 +445,7 @@ function PlaceLienModal({
       }
     >
       <div className="space-y-4">
-        <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-3 text-[13px] text-ink-600">
+        <div className="rounded-2xl bg-ink-50/60 p-3 text-[13px] text-ink-600 ring-1 ring-inset ring-ink-100">
           Freezes funds on <b className="text-ink-800">{entry.user?.name ?? "this user"}</b> and eagerly recovers
           them (and all future credits) into the Company Suspense account until fully recovered. The
           freeze is invisible to the user; the recovery shows as
@@ -445,7 +454,7 @@ function PlaceLienModal({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Lien amount (₹)
             </label>
             <input
@@ -462,7 +471,7 @@ function PlaceLienModal({
             </p>
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+            <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Reason code
             </label>
             <select
@@ -480,7 +489,7 @@ function PlaceLienModal({
         </div>
 
         <div>
-          <label className="text-xs font-bold uppercase tracking-widest text-ink-500">
+          <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
             Remarks (mandatory, audit-logged)
           </label>
           <textarea

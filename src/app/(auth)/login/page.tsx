@@ -5,33 +5,38 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import {
-  Eye,
-  EyeOff,
-  ShieldCheck,
-  Sparkles,
-  Store,
-  Users,
-  Network,
+  Storefront,
+  UsersThree,
+  TreeStructure,
   Crown,
   ArrowRight,
-  AlertCircle,
-  Clock,
-} from "lucide-react";
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { FloatingInput } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
 import { TwoFactorStep } from "@/components/auth/TwoFactorStep";
 import { PinLoginStep } from "@/components/auth/PinLoginStep";
 import { LoginMethodChoice } from "@/components/auth/LoginMethodChoice";
 import { LocationGate, type LocationData } from "@/components/auth/LocationGate";
 import { Turnstile, captchaConfigured } from "@/components/security/Turnstile";
+import {
+  AuthAlert,
+  AuthCard,
+  AuthCardHeader,
+  AuthLinksRow,
+  PasswordToggle,
+  formatCooldown,
+} from "@/components/auth/AuthCard";
+import { StepPanels } from "@/components/auth/StepRail";
 import { cn } from "@/lib/utils";
 
 type PublicRole = "retailer" | "distributor" | "master-distributor" | "super-distributor";
 
-const roleOptions: { id: PublicRole; label: string; icon: typeof Store; tagline: string }[] = [
-  { id: "retailer", label: "Retailer", icon: Store, tagline: "Run a single shop" },
-  { id: "distributor", label: "Distributor", icon: Users, tagline: "Manage retailers" },
-  { id: "master-distributor", label: "Master Dist.", icon: Network, tagline: "White-label & API" },
+const roleOptions: { id: PublicRole; label: string; icon: PhosphorIcon; tagline: string }[] = [
+  { id: "retailer", label: "Retailer", icon: Storefront, tagline: "Run a single shop" },
+  { id: "distributor", label: "Distributor", icon: UsersThree, tagline: "Manage retailers" },
+  { id: "master-distributor", label: "Master Dist.", icon: TreeStructure, tagline: "White-label & API" },
   { id: "super-distributor", label: "Super Dist.", icon: Crown, tagline: "Multi-state network" },
 ];
 
@@ -193,302 +198,170 @@ function LoginForm({ location }: { location: LocationData }) {
     }
   }
 
+  let content: React.ReactNode;
+
   if (step === "choose") {
-    return (
-      <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-        <div className="hidden flex-col justify-between rounded-3xl bg-gradient-to-br from-brand-700 via-brand-600 to-accent-500 p-10 text-white shadow-glow lg:flex">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5" /> Your choice
-            </span>
-            <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-              Two ways to <br /> verify it&apos;s you.
-            </h2>
-            <p className="mt-3 text-white/85">
-              An administrator has allowed you to sign in with your transaction
-              PIN. Prefer your authenticator app? That still works too — the
-              choice is yours, every time you log in.
-            </p>
-          </div>
-          <div className="space-y-3">
-            {[
-              "Authenticator app (TOTP) — most secure",
-              "Transaction PIN — quick and convenient",
-              "Switch between them any time",
-              "Your account stays protected",
-            ].map((t) => (
-              <div key={t} className="flex items-center gap-2 text-sm">
-                <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
-          <LoginMethodChoice
-            userName={userName}
-            onChoose={(method) => setStep(method)}
-            onBack={resetToCredentials}
-          />
-        </div>
-      </div>
+    content = (
+      <LoginMethodChoice
+        userName={userName}
+        onChoose={(method) => setStep(method)}
+        onBack={resetToCredentials}
+      />
     );
-  }
-
-  if (step === "pinlogin") {
-    return (
-      <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-        <div className="hidden flex-col justify-between rounded-3xl bg-gradient-to-br from-brand-700 via-brand-600 to-accent-500 p-10 text-white shadow-glow lg:flex">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5" /> PIN login
-            </span>
-            <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-              Sign in with <br /> your PIN.
-            </h2>
-            <p className="mt-3 text-white/85">
-              You chose to sign in with your transaction PIN. Enter it to
-              continue.
-            </p>
-          </div>
-          <div className="space-y-3">
-            {[
-              "Your transaction PIN is your second factor",
-              "5 wrong attempts locks it for 15 minutes",
-              "You accepted all account risk without 2FA",
-              "Switch back to your authenticator any time",
-            ].map((t) => (
-              <div key={t} className="flex items-center gap-2 text-sm">
-                <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
-          <PinLoginStep
-            tempToken={tempToken}
-            userName={userName}
-            riskAlreadyAccepted={pinRiskAccepted}
-            onBack={backFromFactorStep}
-          />
-        </div>
-      </div>
+  } else if (step === "pinlogin") {
+    content = (
+      <PinLoginStep
+        tempToken={tempToken}
+        userName={userName}
+        riskAlreadyAccepted={pinRiskAccepted}
+        onBack={backFromFactorStep}
+      />
     );
-  }
-
-  if (step === "2fa") {
-    return (
-      <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-        <div className="hidden flex-col justify-between rounded-3xl bg-gradient-to-br from-brand-700 via-brand-600 to-accent-500 p-10 text-white shadow-glow lg:flex">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5" /> Secure login
-            </span>
-            <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-              Two-factor <br /> verification.
-            </h2>
-            <p className="mt-3 text-white/85">
-              Enter the code from your authenticator app to complete sign-in.
-            </p>
-          </div>
-          <div className="space-y-3">
-            {[
-              "Google Authenticator / Authy / Microsoft",
-              "Code refreshes every 30 seconds",
-              "Backup codes available",
-              "Your account stays protected"
-            ].map((t) => (
-              <div key={t} className="flex items-center gap-2 text-sm">
-                <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
-          <TwoFactorStep
-            tempToken={tempToken}
-            userName={userName}
-            userEmail={identifier}
-            onBack={backFromFactorStep}
-          />
-        </div>
-      </div>
+  } else if (step === "2fa") {
+    content = (
+      <TwoFactorStep
+        tempToken={tempToken}
+        userName={userName}
+        userEmail={identifier}
+        onBack={backFromFactorStep}
+      />
     );
-  }
+  } else {
+    content = (
+      <>
+        <AuthCardHeader
+          eyebrow="Welcome back"
+          title="Sign in to your shop"
+          description={
+            <>
+              New to eMoney?{" "}
+              <Link href="/register" className="font-semibold text-brand-700 hover:underline">
+                Request to join
+              </Link>{" "}
+              — we&apos;ll call you back the same day.
+            </>
+          }
+        />
 
-  return (
-    <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-      <div className="hidden flex-col justify-between rounded-3xl bg-gradient-to-br from-brand-700 via-brand-600 to-accent-500 p-10 text-white shadow-glow lg:flex">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-            <Sparkles className="h-3.5 w-3.5" /> Unified portal
-          </span>
-          <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-            One eMoney. <br /> Four powerful dashboards.
-          </h2>
-          <p className="mt-3 text-white/85">
-            Retailer, distributor, master distributor and super distributor — each with its own purpose-built workspace, KPIs and controls.
-          </p>
-        </div>
-
-        <div className="space-y-3">
-          {[
-            "60+ services in one dashboard",
-            "Instant IMPS settlement 24x7",
-            "Highest commissions in the industry",
-            "Two-factor authentication for all users"
-          ].map((t) => (
-            <div key={t} className="flex items-center gap-2 text-sm">
-              <ShieldCheck className="h-4 w-4 text-emerald-300" />
-              {t}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
-        <h1 className="heading-md">Sign in</h1>
-        <p className="mt-2 text-sm text-ink-500">
-          New to eMoney?{" "}
-          <Link href="/register" className="font-semibold text-brand-700">
-            Request to join
-          </Link>
-        </p>
-
-        <div className="mt-6">
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">
+        <fieldset className="mt-6">
+          <legend className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
             I am a
-          </p>
+          </legend>
           <div className="grid grid-cols-2 gap-2">
             {roleOptions.map((r) => {
-              const Icon = r.icon;
               const active = role === r.id;
               return (
                 <button
                   key={r.id}
                   type="button"
                   onClick={() => pickRole(r.id)}
+                  aria-pressed={active}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl border p-3 text-left transition",
+                    "focus-energy group flex items-center gap-3 rounded-2xl p-3 text-left transition",
                     active
-                      ? "border-brand-500 bg-brand-50 shadow-soft"
-                      : "border-ink-100 hover:border-brand-300"
+                      ? "bg-white shadow-energy-sm ring-2 ring-brand-500"
+                      : "bg-[#f6f7fb] ring-1 ring-ink-100 hover:bg-white hover:ring-ink-200"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "grid h-9 w-9 shrink-0 place-items-center rounded-lg",
-                      active
-                        ? "bg-brand-600 text-white"
-                        : "bg-ink-100 text-ink-700"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
+                  <IconTile icon={r.icon} tone={active ? "energy" : "ink"} size="md" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-ink-900">{r.label}</span>
+                    <span className="block truncate text-xs text-ink-500">{r.tagline}</span>
                   </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-ink-900">{r.label}</p>
-                    <p className="truncate text-xs text-ink-500">{r.tagline}</p>
-                  </div>
                 </button>
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
-        {error && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+        <AuthAlert className="mt-5" message={error || null} />
+        <AuthAlert
+          className="mt-3"
+          tone="warning"
+          message={
+            rateLimited ? (
+              <>
+                Too many attempts. Try again in{" "}
+                <span className="font-bold tabular-nums">{formatCooldown(cooldownSec)}</span>
+              </>
+            ) : null
+          }
+        />
 
-        {rateLimited && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
-            <Clock className="h-4 w-4 shrink-0 text-amber-600" />
-            <span>
-              Too many attempts. Try again in{" "}
-              <span className="font-bold tabular-nums">
-                {Math.floor(cooldownSec / 60)}:{String(cooldownSec % 60).padStart(2, "0")}
-              </span>
-            </span>
-          </div>
-        )}
+        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <FloatingInput
+            id="identifier"
+            label="Email or mobile number"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            autoComplete="username"
+            required
+          />
 
-        <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-          <div>
-            <Label htmlFor="identifier">Email or mobile</Label>
-            <Input
-              id="identifier"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="you@example.com or 9999999999"
+          <div className="relative">
+            <FloatingInput
+              id="password"
+              label="Password"
+              type={showPwd ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              className="[&>input]:pr-14"
               required
             />
+            <PasswordToggle shown={showPwd} onToggle={() => setShowPwd((s) => !s)} />
           </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="#"
-                className="text-xs font-medium text-brand-700 hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPwd ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <label className="flex cursor-pointer items-center gap-2 text-ink-700">
+              <input
+                type="checkbox"
+                defaultChecked
+                className="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500"
               />
-              <button
-                type="button"
-                onClick={() => setShowPwd((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500 hover:text-ink-900"
-                aria-label={showPwd ? "Hide password" : "Show password"}
-              >
-                {showPwd ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+              Keep me signed in
+            </label>
+            <Link
+              href="#"
+              className="text-xs font-semibold text-brand-700 hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-ink-700">
-            <input
-              type="checkbox"
-              defaultChecked
-              className="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500"
-            />
-            Keep me signed in for 30 days
-          </label>
-
-          <Turnstile onToken={setCaptchaToken} className="flex justify-center" />
+          <Turnstile onToken={setCaptchaToken} />
 
           <Button
             type="submit"
             size="lg"
             className="w-full"
+            isLoading={loading}
             disabled={loading || rateLimited || (captchaConfigured && !captchaToken)}
           >
             {loading
-              ? "Verifying..."
+              ? "Verifying…"
               : rateLimited
-                ? `Wait ${Math.floor(cooldownSec / 60)}:${String(cooldownSec % 60).padStart(2, "0")}`
-                : <>Continue <ArrowRight className="h-4 w-4" /></>}
+                ? `Wait ${formatCooldown(cooldownSec)}`
+                : <>Continue <ArrowRight size={16} weight="bold" aria-hidden /></>}
           </Button>
         </form>
-      </div>
-    </div>
+
+        <AuthLinksRow className="mt-6 border-t border-ink-100 pt-5">
+          <span>
+            Trouble signing in?{" "}
+            <Link href="/contact" className="font-semibold text-brand-700 hover:underline">
+              Talk to support
+            </Link>
+          </span>
+          <span className="text-ink-400">Protected by 2-factor &amp; location checks</span>
+        </AuthLinksRow>
+      </>
+    );
+  }
+
+  return (
+    <AuthCard>
+      <StepPanels step={step}>{content}</StepPanels>
+    </AuthCard>
   );
 }

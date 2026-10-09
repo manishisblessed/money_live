@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plane, ArrowRightLeft } from "lucide-react";
+import { Plane, ArrowRightLeft, Calendar, Users } from "lucide-react";
+import { AirplaneTakeoff, AirplaneLanding } from "@phosphor-icons/react";
 import { ServicePageHeader } from "@/components/dashboard/ServicePage";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
+import { SearchBand, SearchTile, ResultCard } from "@/components/dashboard/services/TravelSearch";
 import { formatINR } from "@/lib/utils";
 
 const cities = [
@@ -81,120 +85,127 @@ export default function FlightPage() {
     setTo(from);
   }
 
+  const fromCode = from.split(" · ")[0];
+  const toCode = to.split(" · ")[0];
+
   return (
-    <div>
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Plane}
         title="Flight Booking"
-        description="Search and book domestic flights with the best agent fares."
+        description="Domestic flights at agent fares — search, compare, book."
       />
 
-      <form
+      <SearchBand
         onSubmit={(e) => {
           e.preventDefault();
           setSearched(true);
         }}
-        className="rounded-2xl border border-ink-100 bg-white p-6"
+        eyebrow="Flights"
+        title="Where are we flying?"
+        subtitle="One-way domestic search. Fares include your agent margin."
+        footer={
+          <>
+            <Badge size="sm" className="bg-white/10 text-white ring-white/15">Agent fares</Badge>
+            <Badge size="sm" className="bg-white/10 text-white ring-white/15">Domestic routes</Badge>
+          </>
+        }
       >
-        <div className="grid items-end gap-4 lg:grid-cols-12">
-          <div className="lg:col-span-3">
-            <Label>From</Label>
-            <Select value={from} onChange={(e) => setFrom(e.target.value)}>
+        <div className="grid items-stretch gap-3 lg:grid-cols-12">
+          <SearchTile label="From" htmlFor="fl-from" icon={<AirplaneTakeoff weight="duotone" />} className="lg:col-span-3">
+            <Select id="fl-from" value={from} onChange={(e) => setFrom(e.target.value)}>
               {cities.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </Select>
-          </div>
-          <div className="lg:col-span-1 flex items-center justify-center pb-1">
+          </SearchTile>
+          <div className="flex items-center justify-center lg:col-span-1">
             <button
               type="button"
               onClick={swap}
-              aria-label="Swap"
-              className="grid h-10 w-10 place-items-center rounded-full border border-ink-200 bg-white text-ink-700 hover:border-brand-300 hover:text-brand-700"
+              aria-label="Swap origin and destination"
+              className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white hover:text-ink-950 focus-energy"
             >
               <ArrowRightLeft className="h-4 w-4" />
             </button>
           </div>
-          <div className="lg:col-span-3">
-            <Label>To</Label>
-            <Select value={to} onChange={(e) => setTo(e.target.value)}>
+          <SearchTile label="To" htmlFor="fl-to" icon={<AirplaneLanding weight="duotone" />} className="lg:col-span-3">
+            <Select id="fl-to" value={to} onChange={(e) => setTo(e.target.value)}>
               {cities.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </Select>
-          </div>
-          <div className="lg:col-span-2">
-            <Label>Departure</Label>
+          </SearchTile>
+          <SearchTile label="Departure" htmlFor="fl-date" icon={<Calendar />} className="lg:col-span-2">
             <Input
+              id="fl-date"
               type="date"
               required
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
-          </div>
-          <div className="lg:col-span-2">
-            <Label>Travellers</Label>
-            <Select value={pax} onChange={(e) => setPax(Number(e.target.value))}>
+          </SearchTile>
+          <SearchTile label="Travellers" htmlFor="fl-pax" icon={<Users />} className="lg:col-span-2">
+            <Select id="fl-pax" value={pax} onChange={(e) => setPax(Number(e.target.value))}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <option key={n} value={n}>
                   {n} {n > 1 ? "Adults" : "Adult"}
                 </option>
               ))}
             </Select>
-          </div>
+          </SearchTile>
           <div className="lg:col-span-1">
-            <Button type="submit" size="lg" className="w-full">
+            <Button type="submit" size="lg" className="h-full min-h-[3.5rem] w-full">
               Search
             </Button>
           </div>
         </div>
-      </form>
+      </SearchBand>
 
       {searched && (
         <div className="mt-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-base font-semibold text-ink-900">
-              {sampleFlights.length} flights found · {from.split(" · ")[0]} →{" "}
-              {to.split(" · ")[0]}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
+              {sampleFlights.length} flights found · {fromCode} → {toCode}
             </h3>
+            <Badge variant="accent" size="sm" dot>
+              Live fares
+            </Badge>
           </div>
-          {sampleFlights.map((f) => (
-            <div
-              key={f.flightNo}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-100 bg-white p-5"
-            >
+          {sampleFlights.map((f, i) => (
+            <ResultCard key={f.flightNo} index={i} className="flex flex-wrap items-center justify-between gap-4 p-5">
               <div className="flex items-center gap-4">
-                <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-700">
+                <IconTile tone="brand" size="lg">
                   <Plane className="h-5 w-5" />
-                </span>
+                </IconTile>
                 <div>
-                  <p className="font-display text-sm font-semibold text-ink-900">
+                  <p className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
                     {f.airline}
                   </p>
-                  <p className="text-xs text-ink-500">{f.flightNo}</p>
+                  <p className="font-mono text-xs text-ink-500">{f.flightNo}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <div className="text-right">
-                  <p className="font-display text-lg font-bold text-ink-900">
+                  <p className="font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                     {f.depart}
                   </p>
-                  <p className="text-xs text-ink-500">{from.split(" · ")[0]}</p>
+                  <p className="text-xs text-ink-500">{fromCode}</p>
                 </div>
                 <div className="flex flex-col items-center text-xs text-ink-500">
                   <span>{f.duration}</span>
-                  <span className="my-1 h-px w-16 bg-ink-200" />
+                  <span className="my-1 h-px w-20 bg-energy-gradient-x opacity-60" />
                   <span>{f.stops}</span>
                 </div>
                 <div>
-                  <p className="font-display text-lg font-bold text-ink-900">
+                  <p className="font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                     {f.arrive}
                   </p>
-                  <p className="text-xs text-ink-500">{to.split(" · ")[0]}</p>
+                  <p className="text-xs text-ink-500">{toCode}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-display text-xl font-bold text-ink-900">
+                <p className="font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                   {formatINR(f.fare * pax)}
                 </p>
                 <p className="text-xs text-ink-500">
@@ -204,7 +215,7 @@ export default function FlightPage() {
                   Book
                 </Button>
               </div>
-            </div>
+            </ResultCard>
           ))}
         </div>
       )}

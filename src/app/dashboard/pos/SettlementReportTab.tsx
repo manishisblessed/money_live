@@ -25,7 +25,7 @@ import { formatINR } from "@/lib/utils";
 import { type ReportColumn } from "@/lib/reports";
 import { ReportActions } from "@/components/dashboard/ReportActions";
 
-// ── API contract (mirrors src/lib/pos/settlementReport.ts) ──
+// â”€â”€ API contract (mirrors src/lib/pos/settlementReport.ts) â”€â”€
 
 type ReportRetailer = {
   id: string;
@@ -142,7 +142,7 @@ function settlementBadge(status: string) {
 }
 
 function retailerCell(r: { retailer: ReportRetailer | null }) {
-  if (!r.retailer) return <span className="text-xs text-ink-400">—</span>;
+  if (!r.retailer) return <span className="text-xs text-ink-400">â€”</span>;
   return (
     <div className="flex flex-col">
       <span className="max-w-[150px] truncate text-xs font-semibold text-ink-900">
@@ -230,7 +230,7 @@ export function SettlementReportTab({
     const d = await res.json();
     if (d.truncated) {
       toast.warning(
-        `Report capped at ${Number(d.returned).toLocaleString("en-IN")} rows — narrow the date range for the rest.`
+        `Report capped at ${Number(d.returned).toLocaleString("en-IN")} rows â€” narrow the date range for the rest.`
       );
     }
     return (d.rows as ReportRow[]) ?? [];
@@ -265,15 +265,15 @@ export function SettlementReportTab({
   const txnCols: Column<ReportRow>[] = [
     { key: "txnTime", header: "Time", render: (r) => <span className="text-xs">{fmtTime(r.txnTime)}</span> },
     { key: "retailer", header: "Merchant", render: retailerCell },
-    { key: "terminalId", header: "TID", render: (r) => <span className="font-mono text-xs">{r.terminalId ?? "—"}</span> },
-    { key: "paymentMode", header: "Mode", render: (r) => <Badge variant="default">{r.paymentMode ?? "—"}</Badge> },
+    { key: "terminalId", header: "TID", render: (r) => <span className="font-mono text-xs">{r.terminalId ?? "â€”"}</span> },
+    { key: "paymentMode", header: "Mode", render: (r) => <Badge variant="default">{r.paymentMode ?? "â€”"}</Badge> },
     {
       key: "cardBrand",
       header: "Card",
-      render: (r) => (r.cardBrand ? <span className="text-xs">{[r.cardBrand, r.cardType].filter(Boolean).join(" ")}</span> : "—"),
+      render: (r) => (r.cardBrand ? <span className="text-xs">{[r.cardBrand, r.cardType].filter(Boolean).join(" ")}</span> : "â€”"),
     },
     { key: "grossAmount", header: "Amount", align: "right", render: (r) => <span className="font-semibold text-ink-900">{formatINR(r.grossAmount)}</span> },
-    { key: "mdrAmount", header: "MDR", align: "right", render: (r) => <span className="text-rose-600">−{formatINR(r.mdrAmount)}</span> },
+    { key: "mdrAmount", header: "MDR", align: "right", render: (r) => <span className="text-rose-600">âˆ’{formatINR(r.mdrAmount)}</span> },
     { key: "netSettled", header: "Settled", align: "right", render: (r) => <span className="font-semibold text-emerald-700">{formatINR(r.netSettled)}</span> },
     { key: "settlementStatus", header: "Status", render: (r) => settlementBadge(r.settlementStatus) },
     ...(showCommission
@@ -305,7 +305,7 @@ export function SettlementReportTab({
     },
     { key: "txnCount", header: "Txns", align: "right", render: (r) => <span className="font-semibold">{r.txnCount.toLocaleString("en-IN")}</span> },
     { key: "grossAmount", header: "Volume", align: "right", render: (r) => <span className="font-semibold text-ink-900">{formatINR(r.grossAmount)}</span> },
-    { key: "mdrAmount", header: "MDR", align: "right", render: (r) => <span className="text-rose-600">−{formatINR(r.mdrAmount)}</span> },
+    { key: "mdrAmount", header: "MDR", align: "right", render: (r) => <span className="text-rose-600">âˆ’{formatINR(r.mdrAmount)}</span> },
     { key: "netSettled", header: "Settled", align: "right", render: (r) => <span className="font-semibold text-emerald-700">{formatINR(r.netSettled)}</span> },
     ...(showCommission
       ? [
@@ -358,7 +358,7 @@ export function SettlementReportTab({
       </div>
 
       {/* Filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-4">
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-xs font-semibold text-ink-500">From</label>
@@ -462,7 +462,7 @@ export function SettlementReportTab({
       ) : view === "transactions" ? (
         <>
           <DataTable
-            title="POS Settlement — per transaction"
+            title="POS Settlement â€” per transaction"
             description={
               pagination
                 ? `${pagination.total.toLocaleString("en-IN")} transaction${pagination.total === 1 ? "" : "s"} · page ${pagination.page} of ${pagination.totalPages}`
@@ -488,7 +488,7 @@ export function SettlementReportTab({
         </>
       ) : (
         <DataTable
-          title="Settlement rollup — by merchant / downline"
+          title="Settlement rollup â€” by merchant / downline"
           description={
             rollup.length
               ? `${rollup.length} merchant${rollup.length === 1 ? "" : "s"} with POS activity in this period`

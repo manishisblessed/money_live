@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   CreditCard,
-  Link2,
   Copy,
   Check,
   IndianRupee,
@@ -11,12 +10,17 @@ import {
   Percent,
   Banknote
 } from "lucide-react";
+import { LinkSimple, Lightning, ShieldCheck } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { ServiceLayout, ServiceCard } from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { FloatField } from "@/components/dashboard/services/FloatField";
 import { pgTransactions, type PgTransaction } from "@/lib/data";
 import { formatINR, generateRefId } from "@/lib/utils";
 
@@ -79,86 +83,100 @@ export default function PgPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Today's Collections" value="₹1.28 L" delta="+14.2%" icon={IndianRupee} accent="brand" />
-        <StatCard label="Success Rate" value="96.8%" delta="+0.6%" icon={Percent} accent="emerald" />
-        <StatCard label="Transactions Today" value="42" delta="+8" icon={ArrowLeftRight} accent="violet" />
-        <StatCard label="Pending Settlement" value="₹2.69 L" icon={Banknote} accent="accent" />
+        <StatCard label="Today's Collections" value="₹1.28 L" delta="+14.2%" icon={IndianRupee} tone="brand" />
+        <StatCard label="Success Rate" value="96.8%" delta="+0.6%" icon={Percent} tone="accent" />
+        <StatCard label="Transactions Today" value="42" delta="+8" icon={ArrowLeftRight} tone="royal" />
+        <StatCard label="Pending Settlement" value="₹2.69 L" icon={Banknote} tone="amber" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <form
+      <ServiceLayout
+        aside={
+          <>
+            <SummaryPanel
+              title="Payment link"
+              status={
+                link
+                  ? { label: "Link ready", variant: "accent", dot: true }
+                  : { label: "Not generated", variant: "default" }
+              }
+              rows={[
+                { label: "Purpose", value: purpose || "Payment request", muted: !purpose },
+                { label: "Accepts", value: "UPI · Cards · Net banking" },
+                { label: "Settlement", value: "T+1 · automated", tone: "brand" },
+              ]}
+              total={amount ? formatINR(Number(amount) || 0) : undefined}
+              totalLabel="Customer pays"
+              footer={
+                link ? (
+                  <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-2.5 ring-1 ring-ink-100">
+                    <span className="truncate font-mono text-xs font-semibold text-ink-900">{link}</span>
+                    <button
+                      type="button"
+                      onClick={copy}
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-ink-50 px-2.5 py-1 text-xs font-semibold text-brand-700 ring-1 ring-ink-100 transition hover:ring-brand-300 focus-energy"
+                    >
+                      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                      {copied ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid h-20 place-items-center rounded-2xl border border-dashed border-ink-200 bg-white/60 text-xs text-ink-500">
+                    Enter an amount and generate a link to see it here.
+                  </div>
+                )
+              }
+            />
+            <AsideTips
+              items={[
+                { icon: <Lightning weight="duotone" />, text: "You're notified the moment the customer pays." },
+                { icon: <ShieldCheck weight="duotone" />, text: "Every order is tracked with real-time status." },
+              ]}
+            />
+          </>
+        }
+      >
+        <ServiceCard
+          as="form"
           onSubmit={(e) => {
             e.preventDefault();
             createLink();
           }}
-          className="space-y-4 rounded-2xl border border-ink-100 bg-white p-6"
+          icon={<IconTile icon={LinkSimple} tone="energy" size="lg" />}
+          eyebrow="Collect remotely"
+          title="Create payment link"
+          description="Set an amount and a purpose — share the link on WhatsApp or SMS."
         >
-          <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white">
-              <Link2 className="h-4 w-4" />
-            </span>
-            <h3 className="font-display text-base font-semibold text-ink-900">
-              Create payment link
-            </h3>
-          </div>
-          <div>
-            <Label htmlFor="pg-amount">Amount (₹)</Label>
-            <Input
-              id="pg-amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-            />
-          </div>
-          <div>
-            <Label htmlFor="pg-purpose">Purpose (optional)</Label>
-            <Input
+          <div className="grid gap-5">
+            <div>
+              <FloatField
+                id="pg-amount"
+                label="Amount (₹)"
+                type="number"
+                display
+                inputMode="numeric"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              <AmountChips
+                className="mt-3"
+                amounts={[500, 1000, 2000, 5000, 10000]}
+                value={amount}
+                onPick={(v) => setAmount(String(v))}
+              />
+            </div>
+            <FloatField
               id="pg-purpose"
+              label="Purpose (optional)"
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
-              placeholder="e.g. Invoice #4427"
+              hint="e.g. Invoice #4427"
             />
+            <Button type="submit" size="xl" className="w-full">
+              <CreditCard className="h-4 w-4" /> Generate link
+            </Button>
           </div>
-          <Button type="submit" size="lg" className="w-full">
-            <CreditCard className="h-4 w-4" /> Generate link
-          </Button>
-        </form>
-
-        <div className="rounded-2xl border border-ink-100 bg-gradient-to-br from-brand-50 to-accent-50 p-6">
-          <h3 className="font-display text-base font-semibold text-ink-900">
-            Share with your customer
-          </h3>
-          <p className="mt-1 text-xs text-ink-600">
-            Customers can pay via UPI, debit/credit cards, net banking and
-            wallets. You get notified instantly.
-          </p>
-          {link ? (
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 bg-white px-4 py-3">
-                <span className="truncate font-mono text-xs font-semibold text-ink-900">
-                  {link}
-                </span>
-                <button
-                  type="button"
-                  onClick={copy}
-                  className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-brand-700"
-                >
-                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {copied ? "Copied" : "Copy"}
-                </button>
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-ink-700 shadow-sm">
-                {purpose || "Payment request"} • ₹{amount}
-              </div>
-            </div>
-          ) : (
-            <div className="mt-6 grid h-32 place-items-center rounded-xl border border-dashed border-ink-200 bg-white/60 text-xs text-ink-500">
-              Enter an amount and generate a link to see it here.
-            </div>
-          )}
-        </div>
-      </div>
+        </ServiceCard>
+      </ServiceLayout>
 
       <DataTable
         title="Recent PG transactions"

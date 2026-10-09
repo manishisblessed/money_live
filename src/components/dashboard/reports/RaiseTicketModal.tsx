@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, LifeBuoy, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
+import { AlertCircle, ExternalLink } from "lucide-react";
+import { SealCheck } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 
 export type RaiseTicketPayload = {
   /** Real Transaction.refId this ticket is about (validated server-side). */
@@ -52,8 +55,6 @@ export function RaiseTicketModal({ payload, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [payload, onClose]);
 
-  if (!payload) return null;
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!payload) return;
@@ -90,49 +91,42 @@ export function RaiseTicketModal({ payload, onClose }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+    <Modal
+      open={!!payload}
+      onClose={onClose}
+      size="md"
+      eyebrow="Support"
+      title="Raise a ticket"
+      subtitle={
+        payload ? (
+          <>
+            For transaction{" "}
+            <span className="rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-ink-800 ring-1 ring-inset ring-ink-200/70">
+              {payload.txnRefId}
+            </span>
+          </>
+        ) : undefined
+      }
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-ink-100 bg-white shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <LifeBuoy className="h-4.5 w-4.5" />
+      {payload &&
+        (done ? (
+          <div className="py-4 text-center">
+            <span className="relative mx-auto inline-flex">
+              <span
+                aria-hidden
+                className="absolute inset-0 rounded-2xl bg-accent-300 opacity-40 blur-xl"
+              />
+              <IconTile icon={SealCheck} tone="accent" size="xl" className="relative" />
             </span>
-            <div>
-              <h3 className="font-display text-base font-semibold text-ink-900">Raise a ticket</h3>
-              <p className="text-xs text-ink-500">
-                For transaction <span className="font-mono">{payload.txnRefId}</span>
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-400 transition hover:bg-ink-100 hover:text-ink-700"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {done ? (
-          <div className="px-5 py-8 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-              <CheckCircle2 className="h-6 w-6" />
-            </span>
-            <p className="mt-3 font-display text-lg font-semibold text-ink-900">Ticket raised</p>
-            <p className="mt-1 text-sm text-ink-600">
-              Your ticket <span className="font-mono font-semibold">{done.ticketNo}</span> is with our
-              support team. You can track replies from Support Tickets.
+            <p className="mt-4 font-display text-xl font-semibold tracking-[-0.02em] text-ink-950">
+              Ticket raised
             </p>
-            <div className="mt-5 flex items-center justify-center gap-2">
+            <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-ink-600">
+              Your ticket{" "}
+              <span className="font-mono font-semibold text-ink-900">{done.ticketNo}</span> is
+              with our support team. You can track replies from Support Tickets.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
               <Link href="/dashboard/disputes">
                 <Button variant="outline">
                   <ExternalLink className="h-4 w-4" /> View my tickets
@@ -142,9 +136,9 @@ export function RaiseTicketModal({ payload, onClose }: Props) {
             </div>
           </div>
         ) : (
-          <form onSubmit={submit} className="px-5 py-4">
+          <form onSubmit={submit}>
             {error && (
-              <div className="mb-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+              <div className="mb-4 flex items-start gap-2 rounded-2xl border border-coral-200 bg-coral-50 p-3 text-sm text-coral-700">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -152,11 +146,16 @@ export function RaiseTicketModal({ payload, onClose }: Props) {
 
             {/* Auto-filled transaction details */}
             <div>
-              <Label>Transaction details (auto-filled)</Label>
-              <pre className="mt-1 max-h-52 overflow-y-auto whitespace-pre-wrap rounded-xl border border-ink-100 bg-ink-50/60 p-3 font-sans text-xs leading-relaxed text-ink-700">
+              <Label className="flex items-center justify-between">
+                <span>Transaction details</span>
+                <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-500">
+                  Auto-filled
+                </span>
+              </Label>
+              <pre className="max-h-52 overflow-y-auto whitespace-pre-wrap rounded-2xl border border-ink-100 bg-ink-50/60 p-3.5 font-sans text-xs leading-relaxed text-ink-700">
                 {payload.detailsText}
               </pre>
-              <p className="mt-1 text-[11px] text-ink-400">
+              <p className="mt-1.5 text-[11px] text-ink-400">
                 These details are attached automatically — you don&apos;t need to type them again.
               </p>
             </div>
@@ -171,14 +170,17 @@ export function RaiseTicketModal({ payload, onClose }: Props) {
                 maxLength={2000}
                 rows={4}
                 autoFocus
-                className="w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none transition placeholder:text-ink-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
+                className="w-full rounded-2xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 shadow-sm outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-400 focus:border-brand-400 focus:shadow-[0_0_0_4px_rgba(124,58,237,0.14),0_8px_24px_-10px_rgba(244,63,94,0.25)]"
                 placeholder="Tell us what went wrong (e.g. amount debited but payment failed, no confirmation received)…"
                 value={remark}
                 onChange={(e) => setRemark(e.target.value)}
               />
+              <p className="mt-1 text-right text-[11px] tabular-nums text-ink-400">
+                {remark.length}/2000
+              </p>
             </div>
 
-            <div className="mt-5 flex items-center justify-end gap-2">
+            <div className="mt-4 flex items-center justify-end gap-2">
               <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
                 Cancel
               </Button>
@@ -187,8 +189,7 @@ export function RaiseTicketModal({ payload, onClose }: Props) {
               </Button>
             </div>
           </form>
-        )}
-      </div>
-    </div>
+        ))}
+    </Modal>
   );
 }

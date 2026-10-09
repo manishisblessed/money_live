@@ -137,7 +137,7 @@ export default function PosReversalsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="ADMIN"
+        eyebrow="Admin · Money & Ops"
         title="POS Reversals"
         description="Captures that Same Day later voided or refunded at the terminal. These no longer count as successful — reconcile any that had already been credited to a retailer."
       />
@@ -149,7 +149,7 @@ export default function PosReversalsPage() {
         <StatCard label="Clawback Amount" value={formatINR(s?.needs_clawback_amount ?? 0)} icon={RotateCcw} accent="emerald" />
       </div>
 
-      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-2xl border border-ink-100 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm shadow-sm">
         <label className="flex flex-col gap-1 text-xs font-medium text-ink-600">
           From
           <input
@@ -192,7 +192,7 @@ export default function PosReversalsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="mb-4 rounded-2xl bg-rose-50 px-4 py-3 ring-1 ring-inset ring-rose-200 text-sm text-rose-700">
           {error.message}
         </div>
       )}

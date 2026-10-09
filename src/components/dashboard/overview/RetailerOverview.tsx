@@ -15,10 +15,28 @@ import {
   Truck,
   type LucideIcon,
 } from "lucide-react";
+import {
+  PaperPlaneTilt,
+  Fingerprint,
+  DeviceMobile,
+  Receipt as ReceiptIcon,
+  HandCoins,
+  ClockCounterClockwise,
+  Storefront,
+  Sparkle,
+  Rocket,
+} from "@phosphor-icons/react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { TransactionsTable } from "@/components/dashboard/TransactionsTable";
 import { Sparkline } from "@/components/dashboard/Sparkline";
 import { StatSkeleton } from "@/components/ui/Skeleton";
+import { IconTile } from "@/components/ui/Icon";
+import { Badge } from "@/components/ui/Badge";
+import { GreetingBand } from "@/components/dashboard/shell/GreetingBand";
+import { QuickActions, type QuickAction } from "@/components/dashboard/shell/QuickActions";
+import { Stagger, StaggerItem, FadeIn } from "@/components/dashboard/shell/Motion";
+import { SectionHeader } from "@/components/dashboard/shell/SectionHeader";
+import { EmptyState } from "@/components/dashboard/shell/EmptyState";
 import { services } from "@/lib/data";
 import type { Transaction } from "@/lib/data";
 import type { Session } from "@/lib/auth";
@@ -28,11 +46,21 @@ import { useEffectiveServices } from "@/hooks/useEffectiveServices";
 
 /** Primary service cards shown on the retailer dashboard. Each links straight
  *  to its rail; BBPS opens the bill-payment hub with all sub-options. */
-const SERVICE_CARDS: { title: string; description: string; href: string; icon: LucideIcon }[] = [
-  { title: "POS", description: "Manage POS terminals & settlements", href: "/dashboard/pos", icon: Monitor },
-  { title: "Payment Gateway", description: "Collect payments & top up your wallet", href: "/dashboard/wallet", icon: CreditCard },
-  { title: "QR Payments", description: "Static & dynamic UPI QR collections", href: "/dashboard/qr", icon: QrCode },
-  { title: "BBPS", description: "Credit card & utility bill payments", href: "/dashboard/bill-pay", icon: Receipt },
+const SERVICE_CARDS: { title: string; description: string; href: string; icon: LucideIcon; tone: string }[] = [
+  { title: "POS", description: "Manage POS terminals & settlements", href: "/dashboard/pos", icon: Monitor, tone: "from-brand-500 to-brand-700" },
+  { title: "Payment Gateway", description: "Collect payments & top up your wallet", href: "/dashboard/wallet", icon: CreditCard, tone: "from-royal-500 to-royal-700" },
+  { title: "QR Payments", description: "Static & dynamic UPI QR collections", href: "/dashboard/qr", icon: QrCode, tone: "from-accent-500 to-accent-700" },
+  { title: "BBPS", description: "Credit card & utility bill payments", href: "/dashboard/bill-pay", icon: Receipt, tone: "from-coral-500 to-coral-600" },
+];
+
+/** Dock shortcuts for the retailer home. */
+const QUICK_ACTIONS: QuickAction[] = [
+  { label: "Send Money", href: "/dashboard/money-transfer", icon: PaperPlaneTilt, tone: "brand" },
+  { label: "Aadhaar Pay", href: "/dashboard/aadhaar-pay", icon: Fingerprint, tone: "royal" },
+  { label: "Top-up", href: "/dashboard/recharge/mobile", icon: DeviceMobile, tone: "accent" },
+  { label: "Pay Bills", href: "/dashboard/bill-pay/credit-card", icon: ReceiptIcon, tone: "coral" },
+  { label: "Add Funds", href: "/dashboard/funds-request", icon: HandCoins, tone: "amber" },
+  { label: "Activity", href: "/dashboard/transactions", icon: ClockCounterClockwise, tone: "ink" },
 ];
 
 export function RetailerOverview({ session }: { session: Session }) {
@@ -80,28 +108,27 @@ export function RetailerOverview({ session }: { session: Session }) {
     .filter((t) => t.status === "Success")
     .reduce((s, t) => s + t.amount, 0);
 
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 17) return "Good afternoon";
-    return "Good evening";
-  })();
-
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-ink-500">{greeting},</p>
-          <h1 className="heading-md mt-1">
-            {session.name?.split(" ")[0] ?? "there"} 👋
-          </h1>
-          <p className="mt-1 text-sm text-ink-600">
-            Here&apos;s a snapshot of your shop today.
-          </p>
-        </div>
-      </div>
+      <GreetingBand
+        name={session.name}
+        subtitle="Here's a snapshot of your shop today."
+        heroLabel="Wallet balance"
+        heroValue={session.walletBalance}
+        heroHint={
+          <Link href="/dashboard/wallet" className="inline-flex items-center gap-1 font-semibold text-ink-200 transition hover:text-white">
+            Manage wallet <ArrowRight className="h-3 w-3" />
+          </Link>
+        }
+        chips={[
+          { label: "Today", value: loadingTxns ? "…" : formatINR(todayVolume), tone: "accent" },
+          { label: "Txns", value: loadingTxns ? "…" : `${todayCount}`, tone: "brand" },
+        ]}
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <QuickActions actions={QUICK_ACTIONS} />
+
+      <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {loadingTxns ? (
           <>
             <StatSkeleton />
@@ -111,153 +138,186 @@ export function RetailerOverview({ session }: { session: Session }) {
           </>
         ) : (
           <>
-            <WalletCard balance={session.walletBalance} />
-            <StatCard
-              label="Today's Volume"
-              value={formatINR(todayVolume)}
-              icon={IndianRupee}
-              accent="emerald"
-            />
-            <StatCard
-              label="Transactions Today"
-              value={`${todayCount}`}
-              icon={TrendingUp}
-              accent="brand"
-            />
-            <StatCard
-              label="Customers Served"
-              value={`${txns.filter((t) => t.status === "Success").length}`}
-              icon={Users}
-              accent="violet"
-            />
+            <StaggerItem>
+              <StatCard
+                label="Wallet Balance"
+                value={formatINR(session.walletBalance)}
+                icon={Wallet}
+                accent="brand"
+                href="/dashboard/wallet"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Today's Volume"
+                value={formatINR(todayVolume)}
+                icon={IndianRupee}
+                accent="emerald"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Transactions Today"
+                value={`${todayCount}`}
+                icon={TrendingUp}
+                accent="brand"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Customers Served"
+                value={`${txns.filter((t) => t.status === "Success").length}`}
+                icon={Users}
+                accent="violet"
+              />
+            </StaggerItem>
           </>
         )}
-      </div>
+      </Stagger>
 
       <PosBookingStrip />
 
-      <div>
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-semibold text-ink-900">Services</h2>
-          <p className="text-sm text-ink-500">Jump straight into a payment rail</p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section>
+        <SectionHeader
+          title="Services"
+          description="Jump straight into a payment rail"
+          icon={Storefront}
+          tone="brand"
+          className="mb-4"
+        />
+        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICE_CARDS.map((card) => {
             const Icon = card.icon;
             return (
-              <Link
-                key={card.href}
-                href={card.href}
-                className="group flex flex-col rounded-2xl border border-ink-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-soft"
-              >
-                <div className="flex items-start justify-between">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 text-white shadow-soft">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-ink-300 transition group-hover:translate-x-1 group-hover:text-brand-600" />
-                </div>
-                <h3 className="mt-4 font-display text-base font-semibold text-ink-900">{card.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-ink-500">{card.description}</p>
-              </Link>
+              <StaggerItem key={card.href}>
+                <Link
+                  href={card.href}
+                  className="group flex h-full flex-col rounded-3xl border border-ink-100 bg-white p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-brand-200 hover:shadow-energy-sm focus-energy"
+                >
+                  <div className="flex items-start justify-between">
+                    <span className={cn("grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-soft", card.tone)}>
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-ink-300 transition group-hover:translate-x-1 group-hover:text-brand-600" />
+                  </div>
+                  <h3 className="mt-4 font-display text-base font-semibold tracking-[-0.02em] text-ink-900">{card.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-ink-500">{card.description}</p>
+                </Link>
+              </StaggerItem>
             );
           })}
-        </div>
-      </div>
+        </Stagger>
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-ink-100 bg-white p-5 lg:col-span-2">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-ink-500">
-                Volume · recent
+      <Stagger className="grid gap-4 lg:grid-cols-3">
+        <StaggerItem className="lg:col-span-2">
+          <div className="h-full rounded-3xl border border-ink-100 bg-white p-6 shadow-sm">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-500">
+                  Volume · recent
+                </p>
+                <p className="mt-1 font-display text-3xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
+                  {formatINR(volume14d)}
+                </p>
+              </div>
+              <Badge variant="brand" size="sm">Last 14 days</Badge>
+            </div>
+            <div className="mt-5">
+              <Sparkline
+                values={Array.from({ length: 14 }, () => 0)}
+                color="#2563eb"
+                height={80}
+              />
+            </div>
+            {!loadingTxns && volume14d === 0 && (
+              <p className="mt-3 text-xs text-ink-500">
+                No transactions yet — your processed volume appears after successful live transactions.
               </p>
-              <p className="mt-1 font-display text-2xl font-bold text-ink-900">
-                {formatINR(volume14d)}
+            )}
+          </div>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="grain relative h-full overflow-hidden rounded-3xl bg-ink-950 p-6 text-white shadow-[0_24px_60px_-28px_rgba(7,11,20,0.7)]">
+            <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-royal-500/30 blur-3xl" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-coral-500/20 blur-3xl" />
+            <div className="relative z-10 flex h-full flex-col">
+              <IconTile icon={Rocket} tone="energy" size="md" />
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
+                Get started
               </p>
+              <p className="mt-1.5 font-display text-xl font-semibold tracking-[-0.02em]">
+                Run your first live transaction
+              </p>
+              <p className="mt-1.5 text-sm text-ink-300">
+                Top up your wallet, then use Quick services below to process real payments.
+              </p>
+              <Link
+                href="/dashboard/wallet"
+                className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-semibold text-white transition hover:gap-2.5"
+              >
+                Open wallet <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
-          <div className="mt-4">
-            <Sparkline
-              values={Array.from({ length: 14 }, () => 0)}
-              color="#185df5"
-              height={80}
+        </StaggerItem>
+      </Stagger>
+
+      <section>
+        <SectionHeader
+          title="Quick services"
+          description="Most-used services for fast access"
+          icon={Sparkle}
+          tone="royal"
+          className="mb-4"
+          actions={
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 transition hover:text-brand-800"
+            >
+              View all <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          }
+        />
+        {quickServices.length === 0 && (
+          <div className="rounded-3xl border border-dashed border-ink-200 bg-white/60">
+            <EmptyState
+              icon={Storefront}
+              tone="ink"
+              compact
+              title="No services switched on yet"
+              body="Ask your admin to activate services for your account — you'll see them here the moment they're live."
             />
           </div>
-          {!loadingTxns && volume14d === 0 && (
-            <p className="mt-2 text-xs text-ink-500">
-              No transactions yet — your processed volume appears after successful live transactions.
-            </p>
-          )}
-        </div>
-        <div className="rounded-2xl border border-dashed border-brand-200 bg-gradient-to-br from-brand-50 to-accent-50 p-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-700">
-            Get started
-          </p>
-          <p className="mt-3 font-display text-lg font-semibold text-ink-900">
-            Run your first live transaction
-          </p>
-          <p className="mt-1 text-sm text-ink-600">
-            Top up your wallet, then use Quick services below to process real payments.
-          </p>
-          <Link
-            href="/dashboard/wallet"
-            className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline"
-          >
-            Open wallet <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-      </div>
-
-      <div>
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-lg font-semibold text-ink-900">
-              Quick services
-            </h2>
-            <p className="text-sm text-ink-500">
-              Most-used services for fast access
-            </p>
-          </div>
-          <Link
-            href="/services"
-            className="text-sm font-semibold text-brand-700 hover:underline"
-          >
-            View all
-          </Link>
-        </div>
-        {quickServices.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-ink-200 bg-ink-50/50 p-6 text-center text-sm text-ink-500">
-            No services are enabled for your account yet. Contact your admin to
-            get services activated.
-          </div>
         )}
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+        <Stagger className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           {quickServices.map((s) => {
             const Icon = s.icon;
             return (
-              <Link
-                key={s.slug}
-                href={s.href}
-                className={cn(
-                  "group flex items-center gap-3 rounded-2xl border border-ink-100 bg-white p-4 transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-soft"
-                )}
-              >
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-700 transition group-hover:bg-brand-600 group-hover:text-white">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="font-display text-sm font-semibold text-ink-900">
-                    {s.title}
-                  </p>
-                  <p className="text-xs text-ink-500">{s.description.slice(0, 36)}...</p>
-                </div>
-              </Link>
+              <StaggerItem key={s.slug}>
+                <Link
+                  href={s.href}
+                  className="group flex items-center gap-3 rounded-3xl border border-ink-100 bg-white p-4 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-energy-sm focus-energy"
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100 transition group-hover:bg-energy-gradient group-hover:text-white group-hover:ring-white/30">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">
+                      {s.title}
+                    </p>
+                    <p className="truncate text-xs text-ink-500">{s.description.slice(0, 36)}...</p>
+                  </div>
+                </Link>
+              </StaggerItem>
             );
           })}
-        </div>
-      </div>
+        </Stagger>
+      </section>
 
-      <TransactionsTable data={txns} loading={loadingTxns} showCommission={false} />
+      <FadeIn delay={0.1}>
+        <TransactionsTable data={txns} loading={loadingTxns} showCommission={false} />
+      </FadeIn>
     </div>
   );
 }
@@ -300,66 +360,42 @@ function PosBookingStrip() {
   const delivered = booking.status === "DELIVERED";
 
   return (
-    <Link
-      href="/dashboard/pos-booking"
-      className="group flex flex-col gap-4 rounded-2xl border border-ink-100 bg-white p-5 shadow-sm transition hover:border-brand-200 hover:shadow-soft sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div className="flex items-center gap-3">
-        <span className={cn(
-          "grid h-11 w-11 place-items-center rounded-xl text-white shadow-soft",
-          delivered ? "bg-emerald-500" : "bg-gradient-to-br from-brand-600 to-accent-500",
-        )}>
-          <Truck className="h-5 w-5" />
-        </span>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-ink-500">POS Booking</p>
-          <p className="font-display text-sm font-semibold text-ink-900">
-            {booking.plan.name} · {booking.statusLabel}
-            {machineLabel && <span className="ml-1 font-mono text-xs text-ink-500">({machineLabel})</span>}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          {STRIP_STEPS.map((label, i) => {
-            const done = i <= booking.stepIndex;
-            return (
-              <div key={label} className="flex items-center gap-1.5">
-                <span className={cn("h-2 w-2 rounded-full", done ? (delivered ? "bg-emerald-500" : "bg-brand-500") : "bg-ink-200")} />
-                {i < STRIP_STEPS.length - 1 && <span className={cn("h-0.5 w-6 rounded-full", i < booking.stepIndex ? (delivered ? "bg-emerald-500" : "bg-brand-500") : "bg-ink-200")} />}
-              </div>
-            );
-          })}
-        </div>
-        <ArrowRight className="h-4 w-4 text-ink-300 transition group-hover:translate-x-1 group-hover:text-brand-600" />
-      </div>
-    </Link>
-  );
-}
-
-function WalletCard({ balance }: { balance: number }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-accent-500 p-5 text-white shadow-glow">
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-      <div className="flex items-start justify-between">
-        <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/15">
-          <Wallet className="h-5 w-5" />
-        </span>
-        <span className="rounded-full bg-white/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest">
-          eMoney Wallet
-        </span>
-      </div>
-      <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-white/80">
-        Available balance
-      </p>
-      <p className="mt-1 font-display text-2xl font-bold">{formatINR(balance)}</p>
+    <FadeIn>
       <Link
-        href="/dashboard/wallet"
-        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white/90 hover:text-white"
+        href="/dashboard/pos-booking"
+        className="group flex flex-col gap-4 rounded-3xl border border-ink-100 bg-white p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-300 hover:border-brand-200 hover:shadow-energy-sm focus-energy sm:flex-row sm:items-center sm:justify-between"
       >
-        Manage wallet <ArrowRight className="h-3 w-3" />
+        <div className="flex items-center gap-3">
+          <span className={cn(
+            "grid h-11 w-11 place-items-center rounded-xl text-white shadow-soft",
+            delivered ? "bg-gradient-to-br from-emerald-500 to-emerald-700" : "bg-energy-gradient",
+          )}>
+            <Truck className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-500">POS Booking</p>
+            <p className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">
+              {booking.plan.name} · {booking.statusLabel}
+              {machineLabel && <span className="ml-1 font-mono text-xs font-normal text-ink-500">({machineLabel})</span>}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <ol className="flex items-center gap-1.5" aria-label="Booking progress">
+            {STRIP_STEPS.map((label, i) => {
+              const done = i <= booking.stepIndex;
+              return (
+                <li key={label} className="flex items-center gap-1.5" title={label}>
+                  <span className={cn("h-2 w-2 rounded-full", done ? (delivered ? "bg-emerald-500" : "bg-energy-gradient") : "bg-ink-200")} />
+                  {i < STRIP_STEPS.length - 1 && <span className={cn("h-0.5 w-6 rounded-full", i < booking.stepIndex ? (delivered ? "bg-emerald-500" : "bg-energy-gradient-x") : "bg-ink-200")} />}
+                </li>
+              );
+            })}
+          </ol>
+          <ArrowRight className="h-4 w-4 text-ink-300 transition group-hover:translate-x-1 group-hover:text-brand-600" />
+        </div>
       </Link>
-    </div>
+    </FadeIn>
   );
 }

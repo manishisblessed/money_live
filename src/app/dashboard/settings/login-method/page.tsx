@@ -9,13 +9,16 @@ import {
   HelpCircle,
   Loader2,
   Check,
-  AlertTriangle,
   ShieldAlert,
   Lock,
 } from "lucide-react";
-import { ServicePageHeader } from "@/components/dashboard/ServicePage";
+import { Key, ShieldWarning, Fingerprint } from "@phosphor-icons/react";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { IconTile } from "@/components/ui/Icon";
+import { Badge } from "@/components/ui/Badge";
+import { EmptyState, SectionCard, FadeIn } from "@/components/dashboard/patterns";
 import { cn } from "@/lib/utils";
 
 type Preferred = "authenticator" | "tpin" | null;
@@ -42,21 +45,21 @@ const OPTIONS: {
     label: "Ask me every time",
     desc: "Show the chooser at each login so you can pick on the spot.",
     icon: HelpCircle,
-    accent: "text-ink-600",
+    accent: "bg-ink-100 text-ink-600",
   },
   {
     id: "authenticator",
     label: "Authenticator app",
     desc: "Skip the chooser and go straight to your 6-digit TOTP code. Most secure.",
     icon: ShieldCheck,
-    accent: "text-emerald-600",
+    accent: "bg-accent-50 text-accent-700",
   },
   {
     id: "tpin",
     label: "Transaction PIN",
     desc: "Skip the chooser and sign in with your TPIN. Quick and convenient.",
     icon: KeyRound,
-    accent: "text-brand-600",
+    accent: "bg-brand-50 text-brand-700",
   },
 ];
 
@@ -127,61 +130,57 @@ export default function LoginMethodSettingsPage() {
   const current: (typeof OPTIONS)[number]["id"] = state?.preferred ?? "ask";
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <ServicePageHeader
-        icon={ShieldCheck}
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        eyebrow="Account · Security"
         title="Login method"
-        description="Choose how you'd like to verify your identity when you sign in."
-        back="/dashboard/settings"
+        description="Choose how you verify your identity when you sign in."
+        actions={
+          <Link href="/dashboard/settings" className="text-sm font-semibold text-ink-500 hover:text-ink-900">
+            ← Back to settings
+          </Link>
+        }
       />
 
       {loading ? (
-        <div className="flex items-center justify-center rounded-2xl border border-ink-100 bg-white p-10 text-ink-500">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
+        <SectionCard className="grid place-items-center py-12">
+          <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+        </SectionCard>
       ) : !state ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-          Couldn&apos;t load your login settings. Please refresh and try again.
-        </div>
+        <EmptyState
+          bordered
+          tone="coral"
+          icon={ShieldWarning}
+          title="Couldn't load your login settings"
+          description="Please refresh and try again."
+        />
       ) : !state.selfManageable ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-          <div>
-            <p className="font-semibold text-amber-900">
-              PIN login isn&apos;t available for this account
-            </p>
-            <p className="mt-1 text-sm text-amber-800">
-              For security, admin and master-admin accounts must always sign in
-              with an authenticator app.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {/* ── Enable / disable TPIN login ─────────────────────────────── */}
-          <section className="rounded-2xl border border-ink-100 bg-white">
-            <div className="flex items-center gap-3 border-b border-ink-100 px-6 py-4">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-50 text-brand-700">
-                <KeyRound className="h-4 w-4" />
-              </span>
-              <div>
-                <h3 className="font-display text-base font-semibold text-ink-900">
-                  Sign in with your transaction PIN
-                </h3>
-                <p className="text-xs text-ink-500">
-                  Use your TPIN as an alternative to the authenticator app.
-                </p>
-              </div>
-              {state.pinLoginEnabled && (
-                <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                  <Check className="h-3.5 w-3.5" /> Enabled
-                </span>
-              )}
+        <SectionCard tone="amber">
+          <div className="flex items-start gap-3">
+            <IconTile icon={ShieldWarning} tone="amber" size="sm" />
+            <div>
+              <p className="font-semibold text-ink-900">
+                PIN login isn&apos;t available for this account
+              </p>
+              <p className="mt-1 text-sm text-ink-600">
+                For security, admin and master-admin accounts must always sign in
+                with an authenticator app.
+              </p>
             </div>
-
-            <div className="space-y-4 p-6">
+          </div>
+        </SectionCard>
+      ) : (
+        <FadeIn className="space-y-6">
+          {/* ── Enable / disable TPIN login ─────────────────────────────── */}
+          <SectionCard
+            icon={<IconTile icon={Key} tone="brand" size="sm" />}
+            title="Sign in with your transaction PIN"
+            description="Use your TPIN as an alternative to the authenticator app."
+            action={state.pinLoginEnabled ? <Badge variant="success" dot>Enabled</Badge> : <Badge>Off</Badge>}
+          >
+            <div className="space-y-4">
               {!state.hasTxnPin ? (
-                <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-inset ring-amber-200">
                   <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <div className="text-sm text-amber-800">
                     You need a transaction PIN before you can turn this on.{" "}
@@ -211,7 +210,7 @@ export default function LoginMethodSettingsPage() {
                 </>
               ) : (
                 <>
-                  <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  <label className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-inset ring-amber-200">
                     <input
                       type="checkbox"
                       checked={declaration}
@@ -240,68 +239,69 @@ export default function LoginMethodSettingsPage() {
                 </>
               )}
             </div>
-          </section>
+          </SectionCard>
 
           {/* ── Preferred method ────────────────────────────────────────── */}
           {state.pinLoginEnabled && (
-            <section className="space-y-3">
-              <div>
-                <h3 className="font-display text-base font-semibold text-ink-900">
-                  Preferred method at login
-                </h3>
-                <p className="text-sm text-ink-500">
-                  {state.canChoose
-                    ? "Pick a default — you can always switch during login."
-                    : "You'll sign in with your transaction PIN. Set up an authenticator app to be able to choose between the two."}
-                </p>
-              </div>
-
+            <SectionCard
+              icon={<IconTile icon={Fingerprint} tone="royal" size="sm" />}
+              title="Preferred method at login"
+              description={
+                state.canChoose
+                  ? "Pick a default — you can always switch during login."
+                  : "You'll sign in with your transaction PIN. Set up an authenticator app to be able to choose between the two."
+              }
+            >
               {state.canChoose ? (
-                OPTIONS.map((o) => {
-                  const Icon = o.icon;
-                  const active = current === o.id;
-                  const isBusy = busy === `pref-${o.id}`;
-                  return (
-                    <button
-                      key={o.id}
-                      type="button"
-                      disabled={busy !== null}
-                      onClick={() => choose(o.id)}
-                      className={cn(
-                        "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition",
-                        active
-                          ? "border-brand-500 bg-brand-50 shadow-soft"
-                          : "border-ink-100 hover:border-brand-300"
-                      )}
-                    >
-                      <span
+                <div className="space-y-3" role="radiogroup" aria-label="Preferred login method">
+                  {OPTIONS.map((o) => {
+                    const Icon = o.icon;
+                    const active = current === o.id;
+                    const isBusy = busy === `pref-${o.id}`;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        disabled={busy !== null}
+                        onClick={() => choose(o.id)}
                         className={cn(
-                          "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white",
-                          o.accent
+                          "flex w-full items-center gap-4 rounded-2xl p-4 text-left ring-1 ring-inset transition-[box-shadow,background-color] focus-energy",
+                          active
+                            ? "pill-active ring-royal-200 shadow-energy-sm"
+                            : "bg-white ring-ink-100 hover:ring-brand-300"
                         )}
                       >
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold text-ink-900">
-                          {o.label}
+                        <span
+                          className={cn(
+                            "grid h-11 w-11 shrink-0 place-items-center rounded-xl",
+                            o.accent
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
                         </span>
-                        <span className="block text-xs text-ink-500">{o.desc}</span>
-                      </span>
-                      {isBusy ? (
-                        <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brand-600" />
-                      ) : active ? (
-                        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-600 text-white">
-                          <Check className="h-4 w-4" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold text-ink-900">
+                            {o.label}
+                          </span>
+                          <span className="block text-xs text-ink-500">{o.desc}</span>
                         </span>
-                      ) : (
-                        <span className="h-6 w-6 shrink-0 rounded-full border border-ink-200" />
-                      )}
-                    </button>
-                  );
-                })
+                        {isBusy ? (
+                          <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brand-600" />
+                        ) : active ? (
+                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-energy-gradient text-white">
+                            <Check className="h-4 w-4" />
+                          </span>
+                        ) : (
+                          <span className="h-6 w-6 shrink-0 rounded-full ring-1 ring-inset ring-ink-200" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               ) : (
-                <div className="flex items-start gap-3 rounded-2xl border border-ink-100 bg-ink-50 p-4 text-sm text-ink-600">
+                <div className="flex items-start gap-3 rounded-2xl bg-ink-50/70 p-4 text-sm text-ink-600 ring-1 ring-inset ring-ink-100">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                   <span>
                     Want the choice at login?{" "}
@@ -315,9 +315,9 @@ export default function LoginMethodSettingsPage() {
                   </span>
                 </div>
               )}
-            </section>
+            </SectionCard>
           )}
-        </div>
+        </FadeIn>
       )}
 
       <ConfirmDialog

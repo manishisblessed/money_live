@@ -103,24 +103,23 @@ export function CumulativeWalletCard({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-white/10 p-5 text-white shadow-[0_25px_80px_-25px_rgba(9,13,37,0.55)]",
-        "bg-[radial-gradient(120%_120%_at_0%_0%,#12224a_0%,#0a1130_45%,#070a1c_100%)]"
+        "grain relative overflow-hidden rounded-3xl border border-white/10 bg-ink-950 p-6 text-white shadow-[0_30px_80px_-30px_rgba(7,11,20,0.7)]"
       )}
     >
       {/* accent glows */}
       <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-brand-500/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-10 h-56 w-72 rounded-full bg-violet-500/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-10 h-56 w-72 rounded-full bg-royal-500/20 blur-3xl" />
 
-      <header className="relative flex flex-wrap items-start justify-between gap-3">
+      <header className="relative z-10 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white shadow-lg shadow-emerald-900/30">
             <Wallet className="h-5 w-5" strokeWidth={2.2} />
           </span>
           <div>
-            <h2 className="font-display text-lg font-bold tracking-tight">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">
               Cumulative Wallet Balances
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Total user funds held across the platform (liability view)
             </p>
           </div>
@@ -165,7 +164,7 @@ export function CumulativeWalletCard({
             type="button"
             onClick={onRefresh}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-emerald-900/30 transition hover:brightness-110 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-energy-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-energy-sm transition hover:brightness-110 disabled:opacity-60"
           >
             <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
             Refresh
@@ -173,7 +172,7 @@ export function CumulativeWalletCard({
         </div>
       </header>
 
-      <div className="relative mt-4 grid gap-3 lg:grid-cols-3">
+      <div className="relative z-10 mt-5 grid gap-3 lg:grid-cols-3">
         <BucketCard
           title="Total Primary Wallet"
           subtitle={`${formatNumber(data?.walletCount ?? 0)} wallets`}
@@ -232,7 +231,7 @@ export function CumulativeWalletCard({
       </div>
 
       {(data?.heldTotal ?? 0) > 0 && !loading && (
-        <div className="relative mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-slate-300">
+        <div className="relative z-10 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-slate-300">
           <span className="inline-flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-amber-300" />
             <b className="text-white">{money(data!.heldTotal)}</b> currently
@@ -300,14 +299,14 @@ function BucketCard({
           {icon}
         </span>
         <div className="min-w-0">
-          <h3 className="font-display text-sm font-bold text-white">{title}</h3>
+          <h3 className="font-display text-sm font-semibold tracking-[-0.01em] text-white">{title}</h3>
           <p className="truncate text-[11px] text-slate-400">{subtitle}</p>
         </div>
       </div>
 
       <p
         className={cn(
-          "relative mt-3 font-display text-[26px] font-bold leading-tight text-white",
+          "relative mt-3 font-display text-[26px] font-semibold leading-tight tracking-[-0.02em] tabular-nums text-white",
           loading && "animate-pulse text-white/30"
         )}
       >

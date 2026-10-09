@@ -58,9 +58,12 @@ export function NavigationProgress() {
       aria-hidden
     >
       <div
-        className="h-full origin-left bg-gradient-to-r from-brand-500 via-brand-400 to-accent-400 transition-[width] duration-300 ease-out"
+        className="relative h-full origin-left bg-energy-gradient-x shadow-[0_0_12px_rgba(124,58,237,0.55)] transition-[width] duration-300 ease-out"
         style={{ width: `${progress}%` }}
-      />
+      >
+        {/* bright leading edge */}
+        <span className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-white/60" />
+      </div>
     </div>
   );
 }

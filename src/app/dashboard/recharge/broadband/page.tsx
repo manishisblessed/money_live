@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default function BroadbandPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Wifi}
         title="Broadband / OTT"
-        description="Pay your postpaid broadband, landline & OTT subscription bills."
+        description="Pay postpaid broadband, landline & OTT subscription bills."
       />
       <RechargeForm
         serviceTitle="Broadband / OTT"

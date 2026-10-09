@@ -3,9 +3,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { KeyRound, ArrowRight, AlertCircle, RotateCcw, ShieldAlert } from "lucide-react";
+import { Key, ArrowRight, ArrowCounterClockwise, ShieldWarning } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { AuthAlert, AuthCardHeader, AuthLinksRow } from "@/components/auth/AuthCard";
+import { cn } from "@/lib/utils";
 
 interface PinLoginStepProps {
   tempToken: string;
@@ -84,29 +87,29 @@ export function PinLoginStep({ tempToken, userName, riskAlreadyAccepted, onBack 
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-600 text-white">
-          <KeyRound className="h-5 w-5" />
-        </span>
-        <div>
-          <h2 className="heading-md">Sign in with your PIN</h2>
-          <p className="text-sm text-ink-500">
-            Hi {userName}, enter your transaction PIN to continue.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AuthCardHeader
+        as="h2"
+        eyebrow="Verify it's you"
+        title="Sign in with your PIN"
+        description={
+          <>
+            Hi {userName || "there"} — enter your transaction PIN to finish signing in.
+          </>
+        }
+        icon={<IconTile icon={Key} tone="brand" size="lg" />}
+      />
 
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+      <AuthAlert message={error || null} />
 
-      <form className="space-y-4" onSubmit={onSubmit}>
+      <form className="space-y-5" onSubmit={onSubmit}>
         <div>
-          <Label htmlFor="pin-login-pin">Transaction PIN</Label>
+          <label
+            htmlFor="pin-login-pin"
+            className="mb-2 block text-center text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500"
+          >
+            Transaction PIN
+          </label>
           <Input
             ref={inputRef}
             id="pin-login-pin"
@@ -118,22 +121,26 @@ export function PinLoginStep({ tempToken, userName, riskAlreadyAccepted, onBack 
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
             disabled={loading}
             autoComplete="off"
-            className="text-center text-lg font-mono tracking-[0.4em]"
+            className={cn(
+              "h-14 text-center font-display text-2xl font-semibold tracking-[0.5em] placeholder:tracking-[0.5em]",
+              error && "border-coral-300"
+            )}
             required
           />
+          <p className="mt-2 text-center text-xs text-ink-400">4–6 digits · the same PIN you use to confirm payments</p>
         </div>
 
         {!riskAlreadyAccepted && (
-          <label className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-amber-50 p-4 text-xs leading-relaxed text-amber-900 ring-1 ring-inset ring-amber-200">
             <input
               type="checkbox"
               checked={riskAccepted}
               onChange={(e) => setRiskAccepted(e.target.checked)}
               disabled={loading}
-              className="mt-0.5 h-4 w-4 accent-amber-600"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded accent-amber-600"
             />
-            <span className="flex items-start gap-1.5">
-              <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span className="flex items-start gap-2">
+              <ShieldWarning size={16} weight="duotone" className="mt-px shrink-0" aria-hidden />
               <span>
                 I understand that logging in without two-factor authentication is
                 less secure. I accept that all risk for any suspicious or
@@ -144,34 +151,34 @@ export function PinLoginStep({ tempToken, userName, riskAlreadyAccepted, onBack 
           </label>
         )}
 
-        {loading ? (
-          <div className="flex items-center justify-center gap-2.5 py-3 text-sm font-medium text-brand-700">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
-            Verifying...
-          </div>
-        ) : (
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={pin.length < 4 || (!riskAlreadyAccepted && !riskAccepted)}
-          >
-            Verify &amp; sign in <ArrowRight className="h-4 w-4" />
-          </Button>
-        )}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          isLoading={loading}
+          disabled={pin.length < 4 || (!riskAlreadyAccepted && !riskAccepted)}
+        >
+          {loading ? (
+            "Verifying…"
+          ) : (
+            <>
+              Verify &amp; sign in <ArrowRight size={16} weight="bold" aria-hidden />
+            </>
+          )}
+        </Button>
       </form>
 
-      <div className="flex justify-end text-xs">
+      <AuthLinksRow className="justify-end">
         <button
           type="button"
           onClick={onBack}
           disabled={loading}
-          className="flex items-center gap-1 font-medium text-ink-500 hover:text-ink-900 disabled:opacity-50"
+          className="focus-energy inline-flex items-center gap-1.5 rounded-lg font-medium text-ink-500 transition hover:text-ink-900 disabled:opacity-50"
         >
-          <RotateCcw className="h-3 w-3" />
+          <ArrowCounterClockwise size={13} weight="bold" aria-hidden />
           Start over
         </button>
-      </div>
+      </AuthLinksRow>
     </div>
   );
 }

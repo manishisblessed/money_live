@@ -37,7 +37,7 @@ const SETTING_SCHEMAS = {
    * affects links generated afterwards.
    */
   "onboarding.invite_expiry": z.object({
-    days: z.number().int().min(1).max(90).default(30),
+    days: z.number().int().min(30).max(90).default(30),
   }),
 
   /** @deprecated No longer enforced — admin wallet PUSH/PULL executes

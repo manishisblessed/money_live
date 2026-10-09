@@ -2,14 +2,26 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, RefreshCw, Loader2 } from "lucide-react";
-import { Input, Label } from "@/components/ui/Input";
+import { CreditCard, Lightning, ShieldCheck } from "@phosphor-icons/react";
 import { OperatorSelect } from "@/components/ui/OperatorSelect";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { BankLogo } from "@/components/dashboard/BankLogo";
 import {
   TransactionResult,
   type TxnResult,
 } from "@/components/dashboard/TransactionResult";
 import { TxnPinDialog } from "@/components/security/TxnPinDialog";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+  SecureFootnote,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips, InfoChip } from "@/components/dashboard/services/SummaryPanel";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { ChargeBreakdown } from "@/components/dashboard/services/ChargeBreakdown";
 import { generateRefId, formatINR } from "@/lib/utils";
 
 type Operator = {
@@ -323,216 +335,230 @@ export function RechargekitCCForm() {
     }
   }
 
+  const amountNum = Number(amount) || 0;
+  const ifscInvalid = ifsc.length > 0 && !IFSC_RE.test(ifsc);
+
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className="grid gap-4 rounded-2xl border border-ink-100 bg-white p-6 sm:grid-cols-2"
+      <ServiceLayout
+        aside={
+          <>
+            <SummaryPanel
+              title="Credit card payment"
+              status={
+                polling
+                  ? { label: "Processing", variant: "warning", dot: true }
+                  : inputsValid
+                    ? { label: "Ready to pay", variant: "accent", dot: true }
+                    : { label: "Fill the form", variant: "default" }
+              }
+              rows={[
+                {
+                  label: "Bank",
+                  value: bankName ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <BankLogo name={bankName} size={18} />
+                      {bankName}
+                    </span>
+                  ) : (
+                    "—"
+                  ),
+                  muted: !bankName,
+                },
+                { label: "Card", value: cardNumber ? `•••• ${cardNumber.slice(-4)}` : "—", mono: true, muted: !cardNumber },
+                { label: "Cardholder", value: beneficiaryName || "—", muted: !beneficiaryName },
+                { label: "IFSC", value: ifsc || "—", mono: true, muted: !ifsc },
+                ...(quote && amountNum > 0
+                  ? [
+                      { label: "Payment amount", value: formatINR(amountNum) },
+                      { label: "Service charge", value: formatINR(quote.serviceCharge) },
+                      ...(quote.gst > 0 ? [{ label: "GST (18%)", value: formatINR(quote.gst) }] : []),
+                    ]
+                  : []),
+              ]}
+              total={formatINR(quote && amountNum > 0 ? quote.totalDebit : amountNum)}
+              totalLabel="Debit from wallet"
+              totalHint={quoteLoading && amountNum > 0 ? "Calculating charges…" : undefined}
+              footer={
+                quote && quote.commission > 0 && amountNum > 0 ? (
+                  <InfoChip
+                    tone="accent"
+                    icon={<Lightning weight="duotone" />}
+                    label="Commission on this txn"
+                    value={formatINR(quote.commission)}
+                  />
+                ) : undefined
+              }
+            />
+            <AsideTips
+              items={[
+                { icon: <ShieldCheck weight="duotone" />, text: "The card number is sent securely and never stored." },
+                { icon: <CreditCard weight="duotone" />, text: "IFSC auto-fills for supported banks — enter it only if asked." },
+              ]}
+            />
+          </>
+        }
       >
-        {/* Operator selector */}
-        <div className="sm:col-span-2">
-          <Label htmlFor="operator">Card issuer / Bank</Label>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <OperatorSelect
-                id="operator"
-                value={operatorCode}
-                onChange={setOperatorCode}
-                options={operators.map((op) => ({
-                  value: op.operatorCode,
-                  label: op.operatorName,
-                }))}
-                loading={loadingOps}
-                disabled={loadingOps}
+        <ServiceCard
+          as="form"
+          onSubmit={handleSubmit}
+          icon={<IconTile icon={CreditCard} tone="energy" size="lg" />}
+          eyebrow="Direct payment"
+          title="Credit Card Bill Payment-2"
+          description="Enter the full card number, bank and amount — charges show before you confirm."
+        >
+          <div className="grid gap-5">
+            <Field
+              label="Card issuer / bank"
+              htmlFor="operator"
+              hint={!loadingOps && operators.length > 0 ? `${operators.length} operators available` : undefined}
+            >
+              <div className="flex gap-2">
+                <div className="min-w-0 flex-1">
+                  <OperatorSelect
+                    id="operator"
+                    value={operatorCode}
+                    onChange={setOperatorCode}
+                    options={operators.map((op) => ({
+                      value: op.operatorCode,
+                      label: op.operatorName,
+                    }))}
+                    loading={loadingOps}
+                    disabled={loadingOps}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => loadOperators(true)}
+                  disabled={loadingOps}
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-ink-500 ring-1 ring-ink-200 transition hover:bg-ink-50 hover:text-ink-700 focus-energy disabled:opacity-50"
+                  title="Refresh operator list"
+                  aria-label="Refresh operator list"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loadingOps ? "animate-spin" : ""}`} />
+                </button>
+              </div>
+            </Field>
+
+            <FloatField
+              id="cardNumber"
+              label="Credit card number (full)"
+              required
+              mono
+              inputMode="numeric"
+              maxLength={19}
+              value={cardNumber}
+              onChange={(e) =>
+                setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 19))
+              }
+              hint="Sent securely, never stored"
+            />
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <FloatField
+                id="mobile"
+                label="Registered mobile number"
+                required
+                mono
+                inputMode="numeric"
+                maxLength={10}
+                value={mobile}
+                onChange={(e) =>
+                  setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
+                hint="10-digit mobile"
+              />
+              {/* IFSC — auto-filled from the selected bank; manual only when the
+                  operator did not supply one. */}
+              <FloatField
+                id="ifsc"
+                label="Card IFSC code"
+                required
+                mono
+                readOnly={operatorProvidesIfsc}
+                value={ifsc}
+                onChange={(e) => setIfsc(e.target.value.toUpperCase().slice(0, 11))}
+                className={operatorProvidesIfsc ? "[&>input]:bg-ink-50 [&>input]:text-ink-500" : ""}
+                error={ifscInvalid ? "Enter a valid IFSC (format: ICIC0001234)." : undefined}
+                hint={
+                  operatorProvidesIfsc
+                    ? "Auto-filled from the selected bank — nothing to enter."
+                    : selectedOp
+                      ? "This bank didn't share an IFSC — enter the card's bank IFSC."
+                      : "e.g. ICIC0000001"
+                }
               />
             </div>
-            <button
-              type="button"
-              onClick={() => loadOperators(true)}
-              disabled={loadingOps}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-ink-200 text-ink-500 transition hover:bg-ink-50 hover:text-ink-700 disabled:opacity-50"
-              title="Refresh operator list"
-            >
-              <RefreshCw className={`h-4 w-4 ${loadingOps ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-          {!loadingOps && operators.length > 0 && (
-            <p className="mt-1 text-[11px] text-ink-400">
-              {operators.length} operators available
-            </p>
-          )}
-        </div>
 
-        {/* Card number (full 16-digit) */}
-        <div className="sm:col-span-2">
-          <Label htmlFor="cardNumber">Credit card number (full)</Label>
-          <Input
-            id="cardNumber"
-            required
-            inputMode="numeric"
-            maxLength={19}
-            placeholder="Enter full 16-digit card number"
-            value={cardNumber}
-            onChange={(e) =>
-              setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 19))
-            }
-          />
-          <p className="mt-1 text-[11px] text-ink-400">
-            Your card number is sent securely and never stored
-          </p>
-        </div>
+            <FloatField
+              id="beneficiaryName"
+              label="Cardholder name"
+              required
+              value={beneficiaryName}
+              onChange={(e) => setBeneficiaryName(e.target.value)}
+              hint="Name as printed on the card"
+            />
 
-        {/* Mobile */}
-        <div>
-          <Label htmlFor="mobile">Registered mobile number</Label>
-          <Input
-            id="mobile"
-            required
-            inputMode="numeric"
-            maxLength={10}
-            placeholder="10-digit mobile"
-            value={mobile}
-            onChange={(e) =>
-              setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))
-            }
-          />
-        </div>
+            <FloatField
+              id="amount"
+              label="Amount to pay (₹)"
+              required
+              display
+              type="number"
+              min={1}
+              max={500000}
+              inputMode="numeric"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
 
-        {/* IFSC — auto-filled from the selected bank; manual only when the
-            operator did not supply one. */}
-        <div>
-          <Label htmlFor="ifsc">Card IFSC code</Label>
-          <Input
-            id="ifsc"
-            required
-            readOnly={operatorProvidesIfsc}
-            placeholder={operatorProvidesIfsc ? "" : "e.g. ICIC0000001"}
-            value={ifsc}
-            onChange={(e) => setIfsc(e.target.value.toUpperCase().slice(0, 11))}
-            className={operatorProvidesIfsc ? "bg-ink-50 text-ink-500" : ""}
-          />
-          {operatorProvidesIfsc ? (
-            <p className="mt-1 text-[11px] text-emerald-600">
-              Auto-filled from the selected bank — no entry needed.
-            </p>
-          ) : selectedOp ? (
-            <p className="mt-1 text-[11px] text-amber-600">
-              This bank did not provide an IFSC — enter the card&apos;s bank IFSC manually.
-            </p>
-          ) : null}
-          {ifsc.length > 0 && !IFSC_RE.test(ifsc) && (
-            <p className="mt-1 text-[11px] text-rose-600">
-              Enter a valid IFSC (format: ICIC0001234).
-            </p>
-          )}
-        </div>
-
-        {/* Beneficiary name */}
-        <div className="sm:col-span-2">
-          <Label htmlFor="beneficiaryName">Cardholder name</Label>
-          <Input
-            id="beneficiaryName"
-            required
-            placeholder="Name as printed on the card"
-            value={beneficiaryName}
-            onChange={(e) => setBeneficiaryName(e.target.value)}
-          />
-        </div>
-
-        {/* Amount */}
-        <div className="sm:col-span-2">
-          <Label htmlFor="amount">Amount to pay (₹)</Label>
-          <Input
-            id="amount"
-            required
-            type="number"
-            min={1}
-            max={500000}
-            placeholder="Enter amount in rupees"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </div>
-
-        {/* Charge preview */}
-        {quote && Number(amount) > 0 && (
-          <div className="sm:col-span-2 rounded-xl border border-ink-200 bg-ink-50/50 p-4 text-sm">
-            <div className="flex justify-between">
-              <span className="text-ink-600">Payment amount</span>
-              <span className="font-medium text-ink-900">
-                {formatINR(Number(amount))}
-              </span>
-            </div>
-            <div className="mt-1 flex justify-between">
-              <span className="text-ink-600">Service charge</span>
-              <span className="font-medium text-ink-900">
-                {formatINR(quote.serviceCharge)}
-              </span>
-            </div>
-            {quote.gst > 0 && (
-              <div className="mt-1 flex justify-between">
-                <span className="text-ink-600">GST (18%)</span>
-                <span className="font-medium text-ink-900">
-                  {formatINR(quote.gst)}
-                </span>
-              </div>
+            {quote && amountNum > 0 && (
+              <ChargeBreakdown
+                amount={amountNum}
+                amountLabel="Payment amount"
+                serviceCharge={quote.serviceCharge}
+                gst={quote.gst}
+                totalDebit={quote.totalDebit}
+                commission={quote.commission}
+                loading={quoteLoading}
+              />
             )}
-            <hr className="my-2 border-ink-200" />
-            <div className="flex justify-between font-semibold">
-              <span className="text-ink-700">Total debit from wallet</span>
-              <span className="text-ink-900">{formatINR(quote.totalDebit)}</span>
-            </div>
-            {quote.commission > 0 && (
-              <p className="mt-2 text-xs text-emerald-600">
-                Commission earned: {formatINR(quote.commission)} (net of 2% TDS)
-              </p>
+            {quoteLoading && !quote && amountNum > 0 && (
+              <p className="text-center text-xs text-ink-400 animate-pulse">Calculating charges…</p>
             )}
-          </div>
-        )}
-        {quoteLoading && Number(amount) > 0 && (
-          <p className="sm:col-span-2 text-center text-xs text-ink-400 animate-pulse">
-            Calculating charges…
-          </p>
-        )}
 
-        {/* Error */}
-        {error && (
-          <div className="sm:col-span-2 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+            {error && (
+              <Notice tone="danger" icon={<AlertCircle className="h-4 w-4" />}>
+                {error}
+              </Notice>
+            )}
 
-        {/* Polling status */}
-        {pollStatus && (
-          <div className="sm:col-span-2 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-            <span>{pollStatus}</span>
-          </div>
-        )}
+            {pollStatus && (
+              <Notice tone="warning" icon={<Loader2 className="h-4 w-4 animate-spin" />}>
+                {pollStatus}
+              </Notice>
+            )}
 
-        {/* Submit */}
-        <div className="sm:col-span-2">
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={paying || !inputsValid || !!polling}
-            isLoading={paying}
-          >
-            Pay{" "}
-            {quote
-              ? formatINR(quote.totalDebit)
-              : amount
-                ? formatINR(Number(amount))
-                : "credit card"}
-          </Button>
-          <p className="mt-2 text-center text-[11px] text-ink-400">
-            Confirmed with your transaction PIN. Debited from your wallet —
-            failed payments are auto-refunded.
-          </p>
-        </div>
-      </form>
+            <div>
+              <Button
+                type="submit"
+                size="xl"
+                className="w-full"
+                disabled={paying || !inputsValid || !!polling}
+                isLoading={paying}
+              >
+                Pay{" "}
+                {quote
+                  ? formatINR(quote.totalDebit)
+                  : amount
+                    ? formatINR(Number(amount))
+                    : "credit card"}
+              </Button>
+              <SecureFootnote />
+            </div>
+          </div>
+        </ServiceCard>
+      </ServiceLayout>
 
       <TxnPinDialog
         open={pinOpen}

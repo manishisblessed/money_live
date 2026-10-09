@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * Cloudflare Turnstile (CAPTCHA) widget. Renders nothing unless
@@ -80,5 +81,10 @@ export function Turnstile({
   }, [render]);
 
   if (!SITE_KEY) return null;
-  return <div ref={containerRef} className={className} />;
+  return (
+    <div
+      ref={containerRef}
+      className={cn("flex min-h-[65px] w-full items-center justify-center", className)}
+    />
+  );
 }

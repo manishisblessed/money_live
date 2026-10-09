@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Bus } from "lucide-react";
+import { Bus, Calendar, MapPin, Navigation } from "lucide-react";
 import { ServicePageHeader } from "@/components/dashboard/ServicePage";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
+import { SearchBand, SearchTile, ResultCard } from "@/components/dashboard/services/TravelSearch";
 import { formatINR } from "@/lib/utils";
 
 const cities = [
@@ -34,65 +37,78 @@ export default function BusPage() {
   const [searched, setSearched] = useState(false);
 
   return (
-    <div>
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Bus}
         title="Bus Booking"
-        description="Book AC sleeper, semi-sleeper and seater buses across India."
+        description="AC sleeper, semi-sleeper and seater buses across India."
       />
 
-      <form
+      <SearchBand
         onSubmit={(e) => {
           e.preventDefault();
           setSearched(true);
         }}
-        className="grid items-end gap-4 rounded-2xl border border-ink-100 bg-white p-6 lg:grid-cols-12"
+        eyebrow="Buses"
+        title="Pick a route"
+        subtitle="Overnight and day services from every major operator."
+        footer={
+          <>
+            <Badge size="sm" className="bg-white/10 text-white ring-white/15">AC &amp; non-AC</Badge>
+            <Badge size="sm" className="bg-white/10 text-white ring-white/15">Sleeper · Seater</Badge>
+          </>
+        }
       >
-        <div className="lg:col-span-4">
-          <Label>From</Label>
-          <Select value={from} onChange={(e) => setFrom(e.target.value)}>
-            {cities.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </Select>
+        <div className="grid items-stretch gap-3 lg:grid-cols-12">
+          <SearchTile label="From" htmlFor="bus-from" icon={<MapPin />} className="lg:col-span-4">
+            <Select id="bus-from" value={from} onChange={(e) => setFrom(e.target.value)}>
+              {cities.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </Select>
+          </SearchTile>
+          <SearchTile label="To" htmlFor="bus-to" icon={<Navigation />} className="lg:col-span-4">
+            <Select id="bus-to" value={to} onChange={(e) => setTo(e.target.value)}>
+              {cities.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </Select>
+          </SearchTile>
+          <SearchTile label="Travel date" htmlFor="bus-date" icon={<Calendar />} className="lg:col-span-3">
+            <Input
+              id="bus-date"
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </SearchTile>
+          <div className="lg:col-span-1">
+            <Button type="submit" size="lg" className="h-full min-h-[3.5rem] w-full">
+              Search
+            </Button>
+          </div>
         </div>
-        <div className="lg:col-span-4">
-          <Label>To</Label>
-          <Select value={to} onChange={(e) => setTo(e.target.value)}>
-            {cities.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </Select>
-        </div>
-        <div className="lg:col-span-3">
-          <Label>Travel date</Label>
-          <Input
-            type="date"
-            required
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <Button type="submit" size="lg" className="w-full">
-            Search
-          </Button>
-        </div>
-      </form>
+      </SearchBand>
 
       {searched && (
         <div className="mt-6 space-y-3">
-          {buses.map((b) => (
-            <div
-              key={b.name}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-100 bg-white p-5"
-            >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
+              {buses.length} buses · {from} → {to}
+            </h3>
+            <Badge variant="accent" size="sm" dot>
+              Live availability
+            </Badge>
+          </div>
+          {buses.map((b, i) => (
+            <ResultCard key={b.name} index={i} className="flex flex-wrap items-center justify-between gap-4 p-5">
               <div className="flex items-center gap-4">
-                <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-700">
+                <IconTile tone="royal" size="lg">
                   <Bus className="h-5 w-5" />
-                </span>
+                </IconTile>
                 <div>
-                  <p className="font-display text-base font-semibold text-ink-900">
+                  <p className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
                     {b.name}
                   </p>
                   <p className="text-xs text-ink-500">{b.type}</p>
@@ -100,28 +116,31 @@ export default function BusPage() {
               </div>
               <div className="flex items-center gap-6 text-sm">
                 <div>
-                  <p className="font-display text-base font-bold text-ink-900">
+                  <p className="font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                     {b.depart}
                   </p>
                   <p className="text-xs text-ink-500">{from}</p>
                 </div>
+                <span className="h-px w-12 bg-energy-gradient-x opacity-60" />
                 <div>
-                  <p className="font-display text-base font-bold text-ink-900">
+                  <p className="font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                     {b.arrive}
                   </p>
                   <p className="text-xs text-ink-500">{to}</p>
                 </div>
-                <div className="text-xs text-emerald-700">{b.seats} seats left</div>
+                <Badge variant={b.seats <= 5 ? "coral" : "accent"} size="sm">
+                  {b.seats} seats left
+                </Badge>
               </div>
               <div className="text-right">
-                <p className="font-display text-xl font-bold text-ink-900">
+                <p className="font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                   {formatINR(b.fare)}
                 </p>
                 <Button size="sm" className="mt-2">
                   Select seats
                 </Button>
               </div>
-            </div>
+            </ResultCard>
           ))}
         </div>
       )}

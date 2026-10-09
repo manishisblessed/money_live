@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { FilterBar, PillTabs, StatusChip } from "@/components/dashboard/patterns";
 import { formatINR, formatNumber } from "@/lib/utils";
 import {
   RefreshCw,
@@ -75,7 +76,7 @@ const REASON_CODES = [
 ] as const;
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 export default function NetworkManagerPage() {
   const [tier, setTier] = useState<string>("RETAILER");
@@ -155,13 +156,15 @@ export default function NetworkManagerPage() {
       header: "Status",
       render: (r) => (
         <div className="flex flex-wrap items-center gap-1">
-          <Badge variant={r.status === "ACTIVE" ? "success" : r.status === "SUSPENDED" ? "danger" : "warning"}>
-            {r.status.replace(/_/g, " ")}
-          </Badge>
+          <StatusChip
+            status={r.status}
+            variant={r.status === "ACTIVE" ? "success" : r.status === "SUSPENDED" ? "danger" : "warning"}
+            size="sm"
+          />
           {r.reKycExempt ? (
-            <Badge variant="brand">re-KYC exempt</Badge>
+            <Badge variant="brand" size="sm">re-KYC exempt</Badge>
           ) : (
-            r.reKycRequired && <Badge variant="warning">re-KYC due</Badge>
+            r.reKycRequired && <Badge variant="warning" size="sm">re-KYC due</Badge>
           )}
         </div>
       ),
@@ -210,7 +213,7 @@ export default function NetworkManagerPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin · Network"
-        title="Network Manager"
+        title="Network manager"
         description="Every tier of the distribution chain with wallet snapshots, scheme assignment, limits and settlement controls per user."
         actions={
           <Button variant="outline" onClick={load} disabled={loading}>
@@ -219,31 +222,25 @@ export default function NetworkManagerPage() {
         }
       />
 
-      <div className="flex gap-2 overflow-x-auto border-b border-ink-100">
-        {TIERS.map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => {
-              setTier(key);
-              setPage(1);
-            }}
-            className={`-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition ${
-              tier === key
-                ? "border-brand-600 text-brand-700"
-                : "border-transparent text-ink-500 hover:text-ink-800"
-            }`}
-          >
-            {label}
-            <Badge variant={tier === key ? "brand" : "default"}>
-              {formatNumber(tierCounts[key] ?? 0)}
-            </Badge>
-          </button>
-        ))}
+      <div className="overflow-x-auto pb-1">
+        <PillTabs
+          aria-label="Network tier"
+          value={tier}
+          onChange={(key) => {
+            setTier(key);
+            setPage(1);
+          }}
+          tabs={TIERS.map(([key, label]) => ({
+            value: key as string,
+            label,
+            count: formatNumber(tierCounts[key] ?? 0),
+          }))}
+        />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <FilterBar title="Filters" count={total} hint={pages > 1 ? `Page ${page} of ${pages}` : undefined}>
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-ink-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
           <input
             value={q}
             onChange={(e) => {
@@ -252,6 +249,7 @@ export default function NetworkManagerPage() {
             }}
             placeholder="Search name / shop / email / phone / city…"
             className={`${inputCls} w-80 pl-9`}
+            aria-label="Search network"
           />
         </div>
         <select
@@ -261,6 +259,7 @@ export default function NetworkManagerPage() {
             setPage(1);
           }}
           className={inputCls}
+          aria-label="Status filter"
         >
           <option value="all">All statuses</option>
           <option value="ACTIVE">Active</option>
@@ -274,12 +273,13 @@ export default function NetworkManagerPage() {
             setPage(1);
           }}
           className={inputCls}
+          aria-label="Re-KYC filter"
         >
           <option value="all">All re-KYC</option>
           <option value="due">Re-KYC due</option>
           <option value="exempt">Re-KYC exempt</option>
         </select>
-      </div>
+      </FilterBar>
 
       <BulkServicesPanel
         tier={tier}
@@ -377,7 +377,7 @@ function BulkServicesPanel({
   };
 
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white">
+    <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-5 py-3.5 text-left"
@@ -523,7 +523,7 @@ function DefaultServicesPanel({
   };
 
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white">
+    <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-5 py-3.5 text-left"
@@ -755,7 +755,7 @@ function UserDrawer({
         <div className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="font-display text-lg font-bold text-ink-900">
+              <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
                 {user.name}
                 {user.userCode && (
                   <span className="ml-2 rounded-md bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-600 align-middle">
@@ -1197,7 +1197,7 @@ function UserDrawer({
             )}
           </div>
           {resetResult && (
-            <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm">
+            <div className="mt-2 rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-3 py-2 text-sm">
               New password: <b className="font-mono">{resetResult}</b>
               <p className="text-[11px] text-amber-700">
                 Shown once — all existing sessions have been signed out.
@@ -1572,7 +1572,7 @@ function TransferParentSection({
             </Button>
           </div>
         ) : (
-          <div className="space-y-3 rounded-xl border border-brand-200 bg-brand-50/30 p-3">
+          <div className="space-y-3 rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200/30 p-3">
             <p className="text-xs font-semibold text-brand-700">
               Move {user.name} under a new {parentLabel}
             </p>
@@ -1587,7 +1587,7 @@ function TransferParentSection({
                   setSearchQ(e.target.value);
                   searchParents(e.target.value);
                 }}
-                className="w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+                className="w-full rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
               />
               {searching && (
                 <div className="absolute right-3 top-2.5">
@@ -1632,7 +1632,7 @@ function TransferParentSection({
               placeholder="Reason for change (required)"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className="w-full rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
             />
 
             {/* Actions */}
@@ -1864,7 +1864,7 @@ function Section({
     <div className="mt-5">
       <div className="mb-2 flex items-center gap-2">
         <Icon className="h-4 w-4 text-brand-600" />
-        <h3 className="text-xs font-bold uppercase tracking-widest text-ink-500">{title}</h3>
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{title}</h3>
       </div>
       {children}
     </div>

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScanFace, ArrowRight } from "lucide-react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
 
 type LivenessStatus = {
   isNetworkTier: boolean;
@@ -52,16 +54,23 @@ export function LivenessGate() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-md rounded-3xl bg-white shadow-2xl ring-1 ring-ink-900/5"
+          className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-energy ring-1 ring-ink-900/5"
         >
-          <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-3xl bg-gradient-to-r from-brand-500 via-accent-500 to-emerald-500" />
+          <div className="absolute inset-x-0 top-0 h-1.5 bg-energy-gradient-x" />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-energy-gradient opacity-15 blur-3xl"
+          />
 
-          <div className="space-y-5 px-6 pb-6 pt-8">
+          <div className="relative space-y-5 px-6 pb-6 pt-8">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-brand-50 to-emerald-50 ring-1 ring-brand-100">
-                <ScanFace className="h-8 w-8 text-brand-600" />
-              </div>
-              <h2 className="text-xl font-bold text-ink-900">One quick liveness check</h2>
+              <IconTile tone="energy" size="xl" className="mb-4">
+                <ScanFace className="h-7 w-7" />
+              </IconTile>
+              <Badge variant="brand" size="sm" className="mb-2">
+                One-time · 10 seconds
+              </Badge>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">One quick liveness check</h2>
               <p className="mt-1.5 text-sm leading-relaxed text-ink-500">
                 {status?.status === "FAILED"
                   ? "We couldn't read a clear face from your last video. Please record a quick 10-second video again to activate transactions."

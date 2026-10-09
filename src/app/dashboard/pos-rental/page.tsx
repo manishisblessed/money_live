@@ -92,13 +92,13 @@ export default function NetworkPosRentalPage() {
   const [busy, setBusy] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<Sub | null>(null);
 
-  // ── My own rental (what upstream/admin charges me) ──
+  // â”€â”€ My own rental (what upstream/admin charges me) â”€â”€
   const [mySubs, setMySubs] = useState<MySub[]>([]);
   const [myInvoices, setMyInvoices] = useState<MyInvoice[]>([]);
   const [myDues, setMyDues] = useState<MyDues>({ amount: 0, count: 0 });
   const [showInvoices, setShowInvoices] = useState(false);
 
-  // ── My Rental Plans management ──
+  // â”€â”€ My Rental Plans management â”€â”€
   const [planForm, setPlanForm] = useState({ name: "", description: "", monthlyRent: "", includeGst: false });
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [planBusy, setPlanBusy] = useState(false);
@@ -140,7 +140,7 @@ export default function NetworkPosRentalPage() {
 
     // Scope to the selected child's subtree server-side: a machine can be
     // rented to this child even after it has flowed further down the chain
-    // (e.g. MD → DT → RT), so it may currently be held by the child or any of
+    // (e.g. MD â†’ DT â†’ RT), so it may currently be held by the child or any of
     // the child's own descendants.
     fetch(`/api/pos/my-machines?pageSize=200&forChild=${encodeURIComponent(selectedChild)}`)
       .then((r) => r.ok ? r.json() : null)
@@ -170,10 +170,10 @@ export default function NetworkPosRentalPage() {
   const gst = includeGst ? Math.round(baseRent * 0.18 * 100) / 100 : 0;
   const totalPerMachine = baseRent + gst;
 
-  // Auto-calculate commission per machine from the spread (downstream rent −
+  // Auto-calculate commission per machine from the spread (downstream rent âˆ’
   // upstream cost). When GST applies, 18% GST is added on top of the commission
   // spread, and 2% TDS is deducted from the base spread (GST is a pass-through,
-  // not income): net = spread + GST(spread) − TDS(spread).
+  // not income): net = spread + GST(spread) âˆ’ TDS(spread).
   const firstSelectedId = [...selectedMachines][0];
   const upstreamCost = firstSelectedId ? (machineCosts[firstSelectedId] ?? 0) : 0;
   // Machines with no active upstream subscription: the full rent would become
@@ -357,7 +357,7 @@ export default function NetworkPosRentalPage() {
       header: "Machine",
       render: (r) => (
         <div>
-          <p className="font-mono text-xs font-semibold text-ink-900">{r.machine.tid ?? r.machine.serial ?? "—"}</p>
+          <p className="font-mono text-xs font-semibold text-ink-900">{r.machine.tid ?? r.machine.serial ?? "â€”"}</p>
           <p className="text-[11px] text-ink-400">{r.machine.model ?? ""}</p>
         </div>
       ),
@@ -394,7 +394,7 @@ export default function NetworkPosRentalPage() {
       align: "right",
       render: (r) => (
         <span className={`font-medium ${r.commission > 0 ? "text-emerald-600" : "text-ink-400"}`}>
-          {r.commission > 0 ? formatINR(r.commission) : "—"}
+          {r.commission > 0 ? formatINR(r.commission) : "â€”"}
         </span>
       ),
     },
@@ -437,15 +437,15 @@ export default function NetworkPosRentalPage() {
         }
       />
 
-      {/* My Rental — what upstream/admin charges me. Always shown for retailers
+      {/* My Rental â€” what upstream/admin charges me. Always shown for retailers
           (leaf nodes) since it's their only section; parents see it only when
           they actually have upstream-assigned subscriptions or dues. */}
       {(!isParent || mySubs.length > 0 || myDues.amount > 0) && (
-        <div className="rounded-2xl border border-ink-100 bg-white p-6">
+        <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-6">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
-                <Receipt className="h-4 w-4 text-brand-600" /> My Rental — Charged to You
+                <Receipt className="h-4 w-4 text-brand-600" /> My Rental â€” Charged to You
               </h3>
               <p className="mt-1 text-xs text-ink-400">
                 Subscriptions assigned to you by your upstream. Rent is auto-debited from your wallet every month on the billing day.
@@ -470,7 +470,7 @@ export default function NetworkPosRentalPage() {
                   Payment due: {formatINR(myDues.amount)}
                 </p>
                 <p className="text-xs text-rose-600">
-                  {myDues.count} invoice{myDues.count === 1 ? "" : "s"} could not be collected (insufficient wallet balance). Top up your wallet — billing retries automatically.
+                  {myDues.count} invoice{myDues.count === 1 ? "" : "s"} could not be collected (insufficient wallet balance). Top up your wallet â€” billing retries automatically.
                 </p>
               </div>
             </div>
@@ -495,7 +495,7 @@ export default function NetworkPosRentalPage() {
                   {mySubs.map((s) => (
                     <tr key={s.id} className="border-b border-ink-50 last:border-0">
                       <td className="px-4 py-2.5">
-                        <p className="font-mono text-xs font-semibold text-ink-900">{s.machine.tid ?? s.machine.serial ?? "—"}</p>
+                        <p className="font-mono text-xs font-semibold text-ink-900">{s.machine.tid ?? s.machine.serial ?? "â€”"}</p>
                         <p className="text-[11px] text-ink-400">{s.machine.model ?? ""}</p>
                       </td>
                       <td className="px-4 py-2.5 text-ink-700">{s.plan.name}</td>
@@ -523,7 +523,7 @@ export default function NetworkPosRentalPage() {
             </div>
           )}
 
-          {/* Empty state — no subscriptions assigned yet */}
+          {/* Empty state â€” no subscriptions assigned yet */}
           {mySubs.length === 0 && myDues.amount === 0 && (
             <p className="rounded-xl border border-dashed border-ink-200 bg-ink-50/50 px-4 py-8 text-center text-sm text-ink-500">
               No POS rental subscriptions have been assigned to you yet. When your provider assigns a rental plan to one of your machines, it will appear here with the monthly rent and billing day.
@@ -550,7 +550,7 @@ export default function NetworkPosRentalPage() {
                     {myInvoices.map((inv) => (
                       <tr key={inv.id} className="border-b border-ink-50 last:border-0">
                         <td className="px-4 py-2.5 font-mono text-xs text-ink-700">{inv.periodKey}</td>
-                        <td className="px-4 py-2.5 font-mono text-xs text-ink-700">{inv.machine.tid ?? inv.machine.serial ?? "—"}</td>
+                        <td className="px-4 py-2.5 font-mono text-xs text-ink-700">{inv.machine.tid ?? inv.machine.serial ?? "â€”"}</td>
                         <td className="px-4 py-2.5 text-xs text-ink-600">{inv.planName}</td>
                         <td className="px-4 py-2.5 text-right">
                           <p className="font-semibold text-ink-900">{formatINR(inv.totalAmount)}</p>
@@ -561,7 +561,7 @@ export default function NetworkPosRentalPage() {
                             {inv.status.toLowerCase()}
                           </Badge>
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-ink-500">{inv.detail ?? "—"}</td>
+                        <td className="px-4 py-2.5 text-xs text-ink-500">{inv.detail ?? "â€”"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -577,7 +577,7 @@ export default function NetworkPosRentalPage() {
       {isParent && (
       <>
       {/* My Rental Plans management */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-6">
+      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-6">
         <div className="mb-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
             <CreditCard className="h-4 w-4 text-brand-600" /> My Rental Plans
@@ -600,7 +600,7 @@ export default function NetworkPosRentalPage() {
               onChange={(e) => setPlanForm((f) => ({ ...f, description: e.target.value }))} />
           </div>
           <div>
-            <label className={labelCls}>Monthly Rent (₹) *</label>
+            <label className={labelCls}>Monthly Rent (â‚¹) *</label>
             <input className={inputCls} type="number" min="0" step="0.01" placeholder="500" value={planForm.monthlyRent}
               onChange={(e) => setPlanForm((f) => ({ ...f, monthlyRent: e.target.value }))} />
           </div>
@@ -642,7 +642,7 @@ export default function NetworkPosRentalPage() {
                 {avgCost > 0 && <span className="text-ink-500">Upstream: {formatINR(avgCost)}</span>}
                 <span className="text-emerald-700">Spread: {formatINR(spread)}</span>
                 {planForm.includeGst && <span className="text-emerald-700">+GST: {formatINR(gstOnSpread)}</span>}
-                <span className="text-ink-500">−TDS 2%: {formatINR(tds)}</span>
+                <span className="text-ink-500">âˆ’TDS 2%: {formatINR(tds)}</span>
                 <span className="font-bold text-emerald-800">Net: {formatINR(net)}/machine/mo</span>
               </div>
             );
@@ -698,7 +698,7 @@ export default function NetworkPosRentalPage() {
       </div>
 
       {/* Assign subscription panel */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-6">
+      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-6">
         <div className="mb-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
             <Plus className="h-4 w-4 text-brand-600" /> Assign Subscription to {meta.childLabel}
@@ -718,7 +718,7 @@ export default function NetworkPosRentalPage() {
             </option>
             {children.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name} — {c.shop !== "—" ? c.shop : c.city}
+                {c.name} â€” {c.shop !== "â€”" ? c.shop : c.city}
               </option>
             ))}
           </select>
@@ -787,13 +787,13 @@ export default function NetworkPosRentalPage() {
                 <select className={inputCls} value={planId} onChange={(e) => handlePlanChange(e.target.value)}>
                   {assignablePlans.length === 0 && <option value="">No plans available</option>}
                   {assignablePlans.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name} — {formatINR(p.monthlyRent)}/mo{p.isOwn ? " (yours)" : ""}</option>
+                    <option key={p.id} value={p.id}>{p.name} â€” {formatINR(p.monthlyRent)}/mo{p.isOwn ? " (yours)" : ""}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className={labelCls}>Monthly Rent (₹)</label>
+                <label className={labelCls}>Monthly Rent (â‚¹)</label>
                 <input className={inputCls} type="number" min="0" step="0.01" value={monthlyRent}
                   onChange={(e) => setMonthlyRent(e.target.value)} />
               </div>
@@ -854,7 +854,7 @@ export default function NetworkPosRentalPage() {
                         )}
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-ink-400">TDS (2%)</span>
-                          <span className="text-ink-500">−{formatINR(tdsAmt)}</span>
+                          <span className="text-ink-500">âˆ’{formatINR(tdsAmt)}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-semibold text-emerald-700">Net credit to wallet</span>
@@ -871,7 +871,7 @@ export default function NetworkPosRentalPage() {
                 </div>
               )}
 
-              {/* No upstream subscription — full rent would be treated as commission */}
+              {/* No upstream subscription â€” full rent would be treated as commission */}
               {selectedMachines.size > 0 && machinesWithoutUpstream.length > 0 && (
                 <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
@@ -879,7 +879,7 @@ export default function NetworkPosRentalPage() {
                     {machinesWithoutUpstream.length === selectedMachines.size
                       ? "No active upstream subscription found for the selected machine" + (machinesWithoutUpstream.length > 1 ? "s" : "")
                       : `${machinesWithoutUpstream.length} of the selected machines have no active upstream subscription`}
-                    . Your upstream cost is treated as ₹0, so the <span className="font-semibold">full rent becomes your commission</span> and your upstream collects nothing. If you pay rent for {machinesWithoutUpstream.length > 1 ? "these machines" : "this machine"}, ask your upstream to set up your subscription first.
+                    . Your upstream cost is treated as â‚¹0, so the <span className="font-semibold">full rent becomes your commission</span> and your upstream collects nothing. If you pay rent for {machinesWithoutUpstream.length > 1 ? "these machines" : "this machine"}, ask your upstream to set up your subscription first.
                   </p>
                 </div>
               )}
@@ -894,7 +894,7 @@ export default function NetworkPosRentalPage() {
       </div>
 
       {/* Stats */}
-      <div className="flex flex-wrap gap-4 rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="flex flex-wrap gap-4 rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="h-4 w-4" />

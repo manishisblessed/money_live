@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input, Label, Select } from "@/components/ui/Input";
 import { UplineChain } from "@/components/dashboard/UplineChain";
+import { EmptyState, FilterBar, SectionCard, StatusChip } from "@/components/dashboard/patterns";
+import { EnvelopeSimpleOpen } from "@phosphor-icons/react";
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: "SUPER_DISTRIBUTOR", label: "Super Distributor" },
@@ -94,13 +96,13 @@ type Invite = {
   onboardingLink?: string | null;
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-800",
-  REGISTERED: "bg-blue-100 text-blue-800",
-  VERIFIED: "bg-indigo-100 text-indigo-800",
-  APPROVED: "bg-emerald-100 text-emerald-800",
-  REJECTED: "bg-rose-100 text-rose-800",
-  EXPIRED: "bg-gray-100 text-gray-600",
+const STATUS_VARIANT: Record<string, "warning" | "brand" | "royal" | "success" | "danger" | "default"> = {
+  PENDING: "warning",
+  REGISTERED: "brand",
+  VERIFIED: "royal",
+  APPROVED: "success",
+  REJECTED: "danger",
+  EXPIRED: "default",
 };
 
 const DOC_TYPE_LABEL: Record<string, string> = {
@@ -277,21 +279,24 @@ export default function AdminInvitesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
-        title="Onboarding Invites"
+        eyebrow="Admin · People"
+        title="Onboarding invites"
         description="Create and manage onboarding invites for any network role."
+        actions={
+          <Button onClick={() => setShowCreate(true)}>
+            <UserPlus className="h-4 w-4" /> Create invite
+          </Button>
+        }
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={() => setShowCreate(true)}>
-          <UserPlus className="h-4 w-4" /> Create Invite
-        </Button>
+      <FilterBar title="Invites" count={total}>
         <Select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-40"
+          className="h-10 w-40"
+          aria-label="Filter by status"
         >
-          <option value="">All Status</option>
+          <option value="">All statuses</option>
           <option value="PENDING">Pending</option>
           <option value="REGISTERED">Registered</option>
           <option value="VERIFIED">Verified</option>
@@ -299,10 +304,7 @@ export default function AdminInvitesPage() {
           <option value="REJECTED">Rejected</option>
           <option value="EXPIRED">Expired</option>
         </Select>
-        <span className="ml-auto text-sm text-ink-500">
-          {total} invite{total !== 1 ? "s" : ""}
-        </span>
-      </div>
+      </FilterBar>
 
       {showCreate && (
         <CreateInviteForm
@@ -352,26 +354,35 @@ export default function AdminInvitesPage() {
           <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
         </div>
       ) : invites.length === 0 ? (
-        <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center">
-          <p className="text-ink-500">No invites found.</p>
-        </div>
+        <EmptyState
+          bordered
+          icon={EnvelopeSimpleOpen}
+          title="No invites yet"
+          description="Create an invite to bring a new partner onto the platform."
+          action={
+            <Button onClick={() => setShowCreate(true)}>
+              <UserPlus className="h-4 w-4" /> Create invite
+            </Button>
+          }
+        />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-ink-100 bg-white">
+        <SectionCard padding="none">
+        <div className="overflow-x-auto">
           <table className="w-full min-w-[960px] text-sm">
-            <thead className="border-b border-ink-100 bg-ink-50/50">
+            <thead className="border-b border-ink-100 bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Contact</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Role</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Shared By</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Upline</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Status</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Created</th>
-                <th className="sticky right-0 z-20 bg-ink-50 px-4 py-3 text-right font-semibold text-ink-700 shadow-[-8px_0_12px_-8px_rgba(14,22,38,0.12)]">Actions</th>
+                <th className="px-4 py-3 font-semibold">Contact</th>
+                <th className="px-4 py-3 font-semibold">Role</th>
+                <th className="px-4 py-3 font-semibold">Shared by</th>
+                <th className="px-4 py-3 font-semibold">Upline</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Created</th>
+                <th className="sticky right-0 z-20 bg-ink-50 px-4 py-3 text-right font-semibold shadow-[-8px_0_12px_-8px_rgba(14,22,38,0.12)]">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-ink-50">
+            <tbody className="divide-y divide-ink-100">
               {invites.map((inv) => (
-                <tr key={inv.id} className="group hover:bg-ink-50/30">
+                <tr key={inv.id} className="group transition-colors hover:bg-ink-50/40">
                   <td className="px-4 py-3">
                     <div className="font-medium text-ink-900">{inv.name || inv.email}</div>
                     <div className="text-xs text-ink-500">{inv.phone}</div>
@@ -399,9 +410,7 @@ export default function AdminInvitesPage() {
                     <UplineChain nodes={inv.upline ?? []} />
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLORS[inv.status] ?? "bg-gray-100 text-gray-700"}`}>
-                      {inv.status}
-                    </span>
+                    <StatusChip status={inv.status} variant={STATUS_VARIANT[inv.status]} size="sm" />
                   </td>
                   <td className="px-4 py-3 text-ink-500">
                     {new Date(inv.createdAt).toLocaleDateString()}
@@ -466,6 +475,8 @@ export default function AdminInvitesPage() {
                       <button
                         onClick={() => viewDetail(inv.id)}
                         className="rounded-lg p-1.5 text-ink-500 hover:bg-ink-100 hover:text-ink-900"
+                        title="View details"
+                        aria-label="View invite details"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -474,12 +485,16 @@ export default function AdminInvitesPage() {
                           <button
                             onClick={() => handleAction(inv.id, "approve")}
                             className="rounded-lg p-1.5 text-emerald-600 hover:bg-emerald-50"
+                            title="Approve"
+                            aria-label="Approve invite"
                           >
                             <CheckCircle2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => setRejectTarget(inv.id)}
                             className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50"
+                            title="Reject"
+                            aria-label="Reject invite"
                           >
                             <XCircle className="h-4 w-4" />
                           </button>
@@ -492,6 +507,7 @@ export default function AdminInvitesPage() {
             </tbody>
           </table>
         </div>
+        </SectionCard>
       )}
 
       <ConfirmDialog
@@ -625,7 +641,7 @@ function CreateInviteForm({
   return (
     <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-6 shadow-soft">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-lg font-bold text-ink-900">Create New Invite</h3>
+        <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">Create New Invite</h3>
         <button onClick={onClose} className="text-ink-400 hover:text-ink-700">✕</button>
       </div>
 
@@ -635,7 +651,7 @@ function CreateInviteForm({
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
+        <div className="mb-4 rounded-2xl bg-emerald-50 ring-1 ring-inset ring-emerald-200 px-4 py-2 text-sm text-emerald-700">
           {success}
         </div>
       )}
@@ -699,7 +715,7 @@ function CreateInviteForm({
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading...
               </div>
             ) : parents.length === 0 ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
+              <div className="rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 px-4 py-2 text-sm text-amber-700">
                 No active {form.role === "MASTER_DISTRIBUTOR" ? "Super Distributors" : form.role === "DISTRIBUTOR" ? "Master Distributors" : "Distributors"} found. Create one first.
               </div>
             ) : (
@@ -817,7 +833,7 @@ function EditInviteForm({
   return (
     <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-6 shadow-soft">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-lg font-bold text-ink-900">
+        <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
           Edit Invite — {invite.role.replace(/_/g, " ")}
         </h3>
         <button onClick={onClose} className="text-ink-400 hover:text-ink-700">✕</button>
@@ -834,7 +850,7 @@ function EditInviteForm({
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
+        <div className="mb-4 rounded-2xl bg-emerald-50 ring-1 ring-inset ring-emerald-200 px-4 py-2 text-sm text-emerald-700">
           {success}
         </div>
       )}
@@ -935,30 +951,28 @@ function InviteDetail({
   }
 
   return (
-    <div className="rounded-2xl border border-ink-200 bg-white p-6 shadow-soft">
+    <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6 shadow-soft">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-lg font-bold text-ink-900">
+        <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
           Invite Details
         </h3>
         <button onClick={onClose} className="text-ink-400 hover:text-ink-700">✕</button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl bg-ink-50 p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-ink-500">Contact</p>
+        <div className="rounded-2xl bg-ink-50/70 p-4 ring-1 ring-inset ring-ink-100">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Contact</p>
           <p className="mt-1 font-semibold">{invite.name || "—"}</p>
           <p className="text-sm text-ink-600">{invite.email}</p>
           <p className="text-sm text-ink-600">{invite.phone}</p>
         </div>
-        <div className="rounded-xl bg-ink-50 p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-ink-500">Role & Status</p>
+        <div className="rounded-2xl bg-ink-50/70 p-4 ring-1 ring-inset ring-ink-100">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Role & Status</p>
           <p className="mt-1 font-semibold">{invite.role.replace("_", " ")}</p>
-          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLORS[invite.status]}`}>
-            {invite.status}
-          </span>
+          <StatusChip status={invite.status} variant={STATUS_VARIANT[invite.status]} />
         </div>
-        <div className="rounded-xl bg-ink-50 p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-ink-500">Timeline</p>
+        <div className="rounded-2xl bg-ink-50/70 p-4 ring-1 ring-inset ring-ink-100">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Timeline</p>
           <p className="mt-1 text-sm">Created: {new Date(invite.createdAt).toLocaleString()}</p>
           {invite.registeredAt && <p className="text-sm">Registered: {new Date(invite.registeredAt).toLocaleString()}</p>}
           {invite.verifiedAt && <p className="text-sm">Verified: {new Date(invite.verifiedAt).toLocaleString()}</p>}
@@ -966,8 +980,8 @@ function InviteDetail({
       </div>
 
       {invitedBy && (
-        <div className="mt-4 rounded-xl bg-ink-50 p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-ink-500">Shared By</p>
+        <div className="mt-4 rounded-2xl bg-ink-50/70 p-4 ring-1 ring-inset ring-ink-100">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Shared By</p>
           <p className="mt-1 font-semibold text-ink-900">{invitedBy.name}</p>
           <p className="text-sm text-ink-600">
             {invitedBy.role.replace(/_/g, " ")}
@@ -977,7 +991,7 @@ function InviteDetail({
       )}
 
       {onboardingLink && (
-        <div className="mt-4 rounded-xl border border-brand-200 bg-brand-50/60 p-4">
+        <div className="mt-4 rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200/60 p-4">
           <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-700">
             <Link2 className="h-3.5 w-3.5" /> Onboarding Link
           </p>
@@ -1047,7 +1061,7 @@ function InviteDetail({
               null;
             if (!businessName) return null;
             return (
-              <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3">
+              <div className="mb-3 rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200 px-4 py-3">
                 <p className="text-xs font-bold uppercase tracking-wider text-brand-700">
                   Business / Shop Name
                 </p>
@@ -1335,7 +1349,7 @@ function InviteDetail({
       )}
 
       {registeredUser && (
-        <div className="mt-4 rounded-xl border border-ink-100 bg-ink-50/50 p-4">
+        <div className="mt-4 rounded-2xl bg-ink-50/60 p-4 ring-1 ring-inset ring-ink-100">
           <p className="mb-1 text-sm font-bold text-ink-700">Registered User</p>
           <div className="grid grid-cols-2 gap-2 text-sm">
             <p><span className="text-ink-500">Name:</span> {registeredUser.name}</p>

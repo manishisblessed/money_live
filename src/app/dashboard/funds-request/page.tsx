@@ -11,13 +11,24 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
+import { Bank, Clock, ShieldCheck } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
 import { ReportActions } from "@/components/dashboard/ReportActions";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { OperatorGrid } from "@/components/dashboard/services/OperatorGrid";
 import { type Role } from "@/lib/auth";
 import { useAuth } from "@/lib/useAuth";
 import { formatINR } from "@/lib/utils";
@@ -159,7 +170,7 @@ export default function FundsRequestPage() {
       key: "status",
       header: "Status",
       render: (r) => (
-        <Badge variant={STATUS_BADGE[r.status] ?? "warning"}>
+        <Badge variant={STATUS_BADGE[r.status] ?? "warning"} dot={r.status === "PENDING"}>
           {r.status}
         </Badge>
       ),
@@ -174,12 +185,13 @@ export default function FundsRequestPage() {
               if (r.status !== "PENDING") return null;
               const busy = deciding === r.id;
               return (
-                <div className="flex justify-end gap-1">
+                <div className="flex justify-end gap-1.5">
                   <button
                     onClick={() => decide(r.id, "approve")}
                     disabled={busy}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50 disabled:opacity-30"
+                    className="grid h-8 w-8 place-items-center rounded-xl bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-100 transition hover:bg-accent-100 disabled:opacity-30 focus-energy"
                     title="Approve"
+                    aria-label="Approve request"
                   >
                     {busy ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -190,8 +202,9 @@ export default function FundsRequestPage() {
                   <button
                     onClick={() => setRejectTarget(r)}
                     disabled={busy}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50 disabled:opacity-30"
+                    className="grid h-8 w-8 place-items-center rounded-xl bg-coral-50 text-coral-600 ring-1 ring-inset ring-coral-100 transition hover:bg-coral-100 disabled:opacity-30 focus-energy"
                     title="Reject"
+                    aria-label="Reject request"
                   >
                     <XCircle className="h-4 w-4" />
                   </button>
@@ -253,10 +266,9 @@ export default function FundsRequestPage() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
+        <Notice tone="danger" icon={<AlertTriangle className="h-4 w-4" />}>
           {error}
-        </div>
+        </Notice>
       )}
 
       {showNew && !isApprover && (
@@ -354,63 +366,110 @@ function NewRequestForm({
     }
   }
 
+  const amountNum = Number(amount) || 0;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50/60 to-white p-5"
+    <ServiceLayout
+      aside={
+        <>
+          <SummaryPanel
+            title="Fund request"
+            status={
+              amountNum > 0
+                ? { label: "Ready to submit", variant: "accent", dot: true }
+                : { label: "Enter an amount", variant: "default" }
+            }
+            rows={[
+              { label: "Deposit mode", value: mode, tone: "brand" },
+              { label: "Bank", value: bankName || "—", muted: !bankName },
+              { label: "UTR / Ref", value: utr || "—", mono: true, muted: !utr },
+            ]}
+            total={formatINR(amountNum)}
+            totalLabel="Requested"
+            totalHint="Credited to your wallet once approved"
+          />
+          <AsideTips
+            items={[
+              { icon: <Bank weight="duotone" />, text: "Deposit to the company account first, then raise the request with the UTR." },
+              { icon: <Clock weight="duotone" />, text: "Approvals usually land within minutes during working hours." },
+              { icon: <ShieldCheck weight="duotone" />, text: "A wrong UTR is the #1 reason for rejection — double-check it." },
+            ]}
+          />
+        </>
+      }
     >
-      <div className="grid gap-4 md:grid-cols-4">
-        <div>
-          <Label>Amount (₹)</Label>
-          <Input
-            type="number"
-            required
-            min={1}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
+      <ServiceCard
+        as="form"
+        onSubmit={handleSubmit}
+        icon={<IconTile icon={Bank} tone="energy" size="lg" />}
+        eyebrow="New request"
+        title="Tell us about your deposit"
+        description="Share the amount, mode and bank reference. We match it and credit your wallet."
+      >
+        <div className="grid gap-5">
+          <div>
+            <FloatField
+              id="fr-amount"
+              label="Amount (₹)"
+              type="number"
+              required
+              display
+              min={1}
+              inputMode="numeric"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <AmountChips
+              className="mt-3"
+              amounts={[5000, 10000, 25000, 50000, 100000]}
+              value={amount}
+              onPick={(v) => setAmount(String(v))}
+            />
+          </div>
+
+          <Field label="Deposit mode">
+            <OperatorGrid
+              name="Deposit mode"
+              showLogo={false}
+              columns={5}
+              size="sm"
+              options={["IMPS", "NEFT", "RTGS", "UPI", "Cash Deposit"].map((m) => ({ value: m, label: m }))}
+              value={mode}
+              onChange={setMode}
+            />
+          </Field>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FloatField
+              id="fr-bank"
+              label="Bank name (optional)"
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+              hint="SBI, HDFC…"
+            />
+            <FloatField
+              id="fr-utr"
+              label="UTR / Reference"
+              mono
+              value={utr}
+              onChange={(e) => setUtr(e.target.value)}
+              hint="P2A8765 / NEFT123…"
+            />
+          </div>
+
+          {error && <Notice tone="danger">{error}</Notice>}
+
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="ghost" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" size="lg" disabled={submitting} isLoading={submitting}>
+              <Send className="h-4 w-4" />
+              Submit request
+            </Button>
+          </div>
         </div>
-        <div>
-          <Label>Deposit mode</Label>
-          <Select value={mode} onChange={(e) => setMode(e.target.value)}>
-            <option>IMPS</option>
-            <option>NEFT</option>
-            <option>RTGS</option>
-            <option>UPI</option>
-            <option>Cash Deposit</option>
-          </Select>
-        </div>
-        <div>
-          <Label>Bank name (optional)</Label>
-          <Input
-            value={bankName}
-            onChange={(e) => setBankName(e.target.value)}
-            placeholder="SBI, HDFC…"
-          />
-        </div>
-        <div>
-          <Label>UTR / Reference</Label>
-          <Input
-            value={utr}
-            onChange={(e) => setUtr(e.target.value)}
-            placeholder="P2A8765 / NEFT123…"
-          />
-        </div>
-      </div>
-      {error && (
-        <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
-        </p>
-      )}
-      <div className="mt-4 flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={submitting} isLoading={submitting}>
-          <Send className="h-4 w-4" />
-          Submit request
-        </Button>
-      </div>
-    </form>
+      </ServiceCard>
+    </ServiceLayout>
   );
 }

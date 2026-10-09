@@ -180,7 +180,7 @@ export default function AdminDisputesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Compliance"
         title="Disputes & Support"
         description="Support queue with SLA tracking. Breaches are auto-escalated and alerted to ops every 30 minutes."
         actions={
@@ -222,10 +222,10 @@ export default function AdminDisputesPage() {
             ))}
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+          <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
+                <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Ticket</th>
                     <th className="px-5 py-3 font-semibold">Raised by</th>
@@ -295,7 +295,7 @@ export default function AdminDisputesPage() {
 
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-4">
-              <div className="rounded-2xl border border-ink-100 bg-white p-5">
+              <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-ink-500">{detail.ticketNo}</span>
                   <Badge variant={STATUS_BADGE[detail.status] ?? "default"}>{detail.status.replace(/_/g, " ")}</Badge>
@@ -332,7 +332,7 @@ export default function AdminDisputesPage() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-ink-100 bg-white p-5">
+              <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
                 <p className="text-sm font-semibold text-ink-900">Conversation</p>
                 <ul className="mt-3 space-y-3">
                   {detail.messages.length === 0 && (
@@ -369,7 +369,7 @@ export default function AdminDisputesPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-2xl border border-ink-100 bg-white p-5">
+              <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
                 <p className="text-sm font-semibold text-ink-900">Actions</p>
                 {closed ? (
                   <p className="mt-2 text-xs text-ink-500">

@@ -182,11 +182,11 @@ export default function AdminPosBookingsPage() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        <div className="flex items-center gap-2 rounded-3xl bg-rose-50 ring-1 ring-inset ring-rose-200 p-4 text-sm text-rose-700">
           <XCircle className="h-4 w-4 shrink-0" /> {error instanceof Error ? error.message : "Failed to load bookings."}
         </div>
       ) : isLoading && bookings.length === 0 ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-ink-100 bg-white p-6 text-sm text-ink-500">
+        <div className="flex items-center gap-2 rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6 text-sm text-ink-500">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading bookings…
         </div>
       ) : bookings.length === 0 ? (
@@ -196,7 +196,7 @@ export default function AdminPosBookingsPage() {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <div key={b.id} className="rounded-2xl border border-ink-100 bg-white p-5">
+            <div key={b.id} className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export default function AdminPosBookingsPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Paid</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Paid</p>
                   <p className="text-lg font-bold text-ink-900">{formatINR(b.amountPaid)}</p>
                   <p className="text-[11px] text-ink-400">{fmtDateTime(b.createdAt)}</p>
                 </div>
@@ -389,7 +389,7 @@ function downloadBookingsCsv(rows: Booking[], filename: string) {
 function Info({ icon: Icon, label, children }: { icon: typeof Clock; label: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl bg-ink-50 px-4 py-3">
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
         <Icon className="h-3.5 w-3.5" /> {label}
       </p>
       <div className="mt-1">{children}</div>
@@ -446,7 +446,7 @@ function AssignModal({
         </div>
 
         {machines.length === 0 ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+          <div className="rounded-2xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-4 text-sm text-amber-700">
             No unassigned machines in inventory. Add machines under POS Rental → Inventory Intake first.
           </div>
         ) : (

@@ -101,14 +101,14 @@ type RevenueData = {
 };
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "good" | "bad" }) {
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">{label}</p>
+    <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
       <p
-        className={`mt-1 text-xl font-bold ${
+        className={`mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] ${
           tone === "good" ? "text-emerald-600" : tone === "bad" ? "text-rose-600" : "text-ink-900"
         }`}
       >
@@ -385,7 +385,7 @@ export default function RevenuePage() {
           title="Company Earnings & Revenue Wallet"
           description="The Revenue Wallet is the platform owner's book."
         />
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
+        <div className="rounded-3xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-6 text-sm text-amber-800">
           This page is restricted to the master admin. For commission distribution
           figures, use <span className="font-semibold">Commission Distributed</span> or{" "}
           <span className="font-semibold">Per-Txn Earnings</span>.
@@ -468,7 +468,7 @@ export default function RevenuePage() {
       />
 
       {error && (
-        <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div>
+        <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200">{error}</div>
       )}
 
       {loading && !data && (
@@ -492,7 +492,7 @@ export default function RevenuePage() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
                   Revenue Wallet
                 </p>
-                <p className="mt-2 font-display text-3xl font-bold">
+                <p className="mt-2 font-display text-3xl font-semibold tabular-nums tracking-[-0.02em]">
                   {formatINR(data.wallet.balance)}
                 </p>
                 <p className="mt-1 text-xs text-white/70">
@@ -543,7 +543,7 @@ export default function RevenuePage() {
 
           {/* Daily revenue trend */}
           {data.byDay.length > 1 && (
-            <div className="rounded-2xl border border-ink-100 bg-white p-5">
+            <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
               <p className="mb-4 text-sm font-semibold text-ink-800">Daily platform revenue</p>
               <div className="flex h-40 items-end gap-1 overflow-x-auto">
                 {data.byDay.map((d) => (

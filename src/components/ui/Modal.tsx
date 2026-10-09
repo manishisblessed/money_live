@@ -5,6 +5,16 @@ import { X } from "lucide-react";
 import { ReactNode, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Emoney Modal — Phase 1 redesign.
+ *
+ * Shape language that differentiates from Nextgen:
+ *  · `rounded-3xl` surface with a gradient-tinted header slab.
+ *  · Backdrop is a blurred dark layer *plus* a subtle grain overlay for the
+ *    premium film-grain feel.
+ *  · Opens with a spring + slight scale, closes with a quick ease.
+ *  · Backward-compatible API — same props as before, same callers work.
+ */
 export function Modal({
   open,
   onClose,
@@ -57,25 +67,36 @@ export function Modal({
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto px-4 py-6">
+          {/* Backdrop — blurred ink with a touch of grain for premium feel */}
           <motion.button
             type="button"
             aria-label="Close dialog backdrop"
-            className="fixed inset-0 bg-ink-900/40"
+            className="fixed inset-0 grain bg-ink-900/50 backdrop-blur-md"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduce ? undefined : { opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.2 }}
+            transition={{ duration: reduce ? 0 : 0.22 }}
             onClick={onClose}
           />
+          {/* Panel — spring in, slight scale, Emoney 3xl corners */}
           <motion.div
             role="dialog"
             aria-modal="true"
-            initial={reduce ? false : { opacity: 0, y: 16, scale: 0.98 }}
+            initial={reduce ? false : { opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? undefined : { opacity: 0, y: 10, scale: 0.98 }}
-            transition={{ duration: reduce ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
+            transition={
+              reduce
+                ? { duration: 0 }
+                : {
+                    type: "spring",
+                    stiffness: 240,
+                    damping: 24,
+                    mass: 0.9,
+                  }
+            }
             className={cn(
-              "relative z-10 flex w-full max-h-[min(90dvh,720px)] flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl",
+              "relative z-10 flex w-full max-h-[min(90dvh,720px)] flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-energy",
               maxW,
               className
             )}
@@ -83,18 +104,26 @@ export function Modal({
             {(title || eyebrow) && (
               <div
                 className={cn(
-                  "flex shrink-0 items-start justify-between gap-4 bg-gradient-to-br from-brand-50 to-white px-6 py-5",
+                  // Signature Emoney header slab — tinted energy gradient tail
+                  // with the brand-dot in the eyebrow position.
+                  "relative flex shrink-0 items-start justify-between gap-4 overflow-hidden px-6 py-5",
+                  "bg-gradient-to-br from-brand-50 via-white to-coral-50/40",
                   headerClassName
                 )}
               >
-                <div className="min-w-0">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-energy-gradient opacity-20 blur-3xl"
+                />
+                <div className="relative min-w-0">
                   {eyebrow && (
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-700">
+                    <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-700">
+                      <span className="brand-dot" />
                       {eyebrow}
                     </p>
                   )}
                   {title && (
-                    <h3 className="mt-1 font-display text-lg font-bold text-ink-900">
+                    <h3 className="mt-1 font-display text-xl font-bold tracking-[-0.02em] text-ink-900">
                       {title}
                     </h3>
                   )}
@@ -105,7 +134,7 @@ export function Modal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-500 transition hover:bg-ink-100"
+                  className="relative grid h-8 w-8 shrink-0 place-items-center rounded-xl text-ink-500 transition hover:bg-white/70 hover:text-ink-900 hover:shadow-sm"
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />

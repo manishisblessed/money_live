@@ -147,7 +147,7 @@ export default function AmlPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Compliance"
+        eyebrow="Admin · Compliance"
         title="AML monitoring"
         description="Transaction-monitoring alerts, STR/CTR exports and audit-chain integrity."
         actions={
@@ -158,13 +158,13 @@ export default function AmlPage() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 ring-1 ring-inset ring-rose-200 text-sm text-rose-800">
           <AlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
 
       {/* Report exports */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <Label>From</Label>
@@ -206,9 +206,9 @@ export default function AmlPage() {
       </div>
 
       {/* Alert queue */}
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+      <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
+          <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
             <tr>
               <th className="px-5 py-3 font-semibold">Rule</th>
               <th className="px-5 py-3 font-semibold">User</th>
@@ -326,9 +326,9 @@ export default function AmlPage() {
               : `${verifyResult.dateKey}: VERIFICATION FAILED (${verifyResult.reason}). Investigate immediately.`}
           </div>
         )}
-        <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
+            <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
               <tr>
                 <th className="px-5 py-3 font-semibold">Day</th>
                 <th className="px-5 py-3 font-semibold">Rows</th>

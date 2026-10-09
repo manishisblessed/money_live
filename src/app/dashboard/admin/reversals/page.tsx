@@ -31,7 +31,7 @@ type Reversal = {
 const STATUSES = ["all", "PENDING_APPROVAL", "COMPLETED", "REJECTED", "CANCELLED"];
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 export default function ReversalDeskPage() {
   const [rows, setRows] = useState<Reversal[]>([]);
@@ -261,7 +261,7 @@ export default function ReversalDeskPage() {
       />
 
       {/* Raise a reversal */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
         <p className="mb-4 flex items-center gap-2 text-sm font-semibold text-ink-800">
           <Undo2 className="h-4 w-4 text-brand-600" /> Raise a reversal
         </p>

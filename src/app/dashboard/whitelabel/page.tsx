@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Globe, Palette, Headphones, Save, AlertCircle, CheckCircle2, Rocket } from "lucide-react";
+import { Save, AlertCircle, CheckCircle2, Rocket } from "lucide-react";
+import { Globe, Headset, LockKey, PaintBrush } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
+import { FloatingInput, Input, Label } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
+import { EmptyState, FadeIn, SectionCard, StatusChip } from "@/components/dashboard/patterns";
 
 type Profile = {
   brandName: string;
@@ -107,11 +109,19 @@ export default function WhitelabelPage() {
   if (forbidden) {
     return (
       <div className="space-y-6">
-        <PageHeader eyebrow="Platform" title="White-label portal" description="Run the platform under your own brand." />
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-          White-label is available to <strong>Master Distributor</strong> and <strong>Super Distributor</strong> accounts.
-          Contact your upline to upgrade.
-        </div>
+        <PageHeader eyebrow="Platform · Brand" title="White-label portal" description="Run the platform under your own brand." />
+        <EmptyState
+          bordered
+          icon={LockKey}
+          tone="amber"
+          title="White-label is for Master & Super Distributors"
+          description={
+            <>
+              This feature is available to <strong>Master Distributor</strong> and <strong>Super Distributor</strong> accounts.
+              Contact your upline to upgrade.
+            </>
+          }
+        />
       </div>
     );
   }
@@ -125,18 +135,15 @@ export default function WhitelabelPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Platform"
+        eyebrow="Platform · Brand"
         title="White-label portal"
         description="Run eMoney under your own brand, domain and colors."
         actions={
-          <div className="flex items-center gap-2">
-            {profile.status === "LIVE" ? (
-              <Badge variant="success">Live</Badge>
-            ) : profile.status === "SUSPENDED" ? (
-              <Badge variant="danger">Suspended</Badge>
-            ) : (
-              <Badge variant="default">Draft</Badge>
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusChip
+              status={profile.status}
+              label={profile.status === "LIVE" ? "Live" : profile.status === "SUSPENDED" ? "Suspended" : "Draft"}
+            />
             <Button variant="secondary" onClick={() => save()} disabled={!canSave}>
               <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save draft"}
             </Button>
@@ -150,130 +157,120 @@ export default function WhitelabelPage() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-inset ring-rose-200">
           <AlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
       {saved && !error && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-inset ring-emerald-200">
           <CheckCircle2 className="h-4 w-4 shrink-0" /> Profile saved.
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <Card title="Brand identity" icon={<Palette className="h-5 w-5" />}>
+          <SectionCard
+            icon={<IconTile icon={PaintBrush} tone="royal" size="sm" />}
+            title="Brand identity"
+            description="Name, tagline, colours and logo your network will see."
+          >
             <div className="grid gap-5 md:grid-cols-2">
+              <FloatingInput label="Brand name *" value={profile.brandName} onChange={(e) => set("brandName", e.target.value)} placeholder="KapoorPay" />
+              <FloatingInput label="Tagline" value={profile.tagline ?? ""} onChange={(e) => set("tagline", e.target.value)} placeholder="Bharat ka apna fintech" />
               <div>
-                <Label>Brand name *</Label>
-                <Input value={profile.brandName} onChange={(e) => set("brandName", e.target.value)} placeholder="KapoorPay" />
-              </div>
-              <div>
-                <Label>Tagline</Label>
-                <Input value={profile.tagline ?? ""} onChange={(e) => set("tagline", e.target.value)} placeholder="Bharat ka apna fintech" />
-              </div>
-              <div>
-                <Label>Primary color</Label>
+                <Label htmlFor="wl-primary">Primary color</Label>
                 <div className="flex items-center gap-2">
                   <input
+                    id="wl-primary"
                     type="color"
                     value={profile.primaryColor}
                     onChange={(e) => set("primaryColor", e.target.value)}
-                    className="h-10 w-12 cursor-pointer rounded-lg border border-ink-200"
+                    className="h-11 w-12 cursor-pointer rounded-2xl border border-ink-200 p-1"
                   />
-                  <Input value={profile.primaryColor} onChange={(e) => set("primaryColor", e.target.value)} />
+                  <Input value={profile.primaryColor} onChange={(e) => set("primaryColor", e.target.value)} className="font-mono uppercase" aria-label="Primary color hex" />
                 </div>
               </div>
               <div>
-                <Label>Accent color</Label>
+                <Label htmlFor="wl-accent">Accent color</Label>
                 <div className="flex items-center gap-2">
                   <input
+                    id="wl-accent"
                     type="color"
                     value={profile.accentColor}
                     onChange={(e) => set("accentColor", e.target.value)}
-                    className="h-10 w-12 cursor-pointer rounded-lg border border-ink-200"
+                    className="h-11 w-12 cursor-pointer rounded-2xl border border-ink-200 p-1"
                   />
-                  <Input value={profile.accentColor} onChange={(e) => set("accentColor", e.target.value)} />
+                  <Input value={profile.accentColor} onChange={(e) => set("accentColor", e.target.value)} className="font-mono uppercase" aria-label="Accent color hex" />
                 </div>
               </div>
-              <div>
-                <Label>Logo URL</Label>
-                <Input value={profile.logoUrl ?? ""} onChange={(e) => set("logoUrl", e.target.value)} placeholder="https://cdn.yourbrand.in/logo.svg" />
-              </div>
-              <div>
-                <Label>Favicon URL</Label>
-                <Input value={profile.faviconUrl ?? ""} onChange={(e) => set("faviconUrl", e.target.value)} placeholder="https://cdn.yourbrand.in/favicon.svg" />
-              </div>
+              <FloatingInput label="Logo URL" value={profile.logoUrl ?? ""} onChange={(e) => set("logoUrl", e.target.value)} placeholder="https://cdn.yourbrand.in/logo.svg" />
+              <FloatingInput label="Favicon URL" value={profile.faviconUrl ?? ""} onChange={(e) => set("faviconUrl", e.target.value)} placeholder="https://cdn.yourbrand.in/favicon.svg" />
             </div>
-          </Card>
+          </SectionCard>
 
-          <Card title="Domain" icon={<Globe className="h-5 w-5" />}>
+          <SectionCard
+            icon={<IconTile icon={Globe} tone="brand" size="sm" />}
+            title="Domain"
+            description="Where your branded portal lives."
+          >
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <Label>Subdomain</Label>
-                <div className="flex items-center gap-2">
-                  <Input value={profile.subdomain ?? ""} onChange={(e) => set("subdomain", e.target.value)} placeholder="kapoorpay" />
-                  <span className="whitespace-nowrap text-sm text-ink-500">.eMoney.in</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <FloatingInput
+                  label="Subdomain"
+                  className="flex-1"
+                  value={profile.subdomain ?? ""}
+                  onChange={(e) => set("subdomain", e.target.value)}
+                  placeholder="kapoorpay"
+                />
+                <span className="whitespace-nowrap text-sm font-medium text-ink-500">.eMoney.in</span>
               </div>
-              <div>
-                <Label>Custom domain</Label>
-                <Input value={profile.customDomain ?? ""} onChange={(e) => set("customDomain", e.target.value)} placeholder="kapoorpay.in" />
-                <p className="mt-1 text-xs text-ink-500">Point a CNAME at the platform before going live.</p>
-              </div>
+              <FloatingInput
+                label="Custom domain"
+                hint="Point a CNAME at the platform before going live."
+                value={profile.customDomain ?? ""}
+                onChange={(e) => set("customDomain", e.target.value)}
+                placeholder="kapoorpay.in"
+              />
             </div>
-          </Card>
+          </SectionCard>
 
-          <Card title="Support contact" icon={<Headphones className="h-5 w-5" />}>
+          <SectionCard
+            icon={<IconTile icon={Headset} tone="accent" size="sm" />}
+            title="Support contact"
+            description="Shown in the portal footer and on receipts."
+          >
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <Label>Support email</Label>
-                <Input value={profile.supportEmail ?? ""} onChange={(e) => set("supportEmail", e.target.value)} placeholder="hello@kapoorpay.in" />
-              </div>
-              <div>
-                <Label>Support phone (10 digits)</Label>
-                <Input value={profile.supportPhone ?? ""} onChange={(e) => set("supportPhone", e.target.value)} placeholder="9876543210" maxLength={10} />
-              </div>
+              <FloatingInput label="Support email" value={profile.supportEmail ?? ""} onChange={(e) => set("supportEmail", e.target.value)} placeholder="hello@kapoorpay.in" />
+              <FloatingInput label="Support phone (10 digits)" value={profile.supportPhone ?? ""} onChange={(e) => set("supportPhone", e.target.value)} placeholder="9876543210" maxLength={10} />
             </div>
-          </Card>
+          </SectionCard>
         </div>
 
         <div className="space-y-4">
-          <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-            <div className="border-b border-ink-100 p-4">
-              <p className="text-xs font-bold uppercase tracking-widest text-ink-500">Live preview</p>
-              <p className="mt-1 text-sm font-semibold text-ink-900">{previewHost}</p>
-            </div>
-            <div
-              className="p-6 text-white"
-              style={{ background: `linear-gradient(135deg, ${profile.primaryColor}, ${profile.accentColor})` }}
-            >
-              <p className="text-xs font-bold uppercase tracking-widest opacity-80">{profile.brandName || "Your brand"}</p>
-              <p className="mt-3 font-display text-2xl font-bold">{profile.tagline || "Your tagline here"}</p>
-              <p className="mt-1 text-sm text-white/85">60+ services · Pan-India · Built on eMoney</p>
-              <button className="mt-4 rounded-full bg-white px-4 py-1.5 text-sm font-semibold" style={{ color: profile.primaryColor }}>
-                Login
-              </button>
-            </div>
-          </div>
+          <FadeIn>
+            <SectionCard padding="none" eyebrow="Live preview" title={previewHost}>
+              <div
+                className="relative overflow-hidden p-6 text-white"
+                style={{ background: `linear-gradient(135deg, ${profile.primaryColor}, ${profile.accentColor})` }}
+              >
+                <div className="grain pointer-events-none absolute inset-0 opacity-20" aria-hidden />
+                <p className="relative text-[11px] font-bold uppercase tracking-[0.18em] opacity-80">{profile.brandName || "Your brand"}</p>
+                <p className="relative mt-3 font-display text-2xl font-semibold tracking-[-0.02em]">{profile.tagline || "Your tagline here"}</p>
+                <p className="relative mt-1 text-sm text-white/85">60+ services · Pan-India · Built on eMoney</p>
+                <button type="button" className="relative mt-4 rounded-full bg-white px-4 py-1.5 text-sm font-semibold" style={{ color: profile.primaryColor }}>
+                  Login
+                </button>
+              </div>
+            </SectionCard>
+          </FadeIn>
 
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            <strong>Powered by eMoney.</strong> Footer attribution required on all white-labels.
-          </div>
+          <SectionCard tone="accent" padding="sm">
+            <p className="text-sm text-ink-800">
+              <strong className="font-semibold text-ink-900">Powered by eMoney.</strong> Footer attribution is required on all white-labels.
+            </p>
+          </SectionCard>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Card({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-50 text-brand-700">{icon}</span>
-        <h3 className="font-display text-base font-semibold text-ink-900">{title}</h3>
-      </div>
-      {children}
     </div>
   );
 }

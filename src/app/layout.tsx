@@ -1,19 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sans"
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-display"
-});
 
 export const metadata: Metadata = {
   title: {
@@ -58,7 +45,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
+    <html lang="en">
+      {/*
+        eMoney brand typography:
+        · Clash Display → display / headlines (--font-display)
+        · Satoshi       → body / UI (--font-sans)
+        Loaded from Fontshare CDN (OFL, no self-hosting required).
+        Keep `preconnect` first for fastest LCP.
+      */}
+      <head>
+        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
+        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700,500&f[]=satoshi@400,500,700,900&display=swap"
+        />
+      </head>
       <body><AuthProvider>{children}</AuthProvider></body>
     </html>
   );

@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { History, Search, Filter } from "lucide-react";
-import { ServicePageHeader } from "@/components/dashboard/ServicePage";
+import { Search, RefreshCw, Receipt, TrendingUp, HandCoins } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { Input, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TransactionsTable } from "@/components/dashboard/TransactionsTable";
 import { ReportActions } from "@/components/dashboard/ReportActions";
+import { FilterBar, Stagger, StaggerItem } from "@/components/dashboard/patterns";
 import { toDisplayRole } from "@/lib/auth";
 import type { Transaction } from "@/lib/data";
 
@@ -50,83 +52,94 @@ export default function TransactionsPage() {
   }, [rows]);
 
   return (
-    <div>
-      <ServicePageHeader
-        icon={History}
+    <div className="min-w-0 space-y-6">
+      <PageHeader
+        eyebrow="Account"
         title="Transactions"
-        description="Search, filter and export every transaction processed through your account."
+        description="Every payment processed through your account — search, filter and export in one place."
       />
 
-      <div className={`mb-6 grid gap-4 ${showCommission ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
-        <div className="rounded-2xl border border-ink-100 bg-white p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-ink-500">
-            Total transactions
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-ink-900">
-            {loading ? "…" : totals.count}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-ink-100 bg-white p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-ink-500">
-            Total volume
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-ink-900">
-            ₹ {totals.total.toLocaleString("en-IN")}
-          </p>
-        </div>
+      <Stagger
+        className={`grid gap-4 sm:grid-cols-2 ${showCommission ? "xl:grid-cols-3" : ""}`}
+      >
+        <StaggerItem>
+          <StatCard
+            label="Transactions"
+            value={loading ? "…" : totals.count.toLocaleString("en-IN")}
+            icon={Receipt}
+            accent="brand"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard
+            label="Total volume"
+            value={loading ? "…" : `₹ ${totals.total.toLocaleString("en-IN")}`}
+            icon={TrendingUp}
+            accent="violet"
+          />
+        </StaggerItem>
         {showCommission && (
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-ink-500">
-              Total commission
-            </p>
-            <p className="mt-1 font-display text-2xl font-bold text-emerald-700">
-              ₹ {totals.commission.toLocaleString("en-IN")}
-            </p>
-          </div>
+          <StaggerItem>
+            <StatCard
+              label="Commission earned"
+              value={loading ? "…" : `₹ ${totals.commission.toLocaleString("en-IN")}`}
+              icon={HandCoins}
+              accent="emerald"
+            />
+          </StaggerItem>
         )}
-      </div>
+      </Stagger>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-ink-100 bg-white p-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+      <FilterBar
+        title="Filter"
+        count={loading ? undefined : rows.length}
+        actions={
+          <>
+            <Button variant="outline" size="md" onClick={load} isLoading={loading} disabled={loading}>
+              {loading ? "" : <RefreshCw className="h-4 w-4" />}
+              Refresh
+            </Button>
+            <ReportActions
+              filename="transactions"
+              title="eMoney · Transactions"
+              subtitle={`Live view · ${rows.length} records`}
+              columns={[
+                { key: "id", header: "Txn ID" },
+                { key: "service", header: "Service" },
+                { key: "customer", header: "Customer" },
+                { key: "amount", header: "Amount (INR)" },
+                ...(showCommission
+                  ? [{ key: "commission" as const, header: "Commission (INR)" }]
+                  : []),
+                { key: "status", header: "Status" },
+                { key: "date", header: "Date" },
+              ]}
+              rows={rows}
+            />
+          </>
+        }
+      >
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by ID, service or customer..."
-            className="pl-9"
+            placeholder="Search by ID, service or customer…"
+            className="pl-10"
+            aria-label="Search transactions"
           />
         </div>
         <Select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-40"
+          aria-label="Filter by status"
         >
           {["All", "Success", "Pending", "Failed"].map((s) => (
             <option key={s}>{s}</option>
           ))}
         </Select>
-        <Button variant="outline" size="md" onClick={load} isLoading={loading} disabled={loading}>
-          {loading ? "" : <Filter className="h-4 w-4" />}
-          Refresh
-        </Button>
-        <ReportActions
-          filename="transactions"
-          title="eMoney · Transactions"
-          subtitle={`Live view · ${rows.length} records`}
-          columns={[
-            { key: "id", header: "Txn ID" },
-            { key: "service", header: "Service" },
-            { key: "customer", header: "Customer" },
-            { key: "amount", header: "Amount (INR)" },
-            ...(showCommission
-              ? [{ key: "commission" as const, header: "Commission (INR)" }]
-              : []),
-            { key: "status", header: "Status" },
-            { key: "date", header: "Date" },
-          ]}
-          rows={rows}
-        />
-      </div>
+      </FilterBar>
 
       <TransactionsTable data={rows} showHeader={false} loading={loading} showCommission={showCommission} />
     </div>

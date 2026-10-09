@@ -8,17 +8,22 @@ import {
   IndianRupee,
   CircleDollarSign,
   Landmark,
-  RefreshCw,
-  CheckCircle2,
-  Hourglass,
-  XCircle,
   ArrowRight,
-  Layers,
 } from "lucide-react";
+import { TreeStructure, Stack, UsersThree, WarningCircle } from "@phosphor-icons/react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { StatSkeleton } from "@/components/ui/Skeleton";
 import { Badge } from "@/components/ui/Badge";
-import { formatINR, formatNumber, cn } from "@/lib/utils";
+import { SectionHeader } from "@/components/dashboard/shell/SectionHeader";
+import { EmptyState } from "@/components/dashboard/shell/EmptyState";
+import { Stagger, StaggerItem } from "@/components/dashboard/shell/Motion";
+import {
+  DateRangeControl,
+  RefreshPill,
+  StatusPill,
+  ServiceBreakdownList,
+} from "@/components/dashboard/shell/OverviewBits";
+import { formatINR, formatNumber } from "@/lib/utils";
 
 type ServiceToday = {
   amount: number;
@@ -119,279 +124,219 @@ export function NetworkOverview() {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-ink-900">
-            Network Business Overview
-          </h2>
-          <p className="text-sm text-ink-500">
+      <SectionHeader
+        icon={TreeStructure}
+        tone="royal"
+        title="Network Business Overview"
+        description={
+          <>
             {isToday ? "Today's" : "Selected period's"} transaction activity across your{" "}
-            <span className="font-semibold text-ink-600">{childLabel}</span> — each row rolls
+            <span className="font-semibold text-ink-700">{childLabel}</span> — each row rolls
             up that member&apos;s entire downline. Volume is{" "}
-            <span className="font-semibold text-ink-600">completed</span> business.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full border border-ink-100 bg-white px-3 py-1.5">
-            <input
-              type="date"
-              value={from}
-              max={to}
-              onChange={(e) => setFrom(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-ink-700 outline-none"
-              aria-label="From date"
-            />
-            <span className="text-ink-300">→</span>
-            <input
-              type="date"
-              value={to}
-              min={from}
-              max={today}
-              onChange={(e) => setTo(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-ink-700 outline-none"
-              aria-label="To date"
-            />
-          </div>
-          {!isToday && (
-            <button
-              type="button"
-              onClick={() => {
+            <span className="font-semibold text-ink-700">completed</span> business.
+          </>
+        }
+        actions={
+          <>
+            <DateRangeControl
+              from={from}
+              to={to}
+              today={today}
+              isToday={isToday}
+              onFrom={setFrom}
+              onTo={setTo}
+              onReset={() => {
                 setFrom(today);
                 setTo(today);
               }}
-              className="rounded-full border border-ink-100 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 transition hover:border-brand-200 hover:text-brand-700"
-            >
-              Today
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={load}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-full border border-ink-100 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 transition hover:border-brand-200 hover:text-brand-700 disabled:opacity-60"
-          >
-            <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
-            Refresh
-          </button>
-        </div>
-      </div>
+            />
+            <RefreshPill onClick={load} loading={loading} />
+          </>
+        }
+      />
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <StatSkeleton key={i} />
+            <StatSkeleton key={i} className="rounded-3xl" />
           ))}
         </div>
       ) : error === "load" ? (
-        <div className="rounded-2xl border border-dashed border-rose-200 bg-rose-50/50 p-6 text-center text-sm text-rose-700">
-          Couldn&apos;t load the network overview.{" "}
-          <button onClick={load} className="font-semibold underline">
-            Try again
-          </button>
+        <div className="rounded-3xl border border-dashed border-coral-200 bg-coral-50/40">
+          <EmptyState
+            compact
+            icon={WarningCircle}
+            tone="coral"
+            title="Couldn't load the network overview"
+            body="Give it another go — your network data is safe."
+            action={
+              <button onClick={load} className="text-sm font-semibold text-coral-700 underline-offset-4 hover:underline">
+                Try again
+              </button>
+            }
+          />
         </div>
       ) : data ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <StatCard
-              label="Total Transactions"
-              value={formatNumber(data.summary.totalTransactions)}
-              icon={Activity}
-              accent="brand"
-            />
-            <StatCard
-              label="Transacting Members"
-              value={`${formatNumber(data.summary.activeMembers)} / ${formatNumber(
-                data.summary.totalMembers
-              )}`}
-              icon={Users}
-              accent="violet"
-            />
-            <StatCard
-              label="Total Volume"
-              value={formatINR(data.summary.totalVolume)}
-              icon={IndianRupee}
-              accent="emerald"
-            />
-            <StatCard
-              label="Commission (network)"
-              value={formatINR(data.summary.totalCommission)}
-              icon={CircleDollarSign}
-              accent="accent"
-            />
-            <StatCard
-              label="Payouts (outflow)"
-              value={formatINR(data.summary.payout.amount)}
-              icon={Landmark}
-              accent="accent"
-            />
-          </div>
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <StaggerItem>
+              <StatCard
+                label="Total Transactions"
+                value={formatNumber(data.summary.totalTransactions)}
+                icon={Activity}
+                accent="brand"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Transacting Members"
+                value={`${formatNumber(data.summary.activeMembers)} / ${formatNumber(
+                  data.summary.totalMembers
+                )}`}
+                icon={Users}
+                accent="violet"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Total Volume"
+                value={formatINR(data.summary.totalVolume)}
+                icon={IndianRupee}
+                accent="emerald"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Commission (network)"
+                value={formatINR(data.summary.totalCommission)}
+                icon={CircleDollarSign}
+                accent="accent"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Payouts (outflow)"
+                value={formatINR(data.summary.payout.amount)}
+                icon={Landmark}
+                accent="accent"
+              />
+            </StaggerItem>
+          </Stagger>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <StatusPill icon={CheckCircle2} tone="emerald" n={data.summary.successCount} label="Success" />
-            <StatusPill icon={Hourglass} tone="amber" n={data.summary.pendingCount} label="Pending" />
-            <StatusPill icon={XCircle} tone="rose" n={data.summary.failedCount} label="Failed" />
+            <StatusPill tone="emerald" n={data.summary.successCount} label="Success" />
+            <StatusPill tone="amber" n={data.summary.pendingCount} label="Pending" />
+            <StatusPill tone="rose" n={data.summary.failedCount} label="Failed" />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <Stagger className="grid gap-4 lg:grid-cols-3">
             {/* Service-wise breakdown */}
-            <div className="rounded-2xl border border-ink-100 bg-white p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <Layers className="h-4 w-4 text-brand-600" />
-                <h3 className="font-display text-base font-semibold text-ink-900">
-                  Service-wise breakdown
-                </h3>
+            <StaggerItem>
+              <div className="h-full rounded-3xl border border-ink-100 bg-white p-6 shadow-sm">
+                <SectionHeader size="sm" icon={Stack} tone="brand" title="Service-wise breakdown" className="mb-4" />
+                <ServiceBreakdownList rows={data.serviceBreakdown} />
               </div>
-              {data.serviceBreakdown.length === 0 ? (
-                <p className="py-6 text-center text-sm text-ink-500">
-                  No transactions in this period.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {data.serviceBreakdown.map((s) => (
-                    <li
-                      key={s.service}
-                      className="flex items-center justify-between gap-3 rounded-xl bg-ink-50/50 px-3 py-2"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-ink-800">{s.label}</p>
-                        <p className="text-[11px] text-ink-500">
-                          {formatNumber(s.count)} txn · {formatNumber(s.success)} ok
-                          {s.pending > 0 ? ` · ${formatNumber(s.pending)} pending` : ""}
-                          {s.failed > 0 ? ` · ${formatNumber(s.failed)} failed` : ""}
-                        </p>
-                      </div>
-                      <span className="shrink-0 font-display text-sm font-bold text-ink-900">
-                        {formatINR(s.amount)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            </StaggerItem>
 
             {/* Member-wise table */}
-            <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white lg:col-span-2">
-              <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-                <div>
-                  <h3 className="font-display text-base font-semibold capitalize text-ink-900">
-                    Member-wise activity
-                  </h3>
-                  <p className="text-xs text-ink-500">
-                    Direct {childLabel} · click a row for full transaction details
-                  </p>
+            <StaggerItem className="lg:col-span-2">
+              <div className="h-full overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-6 py-4">
+                  <SectionHeader
+                    size="sm"
+                    icon={UsersThree}
+                    tone="royal"
+                    title="Member-wise activity"
+                    description={`Direct ${childLabel} · click a row for full transaction details`}
+                  />
+                  <Link
+                    href="/dashboard/network"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 transition hover:text-brand-800"
+                  >
+                    View network <ArrowRight className="h-3 w-3" />
+                  </Link>
                 </div>
-                <Link
-                  href="/dashboard/network"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline"
-                >
-                  View network <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-              {data.members.length === 0 ? (
-                <div className="px-5 py-12 text-center text-sm text-ink-500">
-                  No {childLabel} yet.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
-                      <tr>
-                        <th className="px-5 py-3 font-semibold">Member</th>
-                        <th className="px-5 py-3 font-semibold">Status</th>
-                        <th className="px-5 py-3 font-semibold text-right">Txns</th>
-                        <th className="px-5 py-3 font-semibold text-right">Volume</th>
-                        <th className="px-5 py-3 font-semibold text-right">Commission</th>
-                        <th className="px-5 py-3" />
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-ink-100 text-ink-800">
-                      {data.members.map((m) => (
-                        <tr key={m.id} className="group hover:bg-ink-50/40">
-                          <td className="px-5 py-3">
-                            <Link href={`/dashboard/network/${m.id}`} className="block">
-                              <div className="font-semibold text-ink-900 group-hover:text-brand-700">
-                                {m.name}
-                              </div>
-                              <div className="text-xs text-ink-500">
-                                {m.userCode ?? m.id.slice(0, 10)} · {m.city}
-                              </div>
-                            </Link>
-                          </td>
-                          <td className="px-5 py-3">
-                            <Badge
-                              variant={
-                                m.status === "Active"
-                                  ? "success"
-                                  : m.status === "Pending KYC"
-                                    ? "warning"
-                                    : "danger"
-                              }
-                            >
-                              {m.status}
-                            </Badge>
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            <div className="font-semibold">{formatNumber(m.txnCount)}</div>
-                            <div className="text-[11px] text-ink-500">
-                              {formatNumber(m.successCount)} ok
-                              {m.pendingCount > 0 ? ` · ${formatNumber(m.pendingCount)} pend` : ""}
-                              {m.failedCount > 0 ? ` · ${formatNumber(m.failedCount)} fail` : ""}
-                            </div>
-                          </td>
-                          <td className="px-5 py-3 text-right font-semibold text-emerald-700">
-                            {formatINR(m.volume)}
-                          </td>
-                          <td className="px-5 py-3 text-right text-ink-700">
-                            {formatINR(m.commission)}
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            <Link
-                              href={`/dashboard/network/${m.id}`}
-                              className="inline-flex items-center text-ink-300 group-hover:text-brand-600"
-                              aria-label={`Open ${m.name}`}
-                            >
-                              <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          </td>
+                {data.members.length === 0 ? (
+                  <EmptyState
+                    icon={UsersThree}
+                    tone="royal"
+                    title={`No ${childLabel} yet`}
+                    body="Invite your first partner and their activity will roll up here."
+                  />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
+                        <tr>
+                          <th className="px-6 py-3 font-semibold">Member</th>
+                          <th className="px-6 py-3 font-semibold">Status</th>
+                          <th className="px-6 py-3 text-right font-semibold">Txns</th>
+                          <th className="px-6 py-3 text-right font-semibold">Volume</th>
+                          <th className="px-6 py-3 text-right font-semibold">Commission</th>
+                          <th className="px-6 py-3" />
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
+                      </thead>
+                      <tbody className="divide-y divide-ink-100 text-ink-800">
+                        {data.members.map((m) => (
+                          <tr key={m.id} className="group transition hover:bg-ink-50/50">
+                            <td className="px-6 py-3">
+                              <Link href={`/dashboard/network/${m.id}`} className="block">
+                                <div className="font-semibold text-ink-900 group-hover:text-brand-700">
+                                  {m.name}
+                                </div>
+                                <div className="text-xs text-ink-500">
+                                  {m.userCode ?? m.id.slice(0, 10)} · {m.city}
+                                </div>
+                              </Link>
+                            </td>
+                            <td className="px-6 py-3">
+                              <Badge
+                                size="sm"
+                                variant={
+                                  m.status === "Active"
+                                    ? "success"
+                                    : m.status === "Pending KYC"
+                                      ? "warning"
+                                      : "danger"
+                                }
+                              >
+                                {m.status}
+                              </Badge>
+                            </td>
+                            <td className="px-6 py-3 text-right">
+                              <div className="font-semibold tabular-nums">{formatNumber(m.txnCount)}</div>
+                              <div className="text-[11px] text-ink-500">
+                                {formatNumber(m.successCount)} ok
+                                {m.pendingCount > 0 ? ` · ${formatNumber(m.pendingCount)} pend` : ""}
+                                {m.failedCount > 0 ? ` · ${formatNumber(m.failedCount)} fail` : ""}
+                              </div>
+                            </td>
+                            <td className="px-6 py-3 text-right font-semibold tabular-nums text-emerald-700">
+                              {formatINR(m.volume)}
+                            </td>
+                            <td className="px-6 py-3 text-right tabular-nums text-ink-700">
+                              {formatINR(m.commission)}
+                            </td>
+                            <td className="px-6 py-3 text-right">
+                              <Link
+                                href={`/dashboard/network/${m.id}`}
+                                className="inline-flex items-center text-ink-300 transition group-hover:translate-x-0.5 group-hover:text-brand-600"
+                                aria-label={`Open ${m.name}`}
+                              >
+                                <ArrowRight className="h-4 w-4" />
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </StaggerItem>
+          </Stagger>
         </>
       ) : null}
     </section>
-  );
-}
-
-function StatusPill({
-  icon: Icon,
-  tone,
-  n,
-  label,
-}: {
-  icon: typeof CheckCircle2;
-  tone: "emerald" | "amber" | "rose";
-  n: number;
-  label: string;
-}) {
-  const tones: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700",
-    amber: "bg-amber-50 text-amber-700",
-    rose: "bg-rose-50 text-rose-700",
-  };
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
-        tones[tone]
-      )}
-    >
-      <Icon className="h-3.5 w-3.5" />
-      {formatNumber(n)} {label}
-    </span>
   );
 }

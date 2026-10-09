@@ -70,7 +70,7 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 export default function PlatformControlsPage() {
   const [settings, setSettings] = useState<SettingsMap | null>(null);
@@ -153,7 +153,7 @@ export default function PlatformControlsPage() {
             const meta = LABELS[key] ?? { title: key, description: "" };
             const draft = drafts[key] ?? {};
             return (
-              <div key={key} className="rounded-2xl border border-ink-100 bg-white p-5">
+              <div key={key} className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
                 <div className="mb-1 flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4 text-brand-600" />
                   <h3 className="text-sm font-bold text-ink-900">{meta.title}</h3>

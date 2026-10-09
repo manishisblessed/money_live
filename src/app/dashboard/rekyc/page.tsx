@@ -15,7 +15,11 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile, type IconTone } from "@/components/ui/Icon";
+import { Notice } from "@/components/dashboard/services/ServiceLayout";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { cn } from "@/lib/utils";
 
 type Method = "aadhaar_otp" | "face_match" | "aadhaar_otp+face";
 
@@ -210,6 +214,22 @@ export default function ReKycPage() {
     else setStep("face");
   }
 
+  // Display-only: which rail stage the current step maps to.
+  const railSteps = [
+    requiresAadhaar ? "Aadhaar" : "Start",
+    ...(requiresFace ? ["Liveness"] : []),
+    "Done",
+  ];
+  const railIndex =
+    step === "done"
+      ? railSteps.length - 1
+      : step === "face" || step === "stepup" || step === "submitting"
+      ? requiresFace
+        ? 1
+        : railSteps.length - 1
+      : 0;
+  const showRail = step !== "loading" && step !== "verified";
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -218,7 +238,8 @@ export default function ReKycPage() {
         description="A quick monthly check that confirms only you are operating this account. Your transactions resume the moment it's complete."
       />
 
-      <div className="mx-auto w-full max-w-lg">
+      <div className="mx-auto w-full max-w-lg space-y-4">
+        {showRail && <StepRail steps={railSteps} index={railIndex} />}
         <AnimatePresence mode="wait">
           {step === "loading" && (
             <Centered key="loading">
@@ -228,11 +249,11 @@ export default function ReKycPage() {
           )}
 
           {step === "verified" && (
-            <Card key="verified" tone="emerald">
-              <IconBubble tone="emerald">
-                <ShieldCheck className="h-8 w-8 text-emerald-600" />
+            <Card key="verified" tone="accent">
+              <IconBubble tone="accent">
+                <ShieldCheck className="h-7 w-7" />
               </IconBubble>
-              <h2 className="text-xl font-bold text-ink-900">
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
                 {status?.exempt ? "No re-verification needed" : "You're verified this month"}
               </h2>
               <p className="text-sm text-ink-500">
@@ -251,11 +272,17 @@ export default function ReKycPage() {
           {step === "intro" && (
             <Card key="intro" tone="amber">
               <IconBubble tone="amber">
-                <ShieldAlert className="h-8 w-8 text-amber-600" />
+                <ShieldAlert className="h-7 w-7" />
               </IconBubble>
-              <h2 className="text-xl font-bold text-ink-900">Re-verify your identity</h2>
+              {status?.reKycDueAt && (
+                <Badge variant="warning" dot className="mx-auto">
+                  Due {fmtDate(status.reKycDueAt)}
+                </Badge>
+              )}
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+                Re-verify your identity
+              </h2>
               <p className="text-sm leading-relaxed text-ink-500">
-                {status?.reKycDueAt && `Due for ${fmtDate(status.reKycDueAt)}. `}
                 {requiresAadhaar && requiresFace
                   ? "We'll confirm your Aadhaar via DigiLocker and a quick liveness check."
                   : requiresAadhaar
@@ -278,9 +305,11 @@ export default function ReKycPage() {
           {step === "redirecting" && (
             <Card key="redirecting" tone="brand">
               <IconBubble tone="brand">
-                <Landmark className="h-8 w-8 text-brand-600" />
+                <Landmark className="h-7 w-7" />
               </IconBubble>
-              <h2 className="text-xl font-bold text-ink-900">Redirecting to DigiLocker…</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+                Redirecting to DigiLocker…
+              </h2>
               <p className="text-sm text-ink-500">
                 Complete the Aadhaar consent on DigiLocker. You&apos;ll be brought
                 back here automatically to finish.
@@ -291,24 +320,26 @@ export default function ReKycPage() {
 
           {step === "stepup" && (
             <Card key="stepup" tone="brand">
-              <IconBubble tone="brand">
-                <ShieldCheck className="h-8 w-8 text-brand-600" />
+              <IconBubble tone="energy">
+                <ShieldCheck className="h-7 w-7" />
               </IconBubble>
-              <h2 className="text-xl font-bold text-ink-900">Confirm it&apos;s you</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+                Confirm it&apos;s you
+              </h2>
               <p className="text-sm text-ink-500">
                 Enter your two-factor code to finish re-verification.
               </p>
-              <div className="text-left">
-                <Label htmlFor="stepup">Two-factor code</Label>
-                <Input
+              <div className="mx-auto max-w-xs text-left">
+                <FloatField
                   id="stepup"
+                  label="Two-factor code"
                   inputMode="numeric"
                   maxLength={8}
-                  placeholder="2FA code"
                   value={stepUpCode}
                   onChange={(e) => setStepUpCode(e.target.value.replace(/\D/g, ""))}
                   autoFocus
-                  className="text-center font-mono tracking-[0.2em]"
+                  mono
+                  className="[&>input]:text-center [&>input]:tracking-[0.3em]"
                 />
               </div>
               {error && <ErrorNote>{error}</ErrorNote>}
@@ -325,7 +356,12 @@ export default function ReKycPage() {
 
           {step === "face" && (
             <Card key="face" tone="brand">
-              <h2 className="text-xl font-bold text-ink-900">Quick liveness check</h2>
+              <IconBubble tone="energy">
+                <Camera className="h-7 w-7" />
+              </IconBubble>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+                Quick liveness check
+              </h2>
               <p className="text-sm text-ink-500">
                 Center your face in the frame and capture. We compare it against your
                 onboarding record (or set it up if this is your first check).
@@ -351,11 +387,13 @@ export default function ReKycPage() {
           )}
 
           {step === "done" && (
-            <Card key="done" tone="emerald">
-              <IconBubble tone="emerald">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+            <Card key="done" tone="accent">
+              <IconBubble tone="accent">
+                <CheckCircle2 className="h-7 w-7" />
               </IconBubble>
-              <h2 className="text-xl font-bold text-ink-900">Verification complete</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+                Verification complete
+              </h2>
               <p className="text-sm text-ink-500">
                 Your account is unlocked.
                 {nextDue ? ` Next re-verification is due ${fmtDate(nextDue)}.` : ""}
@@ -371,51 +409,95 @@ export default function ReKycPage() {
   );
 }
 
-// ── Small presentational helpers (match existing design language) ────────────
+// ── Small presentational helpers (Bharat Energy v2) ──────────────────────────
+
+/** Compact step rail with an energy-gradient progress bar. Display only. */
+function StepRail({ steps, index }: { steps: string[]; index: number }) {
+  const pct = steps.length > 1 ? (index / (steps.length - 1)) * 100 : 100;
+  return (
+    <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-ink-100">
+      <ol className="flex items-center justify-between gap-2">
+        {steps.map((label, i) => {
+          const done = i < index;
+          const current = i === index;
+          return (
+            <li
+              key={label}
+              className="flex items-center gap-2"
+              aria-current={current ? "step" : undefined}
+            >
+              <span
+                className={cn(
+                  "grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold ring-1 transition",
+                  done || current
+                    ? "bg-energy-gradient text-white ring-transparent shadow-energy-sm"
+                    : "bg-ink-50 text-ink-400 ring-ink-200"
+                )}
+              >
+                {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
+              </span>
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  current ? "text-ink-900" : done ? "text-ink-600" : "text-ink-400"
+                )}
+              >
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-100">
+        <motion.div
+          className="h-full rounded-full bg-energy-gradient-x"
+          initial={false}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        />
+      </div>
+    </div>
+  );
+}
 
 function Card({
   children,
   tone,
 }: {
   children: React.ReactNode;
-  tone: "brand" | "amber" | "emerald";
+  tone: "brand" | "amber" | "accent";
 }) {
   const ring =
     tone === "amber"
       ? "ring-amber-100"
-      : tone === "emerald"
-      ? "ring-emerald-100"
-      : "ring-brand-100";
+      : tone === "accent"
+      ? "ring-accent-100"
+      : "ring-ink-100";
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className={`space-y-4 rounded-3xl bg-white p-7 text-center shadow-soft ring-1 ${ring}`}
+      className={cn(
+        "relative space-y-4 overflow-hidden rounded-3xl bg-white p-7 text-center shadow-sm ring-1",
+        ring
+      )}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-energy-gradient-x"
+      />
       {children}
     </motion.div>
   );
 }
 
-function IconBubble({
-  children,
-  tone,
-}: {
-  children: React.ReactNode;
-  tone: "brand" | "amber" | "emerald";
-}) {
-  const bg =
-    tone === "amber"
-      ? "from-amber-50 to-brand-50 ring-amber-100"
-      : tone === "emerald"
-      ? "from-emerald-50 to-brand-50 ring-emerald-100"
-      : "from-brand-50 to-emerald-50 ring-brand-100";
+function IconBubble({ children, tone }: { children: React.ReactNode; tone: IconTone }) {
   return (
-    <div className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br ring-1 ${bg}`}>
+    <IconTile tone={tone} size="xl" className="mx-auto">
       {children}
-    </div>
+    </IconTile>
   );
 }
 
@@ -425,7 +507,7 @@ function Centered({ children }: { children: React.ReactNode }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-3 rounded-3xl bg-white p-10 text-center shadow-soft ring-1 ring-ink-100"
+      className="flex flex-col items-center gap-3 rounded-3xl bg-white p-10 text-center shadow-sm ring-1 ring-ink-100"
     >
       {children}
     </motion.div>
@@ -434,9 +516,9 @@ function Centered({ children }: { children: React.ReactNode }) {
 
 function ErrorNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700">
+    <Notice tone="danger" className="text-left">
       {children}
-    </div>
+    </Notice>
   );
 }
 
@@ -496,7 +578,10 @@ function LivenessCapture({
 
   return (
     <div className="space-y-3">
-      <div className="mx-auto grid aspect-video w-full max-w-xs place-items-center overflow-hidden rounded-2xl border border-ink-200 bg-ink-900/90">
+      <div
+        className="gradient-ring mx-auto grid aspect-video w-full max-w-xs place-items-center overflow-hidden rounded-3xl bg-ink-950 shadow-energy-sm ring-1 ring-ink-200"
+        data-active={active}
+      >
         {snapshot ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={snapshot} alt="Liveness capture" className="h-full w-full object-cover" />
@@ -516,7 +601,7 @@ function LivenessCapture({
           </Button>
         )
       ) : (
-        <p className="flex items-center justify-center gap-1.5 text-sm font-medium text-emerald-700">
+        <p className="flex items-center justify-center gap-1.5 text-sm font-medium text-accent-700">
           <CheckCircle2 className="h-4 w-4" /> Captured
         </p>
       )}

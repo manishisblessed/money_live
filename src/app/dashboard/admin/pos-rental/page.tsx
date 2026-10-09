@@ -97,14 +97,14 @@ function Stat({ label, value, icon: Icon, tone }: { label: string; value: string
     brand: "text-brand-600 bg-brand-50",
   };
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-4">
+    <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
       <div className="flex items-center gap-2">
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${tone ? colors[tone] : "bg-ink-50 text-ink-500"}`}>
           <Icon className="h-4 w-4" />
         </div>
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">{label}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
       </div>
-      <p className={`mt-2 text-xl font-bold ${
+      <p className={`mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] ${
         tone === "good" ? "text-emerald-600" : tone === "bad" ? "text-rose-600" : tone === "brand" ? "text-brand-600" : "text-ink-900"
       }`}>
         {value}
@@ -490,7 +490,7 @@ function PlansTab({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-ink-100 bg-white p-6">
+      <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6">
         <div className="mb-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
             <Plus className="h-4 w-4 text-brand-600" /> Create New Rental Plan
@@ -877,7 +877,7 @@ function SubscriptionsTab({
   return (
     <div className="space-y-4">
       {/* Assign subscription panel */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-6">
+      <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6">
         <div className="mb-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
             <Plus className="h-4 w-4 text-brand-600" /> Assign Subscription
@@ -891,7 +891,7 @@ function SubscriptionsTab({
         <div className="mb-4">
           <label className={labelCls}>Assign to user</label>
           {selectedUser ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50 px-3 py-2.5">
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200 px-3 py-2.5">
               <div className="min-w-0">
                 <p className="flex items-center gap-2 text-sm font-semibold text-ink-900">
                   <span className="truncate">{selectedUser.name}</span>
@@ -1012,7 +1012,7 @@ function SubscriptionsTab({
               {/* Live summary */}
               {baseRent > 0 && selectedMachines.size > 0 && (
                 <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-400">Monthly Billing Summary</p>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Monthly Billing Summary</p>
                   <div className="space-y-1.5 text-sm">
                     <div className="flex items-center justify-between text-xs text-ink-500">
                       <span>Per machine</span>
@@ -1040,13 +1040,13 @@ function SubscriptionsTab({
       </div>
 
       {/* Active totals */}
-      <div className="flex flex-wrap gap-4 rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="flex flex-wrap gap-4 rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="h-4 w-4" />
           </div>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Active</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Active</p>
             <p className="text-sm font-bold text-ink-900">{formatNumber(activeCount)} subscription{activeCount !== 1 ? "s" : ""}</p>
           </div>
         </div>
@@ -1055,7 +1055,7 @@ function SubscriptionsTab({
             <IndianRupee className="h-4 w-4" />
           </div>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Monthly Revenue</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Monthly Revenue</p>
             <p className="text-sm font-bold text-ink-900">{formatINR(activeMonthlyRent)}</p>
           </div>
         </div>
@@ -1457,7 +1457,7 @@ function IntakeTab({ onNotice }: { onNotice: (text: string, ok: boolean) => void
   return (
     <div className="space-y-4">
       {/* Mode toggle */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-6">
+      <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
@@ -1516,7 +1516,7 @@ function IntakeTab({ onNotice }: { onNotice: (text: string, ok: boolean) => void
           <>
             {/* Defaults bar */}
             <div className="mb-4 rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-3">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
                 Defaults for new rows (auto-fill when you add rows)
               </p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -1683,7 +1683,7 @@ function IntakeTab({ onNotice }: { onNotice: (text: string, ok: boolean) => void
       </div>
 
       {/* Tracking */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-6">
+      <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6">
         <div className="mb-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">
             <History className="h-4 w-4 text-brand-600" /> Machine Tracking & Timeline
@@ -1710,7 +1710,7 @@ function IntakeTab({ onNotice }: { onNotice: (text: string, ok: boolean) => void
 
         {track && (
           <div className="mt-4 space-y-4">
-            <div className="rounded-xl bg-ink-50 p-4 text-sm">
+            <div className="rounded-2xl bg-ink-50/70 p-4 ring-1 ring-inset ring-ink-100 text-sm">
               <p className="flex flex-wrap items-center gap-2 font-semibold text-ink-900">
                 {String(track.machine.serial ?? "no-serial")} · {String(track.machine.model ?? track.machine.brand ?? "")}
                 {track.machine.source === "MANUAL" ? (

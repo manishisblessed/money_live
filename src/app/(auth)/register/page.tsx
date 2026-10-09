@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, AlertCircle, PhoneCall } from "lucide-react";
+import {
+  CheckCircle,
+  PhoneCall,
+  Storefront,
+  UsersThree,
+  TreeStructure,
+  ArrowRight,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { FloatingInput, Label, Select } from "@/components/ui/Input";
+import { IconTile } from "@/components/ui/Icon";
 import { Turnstile, captchaConfigured } from "@/components/security/Turnstile";
+import { AuthAlert, AuthCard, AuthCardHeader, AuthLinksRow } from "@/components/auth/AuthCard";
+import { StepPanels, StepRail } from "@/components/auth/StepRail";
+import { cn } from "@/lib/utils";
 
 const roleMap = {
   retailer: "RETAILER",
@@ -25,6 +37,14 @@ const STATES = [
   "Rajasthan",
   "Gujarat",
   "Other",
+];
+
+const JOIN_STEPS = [{ label: "Your details" }, { label: "We call you back" }] as const;
+
+const ROLE_TILES: { id: keyof typeof roleMap; label: string; icon: PhosphorIcon; hint: string }[] = [
+  { id: "retailer", label: "Retailer", icon: Storefront, hint: "One shop" },
+  { id: "distributor", label: "Distributor", icon: UsersThree, hint: "Manage retailers" },
+  { id: "master-distributor", label: "Master Dist.", icon: TreeStructure, hint: "Regional network" },
 ];
 
 export default function JoinPage() {
@@ -88,57 +108,35 @@ export default function JoinPage() {
     }
   }
 
+  const stepIndex = submitted ? 1 : 0;
+
   return (
-    <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-      <div className="hidden flex-col justify-between rounded-3xl bg-gradient-to-br from-accent-500 via-brand-600 to-brand-700 p-10 text-white shadow-glow lg:flex">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-            Become an Agent
-          </span>
-          <h2 className="mt-6 font-display text-3xl font-bold leading-tight">
-            Start earning from your{" "}
-            <span className="bg-gradient-to-r from-amber-200 to-white bg-clip-text text-transparent">
-              very first transaction.
-            </span>
-          </h2>
-          <p className="mt-3 text-white/85">
-            Share your details and our onboarding team will call you back, verify
-            your KYC and get you live with 60+ services.
-          </p>
-        </div>
+    <AuthCard size="lg">
+      <StepRail steps={JOIN_STEPS} current={stepIndex} surface="card" className="mb-6" />
 
-        <ul className="space-y-3 text-sm">
-          {[
-            "Zero joining fee, zero hidden charges",
-            "Free RuPay business card on activation",
-            "Earn up to 1.2% commission per transaction",
-            "24x7 WhatsApp & phone support",
-          ].map((t) => (
-            <li key={t} className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-              {t}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="rounded-3xl border border-ink-100 bg-white p-8 shadow-soft md:p-10">
+      <StepPanels step={stepIndex}>
         {submitted ? (
-          <div className="flex flex-col items-center py-6 text-center">
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-              <CheckCircle2 className="h-9 w-9" />
-            </div>
-            <h1 className="heading-md mt-6">Request received!</h1>
-            <p className="mt-3 max-w-sm text-sm text-ink-500">
-              Thanks{form.name ? `, ${form.name.split(" ")[0]}` : ""}! Our
-              onboarding team will connect with you shortly on{" "}
-              <span className="font-semibold text-ink-700">{form.phone}</span> to
-              complete your setup.
+          <div className="flex flex-col items-center py-4 text-center">
+            <IconTile icon={CheckCircle} tone="accent" size="xl" className="rounded-3xl" />
+            <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+              <span className="brand-dot" aria-hidden />
+              Request received
             </p>
-            <div className="mt-6 flex w-full max-w-xs flex-col gap-3">
-              <div className="flex items-center gap-2 rounded-xl border border-ink-100 bg-ink-50/60 px-4 py-3 text-left text-sm text-ink-600">
-                <PhoneCall className="h-4 w-4 shrink-0 text-brand-600" />
-                Keep your Aadhaar, PAN & bank details handy for eKYC.
+            <h1 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900 md:text-3xl">
+              Thanks{form.name ? `, ${form.name.split(" ")[0]}` : ""} — you&apos;re on the list.
+            </h1>
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-500">
+              Our onboarding team will call you on{" "}
+              <span className="font-semibold text-ink-700">{form.phone}</span> to verify
+              your KYC and switch on your services.
+            </p>
+            <div className="mt-6 flex w-full max-w-sm flex-col gap-3">
+              <div className="flex items-start gap-3 rounded-2xl bg-[#f6f7fb] p-4 text-left text-sm text-ink-600 ring-1 ring-inset ring-ink-100">
+                <IconTile icon={PhoneCall} tone="brand" size="sm" />
+                <span>
+                  Keep your <span className="font-semibold text-ink-900">Aadhaar, PAN and bank details</span>{" "}
+                  handy for eKYC. The call takes about 10 minutes.
+                </span>
               </div>
               <Link href="/">
                 <Button variant="outline" size="lg" className="w-full">
@@ -149,82 +147,77 @@ export default function JoinPage() {
           </div>
         ) : (
           <>
-            <h1 className="heading-md">Join eMoney</h1>
-            <p className="mt-2 text-sm text-ink-500">
-              Fill in your details — our support team will reach out and complete
-              your onboarding. Already a member?{" "}
-              <Link href="/login" className="font-semibold text-brand-700">
-                Login here
-              </Link>
-            </p>
+            <AuthCardHeader
+              eyebrow="Join eMoney"
+              title="Start earning from your first transaction"
+              description={
+                <>
+                  Share a few details and our team will reach out to finish your onboarding.
+                  Already a member?{" "}
+                  <Link href="/login" className="font-semibold text-brand-700 hover:underline">
+                    Sign in
+                  </Link>
+                </>
+              }
+            />
 
-            {error && (
-              <div className="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                {error}
-              </div>
-            )}
+            <AuthAlert className="mt-5" message={error || null} />
 
-            <form
-              className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2"
-              onSubmit={onSubmit}
-            >
-              <div className="sm:col-span-2">
-                <Label htmlFor="name">Full name</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => update("name", e.target.value)}
-                  placeholder="As per Aadhaar"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Mobile</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => update("phone", e.target.value)}
-                  placeholder="10-digit mobile"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => update("email", e.target.value)}
-                  placeholder="you@email.com"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="shopName">Shop / Business name</Label>
-                <Input
-                  id="shopName"
-                  value={form.shopName}
-                  onChange={(e) => update("shopName", e.target.value)}
-                  placeholder="e.g. Sharma Mobile World"
-                />
-              </div>
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={form.city}
-                  onChange={(e) => update("city", e.target.value)}
-                  placeholder="e.g. Gurugram"
-                />
-              </div>
+            <form className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
+              <FloatingInput
+                id="name"
+                label="Full name"
+                value={form.name}
+                onChange={(e) => update("name", e.target.value)}
+                hint="Exactly as printed on your Aadhaar"
+                autoComplete="name"
+                required
+                className="sm:col-span-2"
+              />
+              <FloatingInput
+                id="phone"
+                label="Mobile number"
+                type="tel"
+                inputMode="numeric"
+                value={form.phone}
+                onChange={(e) => update("phone", e.target.value)}
+                hint="10-digit, we'll call this number"
+                autoComplete="tel"
+                required
+              />
+              <FloatingInput
+                id="email"
+                label="Email"
+                type="email"
+                value={form.email}
+                onChange={(e) => update("email", e.target.value)}
+                autoComplete="email"
+                required
+              />
+              <FloatingInput
+                id="shopName"
+                label="Shop / business name"
+                value={form.shopName}
+                onChange={(e) => update("shopName", e.target.value)}
+                hint="Optional · e.g. Sharma Mobile World"
+                autoComplete="organization"
+              />
+              <FloatingInput
+                id="city"
+                label="City"
+                value={form.city}
+                onChange={(e) => update("city", e.target.value)}
+                hint="Optional"
+                autoComplete="address-level2"
+              />
+
               <div className="sm:col-span-2">
                 <Label htmlFor="state">State</Label>
                 <Select
                   id="state"
                   value={form.state}
                   onChange={(e) => update("state", e.target.value)}
+                  className="h-14"
                 >
                   {STATES.map((s) => (
                     <option key={s} value={s}>
@@ -233,29 +226,40 @@ export default function JoinPage() {
                   ))}
                 </Select>
               </div>
-              <div className="sm:col-span-2">
-                <Label>I want to join as</Label>
-                <div className="mt-1 grid grid-cols-3 gap-2">
-                  {(["retailer", "distributor", "master-distributor"] as const).map(
-                    (r) => (
+
+              <fieldset className="sm:col-span-2">
+                <legend className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+                  I want to join as
+                </legend>
+                <div className="grid grid-cols-3 gap-2">
+                  {ROLE_TILES.map((r) => {
+                    const active = form.role === r.id;
+                    return (
                       <button
                         type="button"
-                        key={r}
-                        onClick={() => update("role", r)}
-                        className={`rounded-xl border px-3 py-2 text-sm font-medium capitalize transition ${
-                          form.role === r
-                            ? "border-brand-500 bg-brand-50 text-brand-700"
-                            : "border-ink-200 bg-white text-ink-700 hover:border-ink-300"
-                        }`}
+                        key={r.id}
+                        onClick={() => update("role", r.id)}
+                        aria-pressed={active}
+                        className={cn(
+                          "focus-energy flex flex-col items-start gap-2 rounded-2xl p-3 text-left transition sm:flex-row sm:items-center sm:gap-3",
+                          active
+                            ? "bg-white shadow-energy-sm ring-2 ring-brand-500"
+                            : "bg-[#f6f7fb] ring-1 ring-ink-100 hover:bg-white hover:ring-ink-200"
+                        )}
                       >
-                        {r.replace("-", " ")}
+                        <IconTile icon={r.icon} tone={active ? "energy" : "ink"} size="sm" />
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold text-ink-900">{r.label}</span>
+                          <span className="block truncate text-[11px] text-ink-500">{r.hint}</span>
+                        </span>
                       </button>
-                    )
-                  )}
+                    );
+                  })}
                 </div>
-              </div>
+              </fieldset>
+
               <div className="sm:col-span-2">
-                <Label htmlFor="message">Message (optional)</Label>
+                <Label htmlFor="message">Anything else? (optional)</Label>
                 <textarea
                   id="message"
                   value={form.message}
@@ -263,49 +267,59 @@ export default function JoinPage() {
                   placeholder="Tell us anything that helps us onboard you faster."
                   rows={3}
                   maxLength={1000}
-                  className="flex w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm transition placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-100"
+                  className="flex w-full rounded-2xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 shadow-sm transition-[border-color,box-shadow] duration-200 ease-out placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:shadow-[0_0_0_4px_rgba(124,58,237,0.14),0_8px_24px_-10px_rgba(244,63,94,0.25)]"
                 />
               </div>
+
               <div className="sm:col-span-2">
-                <label className="flex items-start gap-2 text-xs text-ink-600">
+                <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-[#f6f7fb] p-3.5 text-xs leading-relaxed text-ink-600 ring-1 ring-inset ring-ink-100">
                   <input
                     type="checkbox"
                     defaultChecked
                     required
-                    className="mt-0.5 h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink-300 text-brand-600 focus:ring-brand-500"
                   />
-                  I agree to be contacted by eMoney and accept the{" "}
-                  <Link href="/legal/terms" className="font-semibold text-brand-700">
-                    Terms
-                  </Link>{" "}
-                  &{" "}
-                  <Link
-                    href="/legal/privacy"
-                    className="font-semibold text-brand-700"
-                  >
-                    Privacy Policy
-                  </Link>
-                  .
+                  <span>
+                    I agree to be contacted by eMoney and accept the{" "}
+                    <Link href="/legal/terms" className="font-semibold text-brand-700 hover:underline">
+                      Terms
+                    </Link>{" "}
+                    &amp;{" "}
+                    <Link href="/legal/privacy" className="font-semibold text-brand-700 hover:underline">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </span>
                 </label>
               </div>
-              <div className="sm:col-span-2">
-                <Turnstile
-                  onToken={setCaptchaToken}
-                  className="mb-3 flex justify-center"
-                />
+
+              <div className="sm:col-span-2 space-y-3">
+                <Turnstile onToken={setCaptchaToken} />
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full"
+                  isLoading={loading}
                   disabled={loading || (captchaConfigured && !captchaToken)}
                 >
-                  {loading ? "Submitting..." : "Submit join request"}
+                  {loading ? (
+                    "Submitting…"
+                  ) : (
+                    <>
+                      Submit join request <ArrowRight size={16} weight="bold" aria-hidden />
+                    </>
+                  )}
                 </Button>
               </div>
             </form>
+
+            <AuthLinksRow className="mt-6 border-t border-ink-100 pt-5">
+              <span className="text-ink-400">Zero joining fee · no hidden charges</span>
+              <span className="text-ink-400">Callback within one working day</span>
+            </AuthLinksRow>
           </>
         )}
-      </div>
-    </div>
+      </StepPanels>
+    </AuthCard>
   );
 }

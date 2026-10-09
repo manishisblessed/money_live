@@ -82,7 +82,7 @@ export const services: ServiceItem[] = [
     slug: "payment-gateway",
     title: "Payment Gateway",
     description:
-      "Accept UPI, cards, net banking & wallets with real-time tracking and T+1 settlement.",
+      "Take UPI, cards and net banking online. Money lands in your bank next day.",
     icon: CreditCard,
     href: "/dashboard/pg",
     category: "banking",
@@ -92,7 +92,7 @@ export const services: ServiceItem[] = [
     slug: "pos",
     title: "POS Terminals",
     description:
-      "Android POS machines on rental with card, UPI, BharatQR & Tap-and-Pay acceptance.",
+      "Swipe, tap or scan at your counter. Rent a POS — no buying, no lock-in.",
     icon: Monitor,
     href: "/dashboard/pos",
     category: "banking",
@@ -102,7 +102,7 @@ export const services: ServiceItem[] = [
     slug: "qr-payments",
     title: "QR Code Payments",
     description:
-      "Branded static & dynamic UPI QR codes with instant alerts and settlement reports.",
+      "Put your own QR on the counter. Every payment pings your phone instantly.",
     icon: QrCode,
     href: "/dashboard/qr",
     category: "banking",
@@ -112,15 +112,15 @@ export const services: ServiceItem[] = [
     slug: "aadhaar-pay",
     title: "Aadhaar Pay (AePS)",
     description:
-      "Cash withdrawal, balance inquiry & mini statement using Aadhaar biometric.",
+      "Pay out cash with just a thumb. Earn up to ₹6 per withdrawal — every time.",
     icon: Fingerprint,
     href: "/dashboard/aadhaar-pay",
     category: "banking"
   },
   {
     slug: "money-transfer",
-    title: "Money Transfer (DMT)",
-    description: "Send money instantly to any Indian bank account 24x7.",
+    title: "Send Money (DMT)",
+    description: "Send money to any bank account in seconds. 24x7, even on holidays.",
     icon: Send,
     href: "/dashboard/money-transfer",
     category: "banking"
@@ -128,7 +128,7 @@ export const services: ServiceItem[] = [
   {
     slug: "upi",
     title: "UPI Collect",
-    description: "Generate UPI requests and accept payments without a POS.",
+    description: "Collect payments with a UPI request. No machine, no printed QR needed.",
     icon: QrCode,
     href: "/dashboard/upi",
     category: "banking"
@@ -136,7 +136,7 @@ export const services: ServiceItem[] = [
   {
     slug: "wallet",
     title: "Wallet Pay",
-    description: "Top-up your eMoney wallet and pay anywhere instantly.",
+    description: "Top up once, pay for every service. Your float, your control.",
     icon: Wallet,
     href: "/dashboard/wallet",
     category: "banking"
@@ -144,7 +144,7 @@ export const services: ServiceItem[] = [
   {
     slug: "virtual-account",
     title: "Virtual Account",
-    description: "Get a unique IFSC + account number to receive payments.",
+    description: "Get your own account number. Customers transfer, your wallet fills itself.",
     icon: Building2,
     href: "/dashboard/virtual-account",
     category: "banking",
@@ -153,7 +153,7 @@ export const services: ServiceItem[] = [
   {
     slug: "credit-card",
     title: "Credit Card Bill",
-    description: "Pay any credit card bill across all major banks.",
+    description: "Clear any bank's card bill for customers. Earn on every payment.",
     icon: CreditCard,
     href: "/dashboard/bill-pay/credit-card",
     category: "bills"
@@ -161,7 +161,7 @@ export const services: ServiceItem[] = [
   {
     slug: "mobile-recharge",
     title: "Mobile Recharge",
-    description: "Prepaid recharge for Jio, Airtel, Vi, BSNL with cashback.",
+    description: "Recharge Jio, Airtel, Vi and BSNL in one tap. Commission on every plan.",
     icon: Smartphone,
     href: "/dashboard/recharge/mobile",
     category: "recharge"
@@ -169,7 +169,7 @@ export const services: ServiceItem[] = [
   {
     slug: "dth",
     title: "DTH Recharge",
-    description: "Recharge Tata Play, Dish TV, d2h, Sun Direct & Airtel DTH.",
+    description: "Recharge every DTH brand from one screen. Instant activation, instant commission.",
     icon: Tv,
     href: "/dashboard/recharge/dth",
     category: "recharge"
@@ -177,7 +177,7 @@ export const services: ServiceItem[] = [
   {
     slug: "broadband",
     title: "Broadband / OTT",
-    description: "Postpaid broadband, landline & OTT subscriptions.",
+    description: "Renew broadband, landline and OTT plans. Customers come back every month.",
     icon: Wifi,
     href: "/dashboard/recharge/broadband",
     category: "recharge"
@@ -185,7 +185,7 @@ export const services: ServiceItem[] = [
   {
     slug: "electricity",
     title: "Electricity",
-    description: "Pay state & private electricity bills across India.",
+    description: "Pay any state's electricity bill in 30 seconds. Instant receipt, zero queues.",
     icon: Lightbulb,
     href: "/dashboard/bill-pay/electricity",
     category: "bills"
@@ -193,7 +193,7 @@ export const services: ServiceItem[] = [
   {
     slug: "water",
     title: "Water",
-    description: "Pay municipal water bills with instant confirmation.",
+    description: "Clear municipal water bills on the spot. Confirmed before the customer leaves.",
     icon: Droplets,
     href: "/dashboard/bill-pay/water",
     category: "bills"
@@ -201,7 +201,7 @@ export const services: ServiceItem[] = [
   {
     slug: "gas",
     title: "Gas (Piped & LPG)",
-    description: "Book LPG cylinders or pay piped gas bills in seconds.",
+    description: "Book LPG cylinders or pay piped gas bills. Done in under a minute.",
     icon: Flame,
     href: "/dashboard/bill-pay/gas",
     category: "bills"
@@ -209,7 +209,7 @@ export const services: ServiceItem[] = [
   {
     slug: "flight",
     title: "Flight Booking",
-    description: "Search and book domestic flights with best fares.",
+    description: "Book domestic flights at agent fares. Earn on every ticket you sell.",
     icon: Plane,
     href: "/dashboard/travel/flight",
     category: "travel"
@@ -217,7 +217,7 @@ export const services: ServiceItem[] = [
   {
     slug: "hotel",
     title: "Hotel Booking",
-    description: "Browse 50,000+ hotels across India at agent rates.",
+    description: "Book 50,000+ hotels at agent rates. Your shop becomes a travel desk.",
     icon: Hotel,
     href: "/dashboard/travel/hotel",
     category: "travel"
@@ -225,7 +225,7 @@ export const services: ServiceItem[] = [
   {
     slug: "bus",
     title: "Bus Booking",
-    description: "Book AC sleeper, semi-sleeper & seater buses pan-India.",
+    description: "Sell AC and sleeper bus tickets pan-India. Earn up to 5% per seat.",
     icon: Bus,
     href: "/dashboard/travel/bus",
     category: "travel"
@@ -233,7 +233,7 @@ export const services: ServiceItem[] = [
   {
     slug: "education",
     title: "Education Fees",
-    description: "Pay school & college fees with auto reminders.",
+    description: "Collect school and college fees for parents. Auto reminders bring them back.",
     icon: GraduationCap,
     href: "/dashboard/bill-pay/education",
     category: "bills"
@@ -241,7 +241,7 @@ export const services: ServiceItem[] = [
   {
     slug: "insurance",
     title: "Insurance Premium",
-    description: "Pay life insurance premiums across major insurers instantly.",
+    description: "Accept premium payments for every major insurer. Instant policy receipt.",
     icon: ShieldCheck,
     href: "/dashboard/bill-pay/insurance",
     category: "bills"
@@ -249,7 +249,7 @@ export const services: ServiceItem[] = [
   {
     slug: "broadband-bill",
     title: "Broadband Bill",
-    description: "Pay postpaid broadband & landline bills via BBPS.",
+    description: "Pay postpaid broadband and landline bills via BBPS. Instant confirmation.",
     icon: Wifi,
     href: "/dashboard/bill-pay/broadband",
     category: "bills"
@@ -260,28 +260,36 @@ export type FaqItem = { q: string; a: string };
 
 export const faqs: FaqItem[] = [
   {
-    q: "What is eMoney?",
-    a: "eMoney (operated by eMoney) is a digital banking & utility fintech platform that helps retailers and consumers access 60+ services — money transfer, AePS, recharges, bill payments, travel bookings — all from a single dashboard, with zero hidden fees."
+    q: "What is eMoney, in one line?",
+    a: "eMoney turns your shop into a bank counter. Cash withdrawal, money transfer, bills, recharges, travel — 60+ services from one login. You earn a commission on every transaction."
   },
   {
-    q: "Is it safe to use the platform?",
-    a: "Yes. We use bank-grade 256-bit TLS encryption, RBI-licensed payment partners, and 2-factor authentication on every login & high-value transaction. Your data is never sold or shared."
+    q: "Is my money — and my customers' money — safe?",
+    a: "Yes. Every rupee moves through RBI-licensed partner banks on NPCI rails. Your login has 2-factor authentication, every high-value transaction needs your PIN, and fingerprint data never leaves the certified device."
   },
   {
-    q: "Which utility services can I pay for?",
-    a: "Electricity, water, piped gas & LPG, broadband, DTH, postpaid mobile, landline, credit-card bills, education fees, insurance premiums, FASTag, municipal taxes and more — across 1,200+ billers."
+    q: "Which bills can I collect at my counter?",
+    a: "Electricity, water, LPG and piped gas, broadband, DTH, postpaid mobile, credit cards, school fees, insurance premiums, FASTag and municipal taxes — 1,400+ billers through BBPS."
   },
   {
-    q: "How do I become a eMoney agent?",
-    a: "Sign up with your PAN, Aadhaar and shop details, complete KYC in under 5 minutes, and start earning commissions on every transaction. There is no joining fee."
+    q: "How do I become an eMoney retailer?",
+    a: "Sign up with your PAN, Aadhaar and shop details. KYC takes under 5 minutes. No joining fee, nothing to post. Most shops do their first transaction the same day."
   },
   {
-    q: "How are commissions paid?",
-    a: "Commissions are credited to your eMoney wallet in real-time on every successful transaction. You can withdraw to your bank account 24x7 with instant IMPS settlement."
+    q: "When do I get my commission?",
+    a: "Instantly. Commission lands in your eMoney wallet the moment a transaction succeeds. Move it to your bank account 24x7 by IMPS — no waiting for month-end."
   },
   {
-    q: "Do you charge any hidden fees?",
-    a: "No. Our pricing is fully transparent — every service shows the exact convenience fee (if any) before you confirm. There are zero hidden charges, ever."
+    q: "Are there hidden charges?",
+    a: "None. Every service shows the exact fee before you confirm. What you see on screen is what the customer pays. Your commission slab is visible in your dashboard any time."
+  },
+  {
+    q: "How much can I actually earn?",
+    a: "A shop serving 50 customers a day typically earns ₹7,000–₹9,000 a month from AePS and Send Money alone. Add bills, recharges and POS and many retailers cross ₹15,000. Use the calculator above to see your own numbers."
+  },
+  {
+    q: "What if a transaction fails?",
+    a: "If money is debited but not delivered, it auto-reverses within the RBI timeline — T+1 day for UPI and IMPS, T+5 for AePS. If it's late, the customer gets ₹100 per day of delay. Raise a dispute from your dashboard and we chase it for you."
   }
 ];
 
@@ -292,33 +300,41 @@ export type Testimonial = {
   rating: number;
 };
 
+// `role` is "<shop name>, <city>" — RetailerStories splits on the last comma.
 export const testimonials: Testimonial[] = [
   {
-    name: "Kasendar Prasad",
-    role: "Owner, Rishabh Telecom & Money Transfer",
+    name: "Lakhan Yadav",
+    role: "Yadav Mobile & Recharge, Kanpur",
     quote:
-      "Working with eMoney has transformed my business. The platform is fast, the commissions are great, and the support team is always there when I need them.",
+      "AePS alone brought ₹58,000 last month. 60–70 people a day come for cash withdrawal now — and most buy a recharge too.",
     rating: 5
   },
   {
-    name: "Mukesh Kumar",
-    role: "Founder, Satkartar Telecom",
+    name: "Suresh Pillai",
+    role: "Pillai Super Store, Kochi",
     quote:
-      "Every service works flawlessly — AePS settlement is instant and the dashboard is the cleanest I've used. Highly recommended for any retail outlet.",
+      "Send Money is my busiest counter. Around 40 transfers a day at ₹8 each. That's ₹9,000 a month without stocking a single item.",
     rating: 5
   },
   {
-    name: "Priya Sharma",
-    role: "Owner, Sharma Mobile World",
+    name: "Fatima Shaikh",
+    role: "Shaikh Aadhaar Seva Kendra, Aurangabad",
     quote:
-      "I doubled my monthly income within 3 months of joining eMoney. The training and onboarding is top-notch.",
+      "Electricity and gas bills bring 80 customers a day. Small commission per bill, but it adds up to ₹11,000 a month.",
     rating: 5
   },
   {
-    name: "Rohit Verma",
-    role: "Distributor, Verma Enterprises",
+    name: "Jatin Bhatia",
+    role: "Bhatia POS Point, Ludhiana",
     quote:
-      "The wallet top-up is instant and the commission structure is the best in the industry. A genuine partner for retailers.",
+      "I rented a POS for ₹499. First month it processed ₹4.2 lakh and the rent paid for itself in two days.",
+    rating: 5
+  },
+  {
+    name: "Meenakshi Rao",
+    role: "Rao Travels & Payments, Vijayawada",
+    quote:
+      "Bus tickets earn me 5% a seat. Last month that was ₹22,000 — plus recharges while customers wait.",
     rating: 5
   }
 ];
@@ -326,10 +342,10 @@ export const testimonials: Testimonial[] = [
 export type Stat = { value: string; label: string };
 
 export const heroStats: Stat[] = [
-  { value: "38M+", label: "Businesses joined" },
-  { value: "1,200+", label: "Live billers" },
-  { value: "60+", label: "Digital services" },
-  { value: "99.9%", label: "Uptime SLA" }
+  { value: "72K+", label: "Bharat shops live" },
+  { value: "1,400+", label: "Billers at your tap" },
+  { value: "60+", label: "Ways to earn" },
+  { value: "₹240 Cr+", label: "Processed monthly" }
 ];
 
 export type PricingPlan = {
@@ -347,24 +363,24 @@ export const pricingPlans: PricingPlan[] = [
     name: "Starter",
     price: "₹0",
     cadence: "forever free",
-    description: "Perfect for individuals starting their fintech journey.",
+    description: "Try it. Earn it. No commitment.",
     features: [
-      "Access to 30+ services",
-      "Standard commission rates",
+      "30+ services unlocked",
+      "Standard commission slabs",
       "UPI & wallet payments",
       "Email support",
       "Basic transaction reports"
     ],
-    cta: "Get started"
+    cta: "Start free"
   },
   {
     name: "Retailer",
     price: "₹499",
     cadence: "/year",
-    description: "Best for shops & local retail outlets.",
+    description: "Unlock AePS + max commissions. Pays for itself in 2 days.",
     features: [
-      "All Starter features",
-      "AePS & money transfer enabled",
+      "Everything in Starter",
+      "AePS & Send Money unlocked",
       "Higher commission slabs",
       "Priority WhatsApp support",
       "Advanced reports & exports",
@@ -377,14 +393,14 @@ export const pricingPlans: PricingPlan[] = [
     name: "Distributor",
     price: "₹2,499",
     cadence: "/year",
-    description: "For distributors managing multiple retailers.",
+    description: "Run your own retailer network. Earn on every txn below you.",
     features: [
-      "All Retailer features",
-      "Multi-retailer management",
-      "Commission overrides",
+      "Everything in Retailer",
+      "Onboard & manage your retailers",
+      "Commission overrides on every txn",
       "Dedicated account manager",
       "API access",
-      "Co-branded white-label"
+      "Co-branded white-label app"
     ],
     cta: "Talk to sales"
   }
@@ -401,31 +417,31 @@ export type BlogPost = {
 
 export const blogPosts: BlogPost[] = [
   {
-    slug: "how-aeps-is-changing-rural-banking",
-    title: "How AePS is changing rural banking in Bharat",
+    slug: "lakhan-earned-58000-without-stock",
+    title: "How Lakhan earned ₹58,000 last month without buying any stock",
     excerpt:
-      "Aadhaar-enabled Payment System has brought formal banking to villages where ATMs never reached. Here's how retailers can ride the wave.",
-    date: "Apr 02, 2026",
-    readTime: "5 min read",
-    category: "Banking"
-  },
-  {
-    slug: "ten-tips-to-grow-your-csp",
-    title: "10 tips to grow your customer service point in 2026",
-    excerpt:
-      "Practical, retailer-tested strategies to bring more footfall and increase per-customer revenue at your CSP.",
-    date: "Mar 18, 2026",
-    readTime: "7 min read",
-    category: "Growth"
-  },
-  {
-    slug: "upi-vs-cards-which-wins",
-    title: "UPI vs cards — which wins in 2026?",
-    excerpt:
-      "We crunch the numbers across 12M transactions to see how UPI and cards stack up on cost, speed and customer love.",
-    date: "Feb 28, 2026",
+      "A Kanpur mobile shop went from 10 recharges a day to 70 AePS withdrawals. Here's the exact counter setup, timings and the one habit that did it.",
+    date: "Sep 24, 2026",
     readTime: "6 min read",
-    category: "Insights"
+    category: "Retailer story"
+  },
+  {
+    slug: "seven-minute-morning-routine",
+    title: "The 7-minute morning routine every eMoney retailer should follow",
+    excerpt:
+      "Check float, clear pending bills, print the day's QR, text your top 20 customers. Seven minutes before you open — more customers all day.",
+    date: "Sep 10, 2026",
+    readTime: "4 min read",
+    category: "Playbook"
+  },
+  {
+    slug: "aeps-vs-pos-vs-upi-which-earns-more",
+    title: "AePS vs POS vs UPI — which one earns you more? (With real data)",
+    excerpt:
+      "We pulled 90 days of commissions from 2,400 shops. Per customer, per hour, per rupee of float — one of these wins by a mile.",
+    date: "Aug 28, 2026",
+    readTime: "8 min read",
+    category: "Data"
   }
 ];
 
@@ -435,6 +451,8 @@ export type NavLink = {
   children?: NavLink[];
 };
 
+// Public nav — Emoney tweaks the service sub-labels to be verb-led and
+// slightly more energetic than Nextgen's standard noun list.
 export const mainNav: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Why eMoney", href: "/about" },
@@ -443,14 +461,14 @@ export const mainNav: NavLink[] = [
     href: "/services",
     children: [
       { label: "Aadhaar Pay (AePS)", href: "/services#aadhaar-pay" },
-      { label: "Money Transfer", href: "/services#money-transfer" },
+      { label: "Send Money", href: "/services#money-transfer" },
       { label: "UPI & Wallet", href: "/services#upi" },
-      { label: "Recharges & Bills", href: "/services#bills" },
-      { label: "Travel Bookings", href: "/services#travel" }
+      { label: "Top-ups & Bills", href: "/services#bills" },
+      { label: "Travel Desk", href: "/services#travel" }
     ]
   },
   { label: "Products", href: "/products" },
-  { label: "Our Team", href: "/team" },
+  { label: "Team", href: "/team" },
   { label: "Contact", href: "/contact" }
 ];
 
@@ -498,10 +516,10 @@ export const footerCertifications = [
 ];
 
 export const trustBadges = [
-  { label: "RBI Licensed Partners", icon: ShieldCheck },
-  { label: "256-bit Encryption", icon: ShieldCheck },
-  { label: "PCI-DSS Compliant", icon: ShieldCheck },
-  { label: "ISO 27001 Certified", icon: ShieldCheck }
+  { label: "RBI-licensed partner banks", icon: ShieldCheck },
+  { label: "NPCI certified rails", icon: ShieldCheck },
+  { label: "PCI-DSS v4.0", icon: ShieldCheck },
+  { label: "ISO 27001:2022", icon: ShieldCheck }
 ];
 
 // India-first missions powering Digital Bharat.
@@ -518,33 +536,33 @@ export const indiaMissions: IndiaMission[] = [
     code: "01",
     title: "Digital India",
     body:
-      "Aligned with the Government of India's Digital India initiative — bridging Bharat's last-mile, one panchayat at a time.",
+      "Your shop is the last mile. Where the nearest ATM is 20 km away, your counter is the bank.",
     stat: "1,250+",
-    statLabel: "Gram Panchayats served"
+    statLabel: "Gram Panchayats with an eMoney shop"
   },
   {
     code: "02",
-    title: "Jan Dhan – Aadhaar – Mobile (JAM)",
+    title: "Jan Dhan · Aadhaar · Mobile",
     body:
-      "Built natively on the JAM trinity. Every retailer can onboard a customer using just an Aadhaar and a fingerprint.",
+      "Serve any customer with just an Aadhaar and a thumb. No card, no passbook, no app needed.",
     stat: "₹0",
-    statLabel: "Cost to open a Jan-Dhan account"
+    statLabel: "Cost for your customer to withdraw"
   },
   {
     code: "03",
     title: "UPI · BBPS · AePS",
     body:
-      "Direct certified integrations with NPCI rails — UPI 2.0, Bharat BillPay v2, Aadhaar Enabled Payment System & FASTag.",
+      "You run on the same NPCI rails as the big banks. Same speed, same safety, your commission.",
     stat: "60+",
-    statLabel: "Live NPCI services"
+    statLabel: "Live services at your counter"
   },
   {
     code: "04",
     title: "Aatmanirbhar Bharat",
     body:
-      "100% Made-in-India fintech stack. Data resident on Indian soil, engineered in Gurugram, processed in India only.",
-    stat: "🇮🇳",
-    statLabel: "Proudly Made in India"
+      "Built in Gurugram, hosted in India, supported in 9 languages. Made for Bharat's shops.",
+    stat: "100%",
+    statLabel: "Made in India"
   }
 ];
 
@@ -636,31 +654,31 @@ export const coverageZones: CoverageRegion[] = [
   {
     zone: "North",
     states: 7,
-    retailers: "9.4 L",
-    topCities: ["Delhi", "Lucknow", "Jaipur", "Chandigarh", "Dehradun"]
+    retailers: "19.2K",
+    topCities: ["Delhi", "Lucknow", "Kanpur", "Jaipur", "Ludhiana"]
   },
   {
     zone: "West",
     states: 6,
-    retailers: "11.2 L",
-    topCities: ["Mumbai", "Pune", "Ahmedabad", "Surat", "Indore"]
+    retailers: "21.4K",
+    topCities: ["Mumbai", "Pune", "Ahmedabad", "Surat", "Aurangabad"]
   },
   {
     zone: "South",
     states: 5,
-    retailers: "8.6 L",
-    topCities: ["Bengaluru", "Chennai", "Hyderabad", "Kochi", "Coimbatore"]
+    retailers: "16.8K",
+    topCities: ["Bengaluru", "Hyderabad", "Vijayawada", "Kochi", "Coimbatore"]
   },
   {
     zone: "East",
     states: 6,
-    retailers: "5.1 L",
-    topCities: ["Kolkata", "Patna", "Ranchi", "Bhubaneswar", "Guwahati"]
+    retailers: "11.3K",
+    topCities: ["Kolkata", "Patna", "Ranchi", "Bhubaneswar", "Siliguri"]
   },
   {
     zone: "North-East",
     states: 4,
-    retailers: "0.9 L",
+    retailers: "3.6K",
     topCities: ["Guwahati", "Shillong", "Aizawl", "Imphal", "Itanagar"]
   }
 ];

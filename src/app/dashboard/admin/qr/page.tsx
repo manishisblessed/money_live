@@ -358,7 +358,7 @@ function ReviewQueueTab({ kind }: { kind: QrKind }) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-ink-500">Reviewing claim</p>
-              <p className="mt-1 font-display text-xl font-bold text-ink-900">
+              <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
                 {formatINR(selected.amount)} · {selected.utr ? "UTR" : "Card"}{" "}
                 <span className="font-mono">{claimIdentifier(selected)}</span>
               </p>
@@ -813,7 +813,7 @@ function QrManageTab() {
   return (
     <div className="space-y-6">
 
-      <form onSubmit={submitQr} className="rounded-2xl border border-ink-100 bg-white p-6">
+      <form onSubmit={submitQr} className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-6">
         <div className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white">
             <QrCode className="h-4 w-4" />
@@ -1063,7 +1063,7 @@ export default function AdminQrPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Money & Ops"
         title="QR Collections"
         description="Manage the shop collection QRs (separate pools for Instant & T+1) and verify retailer settlement claims. Money moves only after the UTR is confirmed in the provider portal."
       />

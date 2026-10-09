@@ -192,7 +192,7 @@ export default function AdminPosPage() {
   return (
     <div className="min-w-0 space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Money & Ops"
         title="POS Fleet"
         description="Machine inventory, live transactions, exports and device health across all terminals."
       />
@@ -513,7 +513,7 @@ function MachinesTab() {
 
       {/* Fleet by user */}
       {byUser.length > 0 && (
-        <div className="rounded-2xl border border-ink-100 bg-white p-4 shadow-sm">
+        <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h3 className="font-display text-sm font-semibold text-ink-900">Fleet by user</h3>
@@ -571,7 +571,7 @@ function MachinesTab() {
       )}
 
       {/* Filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4 shadow-sm">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm shadow-sm">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr,150px,150px,150px,auto]">
           <div className="min-w-0">
             <label className="mb-1 block text-xs font-semibold text-ink-500">Search</label>
@@ -648,7 +648,7 @@ function MachinesTab() {
       </div>
 
       {/* Bulk action bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ink-100 bg-white px-4 py-3 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={togglePage}
@@ -844,7 +844,7 @@ function AssignModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <div>
             <h3 className="font-display text-base font-semibold text-ink-900">
@@ -1127,7 +1127,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
       </div>
 
       {/* Live indicator + filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4 shadow-sm">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div
             className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5"
@@ -1212,7 +1212,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
 
       {/* Degraded enrichment notice — BIN provider (eKYC Hub) out of balance */}
       {data?.enrichment?.classificationDegraded && (
-        <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <div className="flex items-start gap-2 rounded-3xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-4 text-sm text-amber-800">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
             <strong className="font-semibold">Card classification is degraded.</strong> The card BIN provider (eKYC Hub) rejected lookups — usually an empty API wallet. Cards without a tier from the acquirer are showing a network fallback (e.g. <em>VISA CREDIT</em>). Top up the eKYC Hub balance to restore exact tiers.
@@ -1300,8 +1300,8 @@ function TxnSlipDrawer({ txn, showClassification, onClose }: { txn: PosTransacti
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md overflow-y-auto bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink-100 bg-white px-6 py-4">
-          <h2 className="font-display text-lg font-bold text-ink-900">Transaction Slip</h2>
-          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100">
+          <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">Transaction Slip</h2>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-100">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -1322,7 +1322,7 @@ function TxnSlipDrawer({ txn, showClassification, onClose }: { txn: PosTransacti
           </div>
           {txn.receipt_url && (
             <a href={txn.receipt_url} target="_blank" rel="noopener noreferrer"
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-50 ring-1 ring-inset ring-brand-200 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
               <Download className="h-4 w-4" /> Download Receipt
             </a>
           )}
@@ -1478,7 +1478,7 @@ function TrackingTab() {
       </div>
 
       {/* Filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4 shadow-sm">
+      <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm shadow-sm">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 min-w-0 sm:col-span-1 lg:col-span-2">
             <label className="mb-1 block text-xs font-semibold text-ink-500">Search machine</label>
@@ -1528,7 +1528,7 @@ function TrackingTab() {
       {error ? (
         <ErrorBanner message={error instanceof Error ? error.message : "Failed to load tracking history."} />
       ) : (
-        <div className="rounded-2xl border border-ink-100 bg-white shadow-sm">
+        <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-5 py-4">
             <div>
               <h3 className="font-display text-base font-semibold text-ink-900">POS Tracking History</h3>
@@ -1763,7 +1763,7 @@ function MilestoneModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <div>
             <h3 className="font-display text-base font-semibold text-ink-900">Dispatch milestones</h3>
@@ -1834,7 +1834,7 @@ function Paginator({ page, totalPages, hasPrev, hasNext, onPrev, onNext }: {
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+    <div className="flex items-center gap-2 rounded-3xl bg-rose-50 ring-1 ring-inset ring-rose-200 p-4 text-sm text-rose-700">
       <AlertCircle className="h-4 w-4 shrink-0" />
       {message} Check your connection and POS credentials.
     </div>

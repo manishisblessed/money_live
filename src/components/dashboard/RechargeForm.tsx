@@ -2,14 +2,32 @@
 
 import { useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { DeviceMobile, Lightning, ShieldCheck, Television, WifiHigh } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
 import {
   TransactionResult,
   type TxnResult
 } from "@/components/dashboard/TransactionResult";
 import { TxnPinDialog } from "@/components/security/TxnPinDialog";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+  SecureFootnote,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { OperatorGrid } from "@/components/dashboard/services/OperatorGrid";
+import { FloatField } from "@/components/dashboard/services/FloatField";
 import { generateRefId, formatINR } from "@/lib/utils";
+
+const TYPE_ICON = {
+  MOBILE: DeviceMobile,
+  DTH: Television,
+  BROADBAND: WifiHigh,
+} as const;
 
 /**
  * Recharge (mobile / DTH / broadband) against /api/services/recharge —
@@ -99,76 +117,108 @@ export function RechargeForm({
     }
   }
 
+  const Glyph = TYPE_ICON[type];
+  const amountNum = Number(amount) || 0;
+  const ready = Boolean(number) && amountNum > 0;
+
   return (
     <>
-      <form
-        onSubmit={submit}
-        className="grid gap-4 rounded-2xl border border-ink-100 bg-white p-6 sm:grid-cols-2"
+      <ServiceLayout
+        aside={
+          <>
+            <SummaryPanel
+              title={serviceTitle}
+              status={{
+                label: ready ? "Ready to pay" : "Fill the form",
+                variant: ready ? "accent" : "default",
+                dot: ready,
+              }}
+              rows={[
+                { label: numberLabel, value: number || "—", mono: true, muted: !number },
+                { label: "Operator", value: operator },
+                { label: "Paid from", value: "eMoney wallet" },
+              ]}
+              total={formatINR(amountNum)}
+              totalLabel="You pay"
+              totalHint="Instant confirmation"
+            />
+            <AsideTips
+              items={[
+                { icon: <Lightning weight="duotone" />, text: "Most recharges confirm in under 10 seconds." },
+                { icon: <ShieldCheck weight="duotone" />, text: "Failed recharges auto-refund to your wallet — no follow-up needed." },
+              ]}
+            />
+          </>
+        }
       >
-        <div>
-          <Label htmlFor="number">{numberLabel}</Label>
-          <Input
-            id="number"
-            required
-            placeholder={numberPlaceholder}
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="operator">Operator</Label>
-          <Select
-            id="operator"
-            value={operator}
-            onChange={(e) => setOperator(e.target.value)}
-          >
-            {operators.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </Select>
-        </div>
-        <div className="sm:col-span-2">
-          <Label htmlFor="amount">Amount (₹)</Label>
-          <Input
-            id="amount"
-            required
-            type="number"
-            min={1}
-            max={10000}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter amount"
-          />
-          <div className="mt-2 flex flex-wrap gap-2">
-            {amountPresets.map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setAmount(String(v))}
-                className="rounded-full border border-ink-200 px-3 py-1 text-xs font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700"
-              >
-                {formatINR(v)}
-              </button>
-            ))}
-          </div>
-        </div>
+        <ServiceCard
+          as="form"
+          onSubmit={submit}
+          icon={<IconTile icon={Glyph} tone="energy" size="lg" />}
+          eyebrow="Recharge"
+          title={serviceTitle}
+          description="Pick the operator, enter the number and amount — PIN confirms it."
+        >
+          <div className="grid gap-5">
+            <Field label="Operator">
+              <OperatorGrid
+                name="Operator"
+                options={operators.map((o) => ({ value: o, label: o }))}
+                value={operator}
+                onChange={setOperator}
+                columns={operators.length > 4 ? 4 : 3}
+                size="sm"
+              />
+            </Field>
 
-        {error && (
-          <div className="sm:col-span-2 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+            <FloatField
+              id="number"
+              label={numberLabel}
+              required
+              mono
+              inputMode={type === "MOBILE" ? "tel" : undefined}
+              autoComplete="off"
+              value={number}
+              onChange={(e) => setNumber(e.target.value)}
+              hint={numberPlaceholder}
+            />
 
-        <div className="sm:col-span-2">
-          <Button type="submit" size="lg" className="w-full" disabled={loading} isLoading={loading}>
-            Pay {amount ? formatINR(Number(amount)) : "now"}
-          </Button>
-          <p className="mt-2 text-center text-[11px] text-ink-400">
-            Confirmed with your transaction PIN. Debited from your wallet — failed recharges are auto-refunded.
-          </p>
-        </div>
-      </form>
+            <div>
+              <FloatField
+                id="amount"
+                label="Amount (₹)"
+                required
+                display
+                type="number"
+                min={1}
+                max={10000}
+                inputMode="numeric"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              <AmountChips
+                className="mt-3"
+                amounts={amountPresets}
+                value={amount}
+                onPick={(v) => setAmount(String(v))}
+              />
+            </div>
+
+            {error && (
+              <Notice tone="danger" icon={<AlertCircle className="h-4 w-4" />}>
+                {error}
+              </Notice>
+            )}
+
+            <div>
+              <Button type="submit" size="xl" className="w-full" disabled={loading} isLoading={loading}>
+                Pay {amount ? formatINR(Number(amount)) : "now"}
+              </Button>
+              <SecureFootnote />
+            </div>
+          </div>
+        </ServiceCard>
+      </ServiceLayout>
       <TxnPinDialog
         open={pinOpen}
         title={serviceTitle}

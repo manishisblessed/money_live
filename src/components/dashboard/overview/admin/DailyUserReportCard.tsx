@@ -257,24 +257,23 @@ export function DailyUserReportCard() {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-white/10 p-5 text-white shadow-[0_25px_80px_-25px_rgba(9,13,37,0.55)]",
-        "bg-[radial-gradient(120%_120%_at_100%_100%,#1a2456_0%,#0a1030_45%,#070a1c_100%)]"
+        "grain relative overflow-hidden rounded-3xl border border-white/10 bg-ink-950 p-6 text-white shadow-[0_30px_80px_-30px_rgba(7,11,20,0.7)]"
       )}
     >
       <div className="pointer-events-none absolute -top-24 left-16 h-56 w-72 rounded-full bg-brand-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 right-0 h-48 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 right-0 h-48 w-64 rounded-full bg-accent-400/10 blur-3xl" />
 
       {/* ── header ─────────────────────────────────────────────── */}
-      <header className="relative flex flex-wrap items-start justify-between gap-3">
+      <header className="relative z-10 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-indigo-400 to-brand-600 text-white shadow-lg shadow-brand-950/30">
             <CalendarClock className="h-5 w-5" strokeWidth={2.2} />
           </span>
           <div>
-            <h2 className="font-display text-lg font-bold tracking-tight">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">
               Daily User Report
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               Opening → credits → service-wise usage → commission → closing (Primary wallet)
             </p>
           </div>
@@ -295,7 +294,7 @@ export function DailyUserReportCard() {
             type="button"
             onClick={downloadCsv}
             disabled={downloading || !data}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-emerald-900/30 transition hover:brightness-110 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-energy-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-energy-sm transition hover:brightness-110 disabled:opacity-60"
           >
             <Download className={cn("h-3.5 w-3.5", downloading && "animate-pulse")} />
             {downloading ? "Preparing…" : "CSV"}
@@ -312,7 +311,7 @@ export function DailyUserReportCard() {
       {/* ── KPI row ─────────────────────────────────────────────── */}
       {/* Credits/Debits are shown NET of push/pull so the tiles read as a
           clean closing formula: Opening + Credits + Push − Debits − Pull. */}
-      <div className="relative mt-4 grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+      <div className="relative z-10 mt-5 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
         <KpiTile label="Opening" value={data?.totals.opening ?? 0} loading={loading} tint="brand" />
         <KpiTile label="Credits" value={(data?.totals.creditsTotal ?? 0) - (data?.totals.push ?? 0)} loading={loading} tint="emerald" up />
         <KpiTile label="Push in" value={data?.totals.push ?? 0} loading={loading} tint="sky" up />
@@ -323,7 +322,7 @@ export function DailyUserReportCard() {
       </div>
 
       {/* ── filter strip ────────────────────────────────────────── */}
-      <div className="relative mt-4 flex flex-wrap items-center gap-2">
+      <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2">
         <RolePills value={role} onChange={(r) => { setRole(r); setPage(1); }} />
         <ServiceSelect
           value={service}
@@ -350,14 +349,14 @@ export function DailyUserReportCard() {
 
       {/* ── error banner ────────────────────────────────────────── */}
       {error && (
-        <div className="relative mt-3 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-xs text-rose-100">
+        <div className="relative z-10 mt-3 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-xs text-rose-100">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
       {/* ── table ───────────────────────────────────────────────── */}
-      <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-black/25">
+      <div className="relative z-10 mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-black/25">
         <div className="max-h-[600px] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-[#0b1030]/95 backdrop-blur">
@@ -441,7 +440,7 @@ export function DailyUserReportCard() {
 
       {/* ── pagination ──────────────────────────────────────────── */}
       {data && data.total > pageSize && (
-        <div className="relative mt-3 flex items-center justify-between text-xs text-slate-400">
+        <div className="relative z-10 mt-3 flex items-center justify-between text-xs text-slate-400">
           <span>Page {data.page} of {totalPages}</span>
           <div className="flex items-center gap-1.5">
             <button
@@ -464,7 +463,7 @@ export function DailyUserReportCard() {
         </div>
       )}
 
-      <p className="relative mt-3 text-[11px] text-slate-500">
+      <p className="relative z-10 mt-3 text-[11px] text-slate-500">
         Snapshot for <b className="text-slate-300">{data ? prettyDate(data.date) : "…"}</b> (Asia/Kolkata) ·
         Primary wallet · Reconciles against WalletTxn ledger.
       </p>
@@ -541,7 +540,7 @@ function RolePills({
             className={cn(
               "rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition",
               active
-                ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-900/30"
+                ? "bg-energy-gradient text-white shadow-energy-sm"
                 : "text-slate-300 hover:text-white"
             )}
           >

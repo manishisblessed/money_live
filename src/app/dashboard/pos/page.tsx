@@ -10,7 +10,6 @@ import {
   ArrowLeftRight,
   CreditCard,
   RefreshCw,
-  Download,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -32,6 +31,7 @@ import {
 import { SettlementReportTab } from "./SettlementReportTab";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { PillTabs } from "@/components/dashboard/services/StepHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -49,7 +49,6 @@ import type {
   MyPosMachinesResponse,
   PosTerminalTreeResponse,
   TerminalTreeMember,
-  TerminalTreeTerminal,
 } from "@/lib/partners/sameday-pos.types";
 
 async function fetcher<T>(url: string): Promise<T> {
@@ -108,8 +107,8 @@ function machineBadge(status: string) {
 }
 
 function cleanName(name: string | null) {
-  if (!name) return "—";
-  return name.replace(/\s*\/\s*$/, "").trim() || "—";
+  if (!name) return "â€”";
+  return name.replace(/\s*\/\s*$/, "").trim() || "â€”";
 }
 
 function fmtTime(iso: string) {
@@ -132,7 +131,7 @@ const VALID_TABS: Tab[] = [
   "upload-slip",
 ];
 
-// A "view" over the transaction feed — each tab pins the feed to a set of
+// A "view" over the transaction feed â€” each tab pins the feed to a set of
 // statuses and supplies the labels/accents so one component serves all three.
 type TxnView = {
   key: string;
@@ -189,7 +188,7 @@ export default function PosPage() {
       <PageHeader
         eyebrow="Point of Sale"
         title="POS Terminals"
-        description="Live terminals and per-second transactions from your POS machines — powered by Same Day Solution."
+        description="Live terminals and per-second transactions from your POS machines â€” powered by Same Day Solution."
         actions={
           <Button variant="outline">
             <Wrench className="h-4 w-4" /> Raise service request
@@ -198,22 +197,13 @@ export default function PosPage() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl border border-ink-100 bg-ink-50/60 p-1">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={cn(
-              "flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
-              activeTab === id
-                ? "bg-white text-ink-900 shadow-sm"
-                : "text-ink-500 hover:text-ink-700"
-            )}
-          >
-            <span className="flex items-center justify-center gap-2"><Icon className="h-4 w-4" /> {label}</span>
-          </button>
-        ))}
-      </div>
+      <PillTabs
+        fill
+        layoutId="pos-tabs"
+        tabs={tabs.map(({ id, label, icon: Icon }) => ({ key: id, label, icon: <Icon className="h-4 w-4" /> }))}
+        value={activeTab}
+        onChange={setActiveTab}
+      />
 
       {activeTab === "transactions" ? (
         <TransactionsTab view={TXN_VIEWS.captured} />
@@ -238,9 +228,9 @@ export default function PosPage() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// FREE RENT TARGET TAB — per-machine progress toward waived rent (retailer)
-// ═══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// FREE RENT TARGET TAB â€” per-machine progress toward waived rent (retailer)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 type RentalTargetMachine = {
   subscriptionId: string;
@@ -304,7 +294,7 @@ function FreeRentTab() {
       {error ? (
         <ErrorBanner message={error instanceof Error ? error.message : "Failed to load your rent target."} />
       ) : isLoading ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-ink-100 bg-white p-6 text-sm text-ink-500">
+        <div className="flex items-center gap-2 rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-6 text-sm text-ink-500">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading your machines...
         </div>
       ) : machines.length === 0 ? (
@@ -342,11 +332,11 @@ function RentTargetCard({ m }: { m: RentalTargetMachine }) {
 
         <div className="mt-4 flex items-center gap-2 text-emerald-700">
           <Trophy className="h-5 w-5" />
-          <p className="text-sm font-bold">Congratulations — target achieved!</p>
+          <p className="text-sm font-bold">Congratulations â€” target achieved!</p>
         </div>
         <p className="mt-1 text-xs text-ink-600">
           This machine did <span className="font-semibold text-ink-900">{formatINR(m.businessDone)}</span> of business
-          this cycle. Its <span className="font-semibold text-ink-900">{formatINR(m.rent)}</span> rent is waived —
+          this cycle. Its <span className="font-semibold text-ink-900">{formatINR(m.rent)}</span> rent is waived â€”
           nothing will be debited on {fmtDate(m.nextBilling)}.
         </p>
 
@@ -362,7 +352,7 @@ function RentTargetCard({ m }: { m: RentalTargetMachine }) {
   }
 
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-5">
+    <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-xs font-semibold text-ink-700">{label}</p>
@@ -391,9 +381,9 @@ function RentTargetCard({ m }: { m: RentalTargetMachine }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MACHINES TAB
-// ═══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function MachinesTab() {
   const { data: authSession } = useSession();
@@ -457,18 +447,18 @@ function MachinesTab() {
   }, [mutate, currentUserId, currentUserName]);
 
   const cols: Column<LocalPosMachine>[] = [
-    { key: "tid", header: "TID", render: (r) => <span className="font-mono text-xs font-semibold">{r.tid ?? "—"}</span> },
-    { key: "serial", header: "Serial No.", render: (r) => <span className="font-mono text-xs">{r.serial ?? "—"}</span> },
-    { key: "mid", header: "MID", render: (r) => <span className="font-mono text-xs">{r.mid ?? "—"}</span> },
-    { key: "model", header: "Model", render: (r) => r.model ?? "—" },
-    { key: "location", header: "Location", render: (r) => r.location || "—" },
-    { key: "city", header: "City", render: (r) => r.city || "—" },
+    { key: "tid", header: "TID", render: (r) => <span className="font-mono text-xs font-semibold">{r.tid ?? "â€”"}</span> },
+    { key: "serial", header: "Serial No.", render: (r) => <span className="font-mono text-xs">{r.serial ?? "â€”"}</span> },
+    { key: "mid", header: "MID", render: (r) => <span className="font-mono text-xs">{r.mid ?? "â€”"}</span> },
+    { key: "model", header: "Model", render: (r) => r.model ?? "â€”" },
+    { key: "location", header: "Location", render: (r) => r.location || "â€”" },
+    { key: "city", header: "City", render: (r) => r.city || "â€”" },
     { key: "status", header: "Status", render: (r) => machineBadge(r.status) },
     {
       key: "assignee",
       header: "Assigned To",
       render: (r) => {
-        if (!r.assignee) return "—";
+        if (!r.assignee) return "â€”";
         const isChild = r.assignedUserId !== currentUserId;
         return (
           <div className="flex items-center gap-2">
@@ -553,9 +543,9 @@ function MachinesTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// TRANSACTIONS TAB — refreshes every 1 second
-// ═══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// TRANSACTIONS TAB â€” refreshes every 1 second
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const NETWORK_ROLES = ["SUPER_DISTRIBUTOR", "MASTER_DISTRIBUTOR", "DISTRIBUTOR", "RETAILER"] as const;
 const ROLE_LABELS: Record<string, string> = {
@@ -621,7 +611,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
         const prevTier = filterTiers[i - 1];
         const prevSel = hierSelections[prevTier];
         if (!prevSel) {
-          // No selection at parent tier → show all ancestors' options filtered
+          // No selection at parent tier â†’ show all ancestors' options filtered
           // by any selection higher in the chain.
           let scope: Set<string> | null = null;
           for (let j = i - 2; j >= 0; j--) {
@@ -663,7 +653,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
   }, [allTerminals, effectiveScope, members]);
 
   // Auto-select when exactly one terminal matches. With several available and
-  // none chosen, we show an aggregated "all terminals" feed by default —
+  // none chosen, we show an aggregated "all terminals" feed by default â€”
   // selecting a terminal simply narrows it.
   const activeTerminal = terminalFilter || (filteredTerminals.length === 1 ? filteredTerminals[0].tid : "");
   const hasNoTerminals = treeData != null && allTerminals.length === 0;
@@ -692,7 +682,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
   };
 
   // Fetch once the tree has loaded and the caller owns at least one terminal.
-  // No specific terminal → aggregated "all terminals" feed.
+  // No specific terminal â†’ aggregated "all terminals" feed.
   const canFetchTxn = treeData != null && !hasNoTerminals;
 
   const { data, error, isLoading } = useSWR<PosTransactionsResponse>(
@@ -774,7 +764,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
     }
     const d = await res.json();
     if (d.truncated) {
-      toast.warning(`Report capped at ${Number(d.returned).toLocaleString("en-IN")} rows — narrow the date range for the rest.`);
+      toast.warning(`Report capped at ${Number(d.returned).toLocaleString("en-IN")} rows â€” narrow the date range for the rest.`);
     }
     return (d.rows as PosTransaction[]) ?? [];
   }, [clampedDateFrom, dateTo, view.statuses, modeFilter, activeTerminal, transactions]);
@@ -792,14 +782,14 @@ function TransactionsTab({ view }: { view: TxnView }) {
         <span className="text-xs font-semibold text-ink-900 truncate max-w-[130px]">{r.retailer.shopName || r.retailer.name}</span>
         {r.retailer.userCode && <span className="text-[11px] font-medium text-brand-600">{r.retailer.userCode}</span>}
       </div>
-    ) : <span className="text-xs text-ink-400">—</span> },
+    ) : <span className="text-xs text-ink-400">â€”</span> },
     { key: "payment_mode", header: "Mode", render: (r) => <Badge variant="default">{r.payment_mode}</Badge> },
-    { key: "card_brand", header: "Card", render: (r) => r.payment_mode === "CARD" ? `${r.card_brand} ${r.card_type}` : "—" },
-    { key: "card_classification", header: "Classification", render: (r) => { const label = posClassificationLabel(r); return label ? <Badge variant="accent">{label}</Badge> : "—"; } },
+    { key: "card_brand", header: "Card", render: (r) => r.payment_mode === "CARD" ? `${r.card_brand} ${r.card_type}` : "â€”" },
+    { key: "card_classification", header: "Classification", render: (r) => { const label = posClassificationLabel(r); return label ? <Badge variant="accent">{label}</Badge> : "â€”"; } },
     { key: "amount", header: "Amount", align: "right", render: (r) => <span className="font-semibold text-ink-900">{formatINR(parseFloat(r.amount))}</span> },
     { key: "status", header: "Status", render: (r) => statusBadge(r.status) },
     { key: "customer_name", header: "Customer", render: (r) => <span className="max-w-[140px] truncate block text-xs">{cleanName(r.customer_name)}</span> },
-    { key: "card_number", header: "Card No.", render: (r) => r.card_number ? <span className="font-mono text-xs">{r.card_number}</span> : "—" },
+    { key: "card_number", header: "Card No.", render: (r) => r.card_number ? <span className="font-mono text-xs">{r.card_number}</span> : "â€”" },
     { key: "rrn", header: "RRN", render: (r) => <span className="font-mono text-xs">{r.rrn}</span> },
   ];
   const cols = colsAll.filter((c) => showClassification || c.key !== "card_classification");
@@ -830,7 +820,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
 
       {/* Network hierarchy cascading filters */}
       {filterTiers.length > 0 && members.length > 0 && (
-        <div className="rounded-2xl border border-ink-100 bg-white p-4">
+        <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-4">
           <p className="mb-3 text-xs font-semibold text-ink-500">Filter by network</p>
           <div className="flex flex-wrap items-end gap-3">
             {filterTiers.map((tier) => {
@@ -866,7 +856,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
                   <option value="">All terminals</option>
                   {filteredTerminals.map((t) => (
                     <option key={t.tid} value={t.tid}>
-                      {t.tid}{t.location ? ` — ${t.location}` : t.model ? ` — ${t.model}` : ""}
+                      {t.tid}{t.location ? ` â€” ${t.location}` : t.model ? ` â€” ${t.model}` : ""}
                     </option>
                   ))}
                 </select>
@@ -877,14 +867,14 @@ function TransactionsTab({ view }: { view: TxnView }) {
       )}
 
       {/* Live indicator + Date / Status / Mode filters */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-4">
+      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-4">
         <div className="mb-3 flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
           </span>
           <span className="text-xs font-semibold text-emerald-700">
-            Live — {view.liveWord} only · auto-refreshing
+            Live â€” {view.liveWord} only · auto-refreshing
           </span>
         </div>
         <div className="flex flex-wrap items-end gap-3">
@@ -924,7 +914,7 @@ function TransactionsTab({ view }: { view: TxnView }) {
                 <option value="">All terminals</option>
                 {filteredTerminals.map((t) => (
                   <option key={t.tid} value={t.tid}>
-                    {t.tid}{t.location ? ` — ${t.location}` : t.model ? ` — ${t.model}` : ""}
+                    {t.tid}{t.location ? ` â€” ${t.location}` : t.model ? ` â€” ${t.model}` : ""}
                   </option>
                 ))}
               </select>
@@ -979,9 +969,9 @@ function TransactionsTab({ view }: { view: TxnView }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// SETTLEMENTS TAB — instant-settle chosen captures now; rest auto-settle T+1
-// ═══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// SETTLEMENTS TAB â€” instant-settle chosen captures now; rest auto-settle T+1
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 type PendingSettlement = {
   id: string;
@@ -1061,7 +1051,7 @@ function SettlementsTab() {
       setSelected({});
       mutate();
     } catch {
-      toast.error("Network error — refresh before retrying to avoid duplicates.");
+      toast.error("Network error â€” refresh before retrying to avoid duplicates.");
     } finally {
       setBusy(false);
       setConfirmOpen(false);
@@ -1071,7 +1061,7 @@ function SettlementsTab() {
   const cols: Column<PendingSettlement>[] = [
     {
       key: "id",
-      header: allSelected ? "✓" : "",
+      header: allSelected ? "âœ“" : "",
       render: (r) =>
         instantEnabled && r.instant ? (
           <input
@@ -1081,12 +1071,12 @@ function SettlementsTab() {
             className="h-4 w-4 accent-brand-600"
           />
         ) : (
-          <span title="Will auto-settle T+1" className="text-ink-300">—</span>
+          <span title="Will auto-settle T+1" className="text-ink-300">â€”</span>
         ),
     },
     { key: "capturedAt", header: "Captured", render: (r) => <span className="text-xs">{fmtTime(r.capturedAt)}</span> },
     { key: "transactionRef", header: "Ref", render: (r) => <span className="font-mono text-xs">{r.transactionRef.slice(-12)}</span> },
-    { key: "paymentMode", header: "Mode", render: (r) => <Badge variant="default">{r.paymentMode ?? "—"}</Badge> },
+    { key: "paymentMode", header: "Mode", render: (r) => <Badge variant="default">{r.paymentMode ?? "â€”"}</Badge> },
     { key: "grossAmount", header: "Amount", align: "right", render: (r) => <span className="font-semibold">{formatINR(r.grossAmount)}</span> },
     {
       key: "instant",
@@ -1099,7 +1089,7 @@ function SettlementsTab() {
             <div className="text-[10px] text-ink-500">fee {formatINR(r.instant.mdrAmount)}</div>
           </div>
         ) : (
-          <span className="text-xs text-ink-400">—</span>
+          <span className="text-xs text-ink-400">â€”</span>
         ),
     },
     {
@@ -1171,7 +1161,7 @@ function SettlementsTab() {
           {budgetExhausted ? (
             <span>
               You&apos;ve reached today&apos;s instant settlement limit. Remaining transactions will auto-settle on
-              T+1 — or try again after the daily limit resets.
+              T+1 â€” or try again after the daily limit resets.
             </span>
           ) : overBudget ? (
             <span>
@@ -1191,14 +1181,14 @@ function SettlementsTab() {
 
       {instantEnabled ? (
         <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-3 text-xs text-ink-600">
-          Pick the transactions you want paid out <strong>now</strong> — they&apos;re credited instantly at your
+          Pick the transactions you want paid out <strong>now</strong> â€” they&apos;re credited instantly at your
           scheme&apos;s instant rate. Everything you leave unselected settles automatically on the next day (T+1)
           at your standard rate. A transaction is only ever settled once.
         </div>
       ) : (
         <div className="rounded-xl border border-ink-100 bg-ink-50/60 p-3 text-xs text-ink-600">
           Instant settlement is currently <strong>disabled</strong>. Your captured transactions settle automatically
-          on the next day (T+1) at your standard rate — no action needed.
+          on the next day (T+1) at your standard rate â€” no action needed.
         </div>
       )}
 
@@ -1211,7 +1201,7 @@ function SettlementsTab() {
           columns={cols}
           data={entries}
           loading={isLoading}
-          empty="Nothing to settle — all your captured transactions are settled."
+          empty="Nothing to settle â€” all your captured transactions are settled."
         />
       )}
 
@@ -1234,9 +1224,9 @@ function SettlementsTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// UPLOAD SLIP TAB — External POS slips for no-API terminals (e.g. Yes Bank)
-// ═══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// UPLOAD SLIP TAB â€” External POS slips for no-API terminals (e.g. Yes Bank)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 type ManualSlip = {
   id: string;
@@ -1319,7 +1309,7 @@ function ManualSlipTab() {
 
     setBusy(true);
     try {
-      // 1. Signed params for a direct browser → Cloudinary upload (private).
+      // 1. Signed params for a direct browser â†’ Cloudinary upload (private).
       const signRes = await fetch("/api/uploads/sign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1363,7 +1353,7 @@ function ManualSlipTab() {
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(typeof d.error === "string" ? d.error : "Could not submit the slip");
-      toast.success("Slip submitted — an admin will review it shortly.");
+      toast.success("Slip submitted â€” an admin will review it shortly.");
       resetForm();
       mutate();
     } catch (e) {
@@ -1387,7 +1377,7 @@ function ManualSlipTab() {
       </Badge>
     ) },
     { key: "grossAmount", header: "Amount", align: "right", render: (r) => <span className="font-semibold">{formatINR(r.grossAmount)}</span> },
-    { key: "rrn", header: "RRN", render: (r) => <span className="font-mono text-xs">{r.rrn ?? "—"}</span> },
+    { key: "rrn", header: "RRN", render: (r) => <span className="font-mono text-xs">{r.rrn ?? "â€”"}</span> },
     {
       key: "status",
       header: "Status",
@@ -1398,7 +1388,7 @@ function ManualSlipTab() {
             <span className="text-[11px] text-rose-600">Reason: {r.rejectionReason}</span>
           )}
           {r.status === "APPROVED" && (
-            <span className="text-[11px] text-emerald-600">In settlement — see Instant Settlement tab</span>
+            <span className="text-[11px] text-emerald-600">In settlement â€” see Instant Settlement tab</span>
           )}
         </div>
       ),
@@ -1414,7 +1404,7 @@ function ManualSlipTab() {
         <StatCard label="Rejected" value={String(rejected)} icon={XCircle} accent="violet" />
       </div>
 
-      <div className="rounded-2xl border border-ink-100 bg-white p-5">
+      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-ink-100 p-5">
         <div className="mb-4 flex items-center gap-2">
           <Upload className="h-4 w-4 text-brand-600" />
           <h3 className="text-sm font-semibold text-ink-900">Upload a transaction slip</h3>
@@ -1434,17 +1424,17 @@ function ManualSlipTab() {
                 onChange={(e) => setMachineId(e.target.value)}
                 className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
               >
-                <option value="">Select terminal…</option>
+                <option value="">Select terminalâ€¦</option>
                 {machines.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.tid}{m.model ? ` — ${m.model}` : ""}{m.location ? ` (${m.location})` : ""}
+                    {m.tid}{m.model ? ` â€” ${m.model}` : ""}{m.location ? ` (${m.location})` : ""}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-semibold text-ink-500">Amount (₹)</label>
+              <label className="mb-1 block text-xs font-semibold text-ink-500">Amount (â‚¹)</label>
               <input
                 type="number"
                 min="1"
@@ -1492,7 +1482,7 @@ function ManualSlipTab() {
                 onChange={(e) => setCardType(e.target.value)}
                 className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
               >
-                <option value="">—</option>
+                <option value="">â€”</option>
                 <option value="CREDIT">Credit</option>
                 <option value="DEBIT">Debit</option>
                 <option value="PREPAID">Prepaid</option>
@@ -1567,7 +1557,7 @@ function ManualSlipTab() {
   );
 }
 
-// ── Shared ──
+// â”€â”€ Shared â”€â”€
 
 function Paginator({ page, totalPages, hasPrev, hasNext, onPrev, onNext }: {
   page: number; totalPages: number; hasPrev: boolean; hasNext: boolean; onPrev: () => void; onNext: () => void;

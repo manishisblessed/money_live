@@ -8,8 +8,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { BankLogo } from "@/components/dashboard/BankLogo";
+import { IconTile } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 export type OperatorOption = {
@@ -163,30 +165,35 @@ export function OperatorSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
-          "flex h-11 w-full items-center gap-2 rounded-xl border border-ink-200 bg-white px-2.5 py-1.5 text-left text-sm text-ink-900 shadow-sm transition focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-100",
+          "flex h-12 w-full items-center gap-2.5 rounded-2xl border border-ink-200 bg-white py-1.5 pl-2 pr-3 text-left text-sm text-ink-900 shadow-sm",
+          "transition-[border-color,box-shadow] duration-200 ease-out focus:outline-none",
+          "focus:border-brand-400 focus:shadow-[0_0_0_4px_rgba(124,58,237,0.14),0_8px_24px_-10px_rgba(244,63,94,0.25)]",
+          open && "border-brand-400 shadow-[0_0_0_4px_rgba(124,58,237,0.14),0_8px_24px_-10px_rgba(244,63,94,0.25)]",
           (disabled || loading) && "cursor-not-allowed opacity-60"
         )}
       >
-        {!loading && <BankLogo name={selected?.label} size={30} />}
+        {!loading && <BankLogo name={selected?.label} size={32} />}
         <span
           className={cn(
             "min-w-0 flex-1 truncate",
-            !selected && "text-ink-400"
+            selected ? "font-medium" : "text-ink-400"
           )}
         >
           {buttonLabel}
         </span>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 shrink-0 text-ink-400 transition-transform",
-            open && "rotate-180"
-          )}
-        />
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-ink-50 text-ink-500">
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              open && "rotate-180"
+            )}
+          />
+        </span>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-ink-200 bg-white shadow-lg">
-          <div className="flex items-center gap-2 border-b border-ink-100 px-3">
+        <div className="absolute z-50 mt-2 w-full origin-top overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-energy animate-fade-up motion-reduce:animate-none [animation-duration:220ms]">
+          <div className="flex items-center gap-2 border-b border-ink-100 bg-ink-50/50 px-3">
             <Search className="h-4 w-4 shrink-0 text-ink-400" />
             <input
               ref={searchRef}
@@ -197,8 +204,11 @@ export function OperatorSelect({
               }}
               onKeyDown={onListKeyDown}
               placeholder="Search bank…"
-              className="h-10 w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
+              className="h-11 w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
             />
+            <kbd className="hidden rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-ink-400 sm:inline-block">
+              Esc
+            </kbd>
           </div>
           <ul
             ref={listRef}
@@ -209,10 +219,13 @@ export function OperatorSelect({
                 ? `${listboxId}-${filtered[activeIndex].value}`
                 : undefined
             }
-            className="max-h-64 overflow-y-auto py-1"
+            className="max-h-64 overflow-y-auto p-1.5"
           >
             {filtered.length === 0 ? (
-              <li className="px-3 py-3 text-sm text-ink-400">{emptyText}</li>
+              <li className="flex flex-col items-center gap-2 px-3 py-6 text-center text-sm text-ink-500">
+                <IconTile icon={MagnifyingGlass} tone="ink" size="md" />
+                {emptyText}
+              </li>
             ) : (
               filtered.map((opt, i) => {
                 const isSelected = opt.value === value;
@@ -226,8 +239,8 @@ export function OperatorSelect({
                     onMouseEnter={() => setActiveIndex(i)}
                     onClick={() => pick(opt)}
                     className={cn(
-                      "flex cursor-pointer items-center gap-3 px-3 py-2 text-sm",
-                      isActive ? "bg-brand-50" : "bg-white",
+                      "flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-colors",
+                      isActive ? "bg-brand-50/80" : "bg-white",
                       isSelected && "font-semibold text-brand-700"
                     )}
                   >
@@ -235,6 +248,11 @@ export function OperatorSelect({
                     <span className="min-w-0 flex-1 truncate text-ink-800">
                       {opt.label}
                     </span>
+                    {isSelected && (
+                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-energy-gradient text-white">
+                        <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
+                      </span>
+                    )}
                   </li>
                 );
               })

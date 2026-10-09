@@ -2,14 +2,32 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { Input, Label, Select } from "@/components/ui/Input";
+import { Receipt, ShieldCheck, Lightning } from "@phosphor-icons/react";
+import { Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
 import {
   TransactionResult,
   type TxnResult,
 } from "@/components/dashboard/TransactionResult";
 import { TxnPinDialog } from "@/components/security/TxnPinDialog";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+  SecureFootnote,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips, InfoChip } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { OperatorGrid } from "@/components/dashboard/services/OperatorGrid";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { StepHeader } from "@/components/dashboard/services/StepHeader";
+import { ChargeBreakdown, BillCard } from "@/components/dashboard/services/ChargeBreakdown";
 import { generateRefId, formatINR } from "@/lib/utils";
+
+/** Biller lists longer than this stay a searchable <select>; shorter ones become tap tiles. */
+const GRID_MAX = 8;
 
 /**
  * Live BBPS bill payment — works for any category (electricity, water, gas,
@@ -250,193 +268,252 @@ export function BbpsBillForm({
     }
   }
 
+  // Display-only derivation of where the retailer is in the flow.
+  const stage: "biller" | "fetch" | "pay" = !billerCode ? "biller" : !bill ? "fetch" : "pay";
+  const amountNum = Number(amount) || 0;
+  const firstParam = Object.values(customerParams())[0];
+  const useGrid = !loadingBillers && billers.length > 0 && billers.length <= GRID_MAX;
+
   return (
     <>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!bill || !amount) return;
-          const amt = Number(amount);
-          const maxAllowed = bill.maxAmount ?? 500000;
-          if (amt > maxAllowed) {
-            setError(`Amount exceeds the maximum payable limit of ${formatINR(maxAllowed)}`);
-            return;
-          }
-          setError(null);
-          setPinOpen(true);
-        }}
-        className="grid gap-4 rounded-2xl border border-ink-100 bg-white p-6 sm:grid-cols-2"
-      >
-        <div className="sm:col-span-2">
-          <Label htmlFor="biller">Biller / Operator</Label>
-          <Select
-            id="biller"
-            value={billerCode}
-            onChange={(e) => selectBiller(e.target.value)}
-            disabled={loadingBillers || billers.length === 0}
-          >
-            {loadingBillers && <option value="">Loading billers…</option>}
-            {!loadingBillers && billers.length === 0 && <option value="">No billers available</option>}
-            {billers.map((b) => (
-              <option key={b.code} value={b.code}>
-                {b.name}
-              </option>
-            ))}
-          </Select>
-          {billersSource && billersSource !== "CATALOG" && billers.length > 0 && (
-            <p className="mt-1 text-[11px] text-ink-400">
-              Live BBPS biller list · {billers.length} billers
-            </p>
-          )}
-          {billersError && (
-            <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <span>{billersError}</span>
-              <button
-                type="button"
-                onClick={loadBillers}
-                className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-900 hover:underline"
-              >
-                <RefreshCw className="h-3 w-3" /> Retry
-              </button>
-            </div>
-          )}
-        </div>
-
-        {fields.map((f) => (
-          <div key={f.name} className={fields.length === 1 ? "sm:col-span-2" : undefined}>
-            <Label htmlFor={`param-${f.name}`}>
-              {f.name === FALLBACK_PARAM ? consumerLabel : f.name}
-              {f.optional && <span className="ml-1 text-[11px] font-normal text-ink-400">(optional)</span>}
-            </Label>
-            <Input
-              id={`param-${f.name}`}
-              required={!f.optional}
-              inputMode={f.dataType === "NUMERIC" ? "numeric" : undefined}
-              placeholder={f.dataType === "NUMERIC" ? "Digits only" : "Enter value"}
-              value={paramValues[f.name] ?? ""}
-              onChange={(e) => {
-                const v = f.dataType === "NUMERIC" ? e.target.value.replace(/\D/g, "") : e.target.value;
-                setParamValues((p) => ({ ...p, [f.name]: v }));
-                resetBill();
-              }}
-            />
-          </div>
-        ))}
-
-        {error && (
-          <div className="sm:col-span-2 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <div className="sm:col-span-2">
-          {!bill ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={fetchBill}
-              disabled={fetching || !requiredFilled || !billerCode}
-              isLoading={fetching}
-            >
-              Fetch bill
-            </Button>
-          ) : (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-              {bill.customerName && <p className="font-semibold text-ink-900">{bill.customerName}</p>}
-              {bill.dueDate && <p className="text-xs text-ink-600">Bill due {bill.dueDate}</p>}
-              <p className="mt-2 font-display text-xl font-bold text-emerald-700">
-                {formatINR(bill.amount)}
-              </p>
-              {bill.minAmount !== undefined && (
-                <p className="mt-1 text-xs text-ink-600">
-                  Minimum due {formatINR(bill.minAmount)}
-                  {bill.maxAmount !== undefined && (
-                    <> · Max payable {formatINR(bill.maxAmount)}</>
-                  )}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {bill && (
+      <ServiceLayout
+        aside={
           <>
-            <div className="sm:col-span-2">
-              <Label htmlFor="amount">Amount to pay (₹)</Label>
-              <Input
-                id="amount"
-                required
-                type="number"
-                min={1}
-                max={bill.maxAmount ?? 500000}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-              <div className="mt-2 flex flex-wrap gap-2">
-                {bill.minAmount !== undefined && bill.minAmount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setAmount(String(bill.minAmount))}
-                    className="rounded-full border border-ink-200 px-3 py-1 text-xs font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700"
-                  >
-                    Minimum due — {formatINR(bill.minAmount)}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setAmount(String(bill.amount))}
-                  className="rounded-full border border-ink-200 px-3 py-1 text-xs font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700"
-                >
-                  Total due — {formatINR(bill.amount)}
-                </button>
-              </div>
-            </div>
-            {quote && Number(amount) > 0 && (
-              <div className="sm:col-span-2 rounded-xl border border-ink-200 bg-ink-50/50 p-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-ink-600">Bill amount</span>
-                  <span className="font-medium text-ink-900">{formatINR(Number(amount))}</span>
-                </div>
-                <div className="mt-1 flex justify-between">
-                  <span className="text-ink-600">Service charge</span>
-                  <span className="font-medium text-ink-900">{formatINR(quote.serviceCharge)}</span>
-                </div>
-                {quote.gst > 0 && (
-                  <div className="mt-1 flex justify-between">
-                    <span className="text-ink-600">GST (18%)</span>
-                    <span className="font-medium text-ink-900">{formatINR(quote.gst)}</span>
-                  </div>
-                )}
-                <hr className="my-2 border-ink-200" />
-                <div className="flex justify-between font-semibold">
-                  <span className="text-ink-700">Total debit from wallet</span>
-                  <span className="text-ink-900">{formatINR(quote.totalDebit)}</span>
-                </div>
-                {quote.commission > 0 && (
-                  <p className="mt-2 text-xs text-emerald-600">
-                    Commission earned: {formatINR(quote.commission)} (net of 2% TDS)
-                  </p>
-                )}
-              </div>
-            )}
-            {quoteLoading && Number(amount) > 0 && (
-              <p className="sm:col-span-2 text-center text-xs text-ink-400 animate-pulse">
-                Calculating charges…
-              </p>
-            )}
-            <div className="sm:col-span-2">
-              <Button type="submit" size="lg" className="w-full" disabled={paying || !amount} isLoading={paying}>
-                Pay {quote ? formatINR(quote.totalDebit) : amount ? formatINR(Number(amount)) : "bill"}
-              </Button>
-              <p className="mt-2 text-center text-[11px] text-ink-400">
-                Confirmed with your transaction PIN. Debited from your wallet — failed payments are auto-refunded.
-              </p>
-            </div>
+            <SummaryPanel
+              title={`${serviceTitle} bill`}
+              status={
+                bill
+                  ? { label: "Bill fetched", variant: "accent", dot: true }
+                  : { label: "Awaiting bill", variant: "default" }
+              }
+              rows={[
+                { label: "Biller", value: biller?.name ?? "—", muted: !biller },
+                {
+                  label: fields.length === 1 && fields[0].name === FALLBACK_PARAM ? consumerLabel : "Customer ref",
+                  value: firstParam ?? "—",
+                  mono: true,
+                  muted: !firstParam,
+                },
+                ...(bill?.customerName ? [{ label: "Customer", value: bill.customerName }] : []),
+                ...(bill?.dueDate ? [{ label: "Due", value: bill.dueDate }] : []),
+                ...(bill ? [{ label: "Bill amount", value: formatINR(bill.amount) }] : []),
+                ...(quote && amountNum > 0
+                  ? [
+                      { label: "Service charge", value: formatINR(quote.serviceCharge) },
+                      ...(quote.gst > 0 ? [{ label: "GST (18%)", value: formatINR(quote.gst) }] : []),
+                    ]
+                  : []),
+              ]}
+              total={bill ? formatINR(quote && amountNum > 0 ? quote.totalDebit : amountNum) : undefined}
+              totalLabel="Debit from wallet"
+              totalHint={quoteLoading && amountNum > 0 ? "Calculating charges…" : undefined}
+              footer={
+                quote && quote.commission > 0 && amountNum > 0 ? (
+                  <InfoChip
+                    tone="accent"
+                    icon={<Lightning weight="duotone" />}
+                    label="Commission on this txn"
+                    value={formatINR(quote.commission)}
+                  />
+                ) : undefined
+              }
+            />
+            <AsideTips
+              items={[
+                { icon: <Receipt weight="duotone" />, text: "Fetch the bill first — the biller tells us the exact due amount." },
+                { icon: <ShieldCheck weight="duotone" />, text: "Failed payments auto-refund to your wallet." },
+              ]}
+            />
           </>
-        )}
-      </form>
+        }
+      >
+        <ServiceCard
+          as="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!bill || !amount) return;
+            const amt = Number(amount);
+            const maxAllowed = bill.maxAmount ?? 500000;
+            if (amt > maxAllowed) {
+              setError(`Amount exceeds the maximum payable limit of ${formatINR(maxAllowed)}`);
+              return;
+            }
+            setError(null);
+            setPinOpen(true);
+          }}
+          icon={<IconTile icon={Receipt} tone="energy" size="lg" />}
+          eyebrow="Bharat BillPay"
+          title={`Pay ${serviceTitle.toLowerCase()} bill`}
+          description="Pick the biller, fetch the bill, then pay — PIN confirms it."
+        >
+          <div className="grid gap-5">
+            <StepHeader
+              layoutId={`bbps-steps-${category}`}
+              steps={[
+                { key: "biller", label: "Biller" },
+                { key: "fetch", label: "Fetch bill" },
+                { key: "pay", label: "Pay" },
+              ]}
+              current={stage}
+            />
+
+            <Field
+              label="Biller / operator"
+              htmlFor="biller"
+              hint={
+                billersSource && billersSource !== "CATALOG" && billers.length > 0
+                  ? `Live BBPS biller list · ${billers.length} billers`
+                  : undefined
+              }
+            >
+              {useGrid ? (
+                <OperatorGrid
+                  name="Biller"
+                  options={billers.map((b) => ({ value: b.code, label: b.name }))}
+                  value={billerCode}
+                  onChange={selectBiller}
+                  columns={billers.length > 4 ? 4 : 3}
+                  size="sm"
+                />
+              ) : (
+                <Select
+                  id="biller"
+                  value={billerCode}
+                  onChange={(e) => selectBiller(e.target.value)}
+                  disabled={loadingBillers || billers.length === 0}
+                >
+                  {loadingBillers && <option value="">Loading billers…</option>}
+                  {!loadingBillers && billers.length === 0 && <option value="">No billers available</option>}
+                  {billers.map((b) => (
+                    <option key={b.code} value={b.code}>
+                      {b.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+              {billersError && (
+                <Notice
+                  tone="warning"
+                  className="mt-2"
+                  action={
+                    <button
+                      type="button"
+                      onClick={loadBillers}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-amber-900 hover:underline"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Retry
+                    </button>
+                  }
+                >
+                  {billersError}
+                </Notice>
+              )}
+            </Field>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              {fields.map((f) => (
+                <FloatField
+                  key={f.name}
+                  id={`param-${f.name}`}
+                  label={`${f.name === FALLBACK_PARAM ? consumerLabel : f.name}${f.optional ? " (optional)" : ""}`}
+                  required={!f.optional}
+                  mono
+                  inputMode={f.dataType === "NUMERIC" ? "numeric" : undefined}
+                  hint={f.dataType === "NUMERIC" ? "Digits only" : undefined}
+                  value={paramValues[f.name] ?? ""}
+                  onChange={(e) => {
+                    const v = f.dataType === "NUMERIC" ? e.target.value.replace(/\D/g, "") : e.target.value;
+                    setParamValues((p) => ({ ...p, [f.name]: v }));
+                    resetBill();
+                  }}
+                  className={fields.length === 1 ? "sm:col-span-2" : undefined}
+                />
+              ))}
+            </div>
+
+            {error && (
+              <Notice tone="danger" icon={<AlertCircle className="h-4 w-4" />}>
+                {error}
+              </Notice>
+            )}
+
+            {!bill ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={fetchBill}
+                disabled={fetching || !requiredFilled || !billerCode}
+                isLoading={fetching}
+              >
+                Fetch bill
+              </Button>
+            ) : (
+              <BillCard
+                customerName={bill.customerName}
+                dueDate={bill.dueDate}
+                amount={bill.amount}
+                minAmount={bill.minAmount}
+                maxAmount={bill.maxAmount}
+                onChange={resetBill}
+              />
+            )}
+
+            {bill && (
+              <>
+                <div>
+                  <FloatField
+                    id="amount"
+                    label="Amount to pay (₹)"
+                    required
+                    display
+                    type="number"
+                    min={1}
+                    max={bill.maxAmount ?? 500000}
+                    inputMode="numeric"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <AmountChips
+                    className="mt-3"
+                    amounts={[
+                      ...(bill.minAmount !== undefined && bill.minAmount > 0 ? [bill.minAmount] : []),
+                      bill.amount,
+                    ].filter((v, i, arr) => arr.indexOf(v) === i)}
+                    value={amount}
+                    onPick={(v) => setAmount(String(v))}
+                    render={(v) =>
+                      v === bill.amount
+                        ? `Total due — ${formatINR(v)}`
+                        : `Minimum due — ${formatINR(v)}`
+                    }
+                  />
+                </div>
+                {quote && amountNum > 0 && (
+                  <ChargeBreakdown
+                    amount={amountNum}
+                    serviceCharge={quote.serviceCharge}
+                    gst={quote.gst}
+                    totalDebit={quote.totalDebit}
+                    commission={quote.commission}
+                    loading={quoteLoading}
+                  />
+                )}
+                {quoteLoading && !quote && amountNum > 0 && (
+                  <p className="text-center text-xs text-ink-400 animate-pulse">Calculating charges…</p>
+                )}
+                <div>
+                  <Button type="submit" size="xl" className="w-full" disabled={paying || !amount} isLoading={paying}>
+                    Pay {quote ? formatINR(quote.totalDebit) : amount ? formatINR(Number(amount)) : "bill"}
+                  </Button>
+                  <SecureFootnote />
+                </div>
+              </>
+            )}
+          </div>
+        </ServiceCard>
+      </ServiceLayout>
 
       <TxnPinDialog
         open={pinOpen}

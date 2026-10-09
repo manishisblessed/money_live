@@ -261,7 +261,7 @@ export default function AdminSliderPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Platform"
         title="Slider & Pop-up Manager"
         description="Manage colorful dashboard banners (carousel) and pop-up announcements. Schedule them, target specific roles, and reorder — every change is audit logged."
         actions={
@@ -277,7 +277,7 @@ export default function AdminSliderPage() {
       />
 
       {loading ? (
-        <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center text-sm text-ink-500">
+        <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-10 text-center text-sm text-ink-500">
           Loading sliders…
         </div>
       ) : (
@@ -367,7 +367,7 @@ function SliderSection({
             {icon}
           </span>
           <div>
-            <h2 className="font-display text-base font-bold text-ink-900">{heading}</h2>
+            <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{heading}</h2>
             <p className="text-xs text-ink-500">{subtitle}</p>
           </div>
         </div>
@@ -377,7 +377,7 @@ function SliderSection({
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-8 text-center text-sm text-ink-500">
+        <div className="rounded-3xl border border-dashed border-ink-200 bg-white p-8 text-center text-sm text-ink-500">
           No {heading.toLowerCase()} yet.
         </div>
       ) : (
@@ -468,7 +468,7 @@ function SliderCard({
               type="button"
               onClick={onUp}
               disabled={first}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-ink-200 text-ink-600 transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-40"
+              className="grid h-8 w-8 place-items-center rounded-xl border border-ink-200 text-ink-600 transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-40"
               aria-label="Move up"
             >
               <ArrowUp className="h-4 w-4" />
@@ -477,7 +477,7 @@ function SliderCard({
               type="button"
               onClick={onDown}
               disabled={last}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-ink-200 text-ink-600 transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-40"
+              className="grid h-8 w-8 place-items-center rounded-xl border border-ink-200 text-ink-600 transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-40"
               aria-label="Move down"
             >
               <ArrowDown className="h-4 w-4" />
@@ -495,7 +495,7 @@ function SliderCard({
             <button
               type="button"
               onClick={onEdit}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-ink-200 text-ink-600 transition hover:border-brand-300 hover:text-brand-700"
+              className="grid h-8 w-8 place-items-center rounded-xl border border-ink-200 text-ink-600 transition hover:border-brand-300 hover:text-brand-700"
               aria-label="Edit"
             >
               <Pencil className="h-4 w-4" />
@@ -503,7 +503,7 @@ function SliderCard({
             <button
               type="button"
               onClick={onDelete}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-ink-200 text-rose-500 transition hover:border-rose-300 hover:bg-rose-50"
+              className="grid h-8 w-8 place-items-center rounded-xl border border-ink-200 text-rose-500 transition hover:border-rose-300 hover:bg-rose-50"
               aria-label="Delete"
             >
               <Trash2 className="h-4 w-4" />
@@ -653,11 +653,11 @@ function SliderForm({
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-700">
               {form.id ? "Edit" : "New"} {form.kind === "SLIDE" ? "Slider" : "Pop-up"}
             </p>
-            <h2 className="font-display text-lg font-bold text-ink-900">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
               {form.kind === "SLIDE" ? "Carousel banner" : "Pop-up announcement"}
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-lg text-ink-500 hover:bg-ink-100">
+          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-xl text-ink-500 hover:bg-ink-100">
             <X className="h-5 w-5" />
           </button>
         </div>

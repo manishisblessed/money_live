@@ -73,7 +73,7 @@ export default function AdminBillersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Platform"
         title="Billers & routing"
         description="Manage billers across BBPS, NPCI, NETC and direct integrations. Configure failover routes and monitor uptime."
         actions={
@@ -109,9 +109,9 @@ export default function AdminBillersPage() {
           { l: "Degraded now", v: String(stats.degradedCount) },
           { l: "Down now", v: String(stats.downCount) },
         ].map((s) => (
-          <div key={s.l} className="rounded-2xl border border-ink-100 bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">{s.l}</p>
-            <p className="mt-1 font-display text-xl font-bold text-ink-900">{s.v}</p>
+          <div key={s.l} className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{s.l}</p>
+            <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{s.v}</p>
           </div>
         ))}
       </div>

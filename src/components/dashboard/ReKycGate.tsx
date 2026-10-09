@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShieldAlert, CalendarClock, ArrowRight } from "lucide-react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
 
 type ReKycStatus = {
   reKycRequired: boolean;
@@ -60,16 +62,23 @@ export function ReKycGate() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-md rounded-3xl bg-white shadow-2xl ring-1 ring-ink-900/5"
+          className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-energy ring-1 ring-ink-900/5"
         >
-          <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-3xl bg-gradient-to-r from-amber-500 via-brand-500 to-accent-500" />
+          <div className="absolute inset-x-0 top-0 h-1.5 bg-energy-gradient-x" />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-amber-300 opacity-20 blur-3xl"
+          />
 
-          <div className="space-y-5 px-6 pb-6 pt-8">
+          <div className="relative space-y-5 px-6 pb-6 pt-8">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-amber-50 to-brand-50 ring-1 ring-amber-100">
-                <ShieldAlert className="h-8 w-8 text-amber-600" />
-              </div>
-              <h2 className="text-xl font-bold text-ink-900">Monthly identity check</h2>
+              <IconTile tone="amber" size="xl" className="mb-4">
+                <ShieldAlert className="h-7 w-7" />
+              </IconTile>
+              <Badge variant="warning" size="sm" className="mb-2">
+                Monthly · quick check
+              </Badge>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">Monthly identity check</h2>
               <p className="mt-1.5 text-sm leading-relaxed text-ink-500">
                 To keep your account secure, please re-verify your identity for this
                 month. Transactions are paused until you complete this quick check.
@@ -77,8 +86,10 @@ export function ReKycGate() {
             </div>
 
             {due && (
-              <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
-                <CalendarClock className="h-5 w-5 shrink-0 text-amber-600" />
+              <div className="flex items-center gap-3 rounded-2xl bg-amber-50/80 p-4 ring-1 ring-amber-200">
+                <IconTile tone="amber" size="sm">
+                  <CalendarClock className="h-4 w-4" />
+                </IconTile>
                 <p className="text-sm text-amber-900">
                   Re-verification due for{" "}
                   <span className="font-semibold">{due}</span>.

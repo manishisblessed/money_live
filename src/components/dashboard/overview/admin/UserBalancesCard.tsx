@@ -91,23 +91,22 @@ export function UserBalancesCard() {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-white/10 p-5 text-white shadow-[0_25px_80px_-25px_rgba(9,13,37,0.55)]",
-        "bg-[radial-gradient(120%_120%_at_100%_0%,#141e46_0%,#0a1130_45%,#070a1c_100%)]"
+        "grain relative overflow-hidden rounded-3xl border border-white/10 bg-ink-950 p-6 text-white shadow-[0_30px_80px_-30px_rgba(7,11,20,0.7)]"
       )}
     >
       <div className="pointer-events-none absolute -top-24 right-0 h-56 w-72 rounded-full bg-brand-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-64 rounded-full bg-teal-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-64 rounded-full bg-accent-400/10 blur-3xl" />
 
-      <header className="relative flex flex-wrap items-start justify-between gap-3">
+      <header className="relative z-10 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-blue-900/30">
             <Users className="h-5 w-5" strokeWidth={2.2} />
           </span>
           <div>
-            <h2 className="font-display text-lg font-bold tracking-tight">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">
               User-wise Balances
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-400">
               {loading ? (
                 <span className="inline-block h-3 w-24 animate-pulse rounded bg-white/10 align-middle" />
               ) : (
@@ -136,7 +135,7 @@ export function UserBalancesCard() {
       </header>
 
       {/* table */}
-      <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-black/25">
+      <div className="relative z-10 mt-5 overflow-hidden rounded-2xl border border-white/[0.06] bg-black/25">
         <div className="max-h-[360px] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-[#0b1030]/95 backdrop-blur">
@@ -220,7 +219,7 @@ export function UserBalancesCard() {
         </div>
       </div>
 
-      <footer className="relative mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+      <footer className="relative z-10 mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
         <Link
           href="/dashboard/admin/wallet-ops"
           className="inline-flex items-center gap-1 font-semibold text-brand-200 transition hover:text-white"
@@ -254,7 +253,7 @@ function TabPills({
             className={cn(
               "rounded-lg px-3 py-1.5 text-[11px] font-semibold transition",
               active
-                ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-900/30"
+                ? "bg-energy-gradient text-white shadow-energy-sm"
                 : "text-slate-300 hover:text-white"
             )}
           >

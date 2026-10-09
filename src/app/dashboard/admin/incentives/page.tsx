@@ -150,7 +150,7 @@ export default function IncentivesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Revenue"
         title="Reward Incentives"
         description="Encourage retailers with monthly volume rewards — e.g. QR ₹20 lakh → 0.10% reverse cashback on the MDR they paid. Define tiered slab rates, set per-user thresholds, and the engine auto-credits on the last day of each month."
         actions={
@@ -183,11 +183,11 @@ export default function IncentivesPage() {
           </h2>
         </div>
         {loading && schemes.length === 0 ? (
-          <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center text-sm text-ink-500">
+          <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-10 text-center text-sm text-ink-500">
             Loading incentives…
           </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-10 text-center text-sm text-ink-500">
+          <div className="rounded-3xl border border-dashed border-ink-200 bg-white p-10 text-center text-sm text-ink-500">
             No incentives yet. Create one to start rewarding retailers.
           </div>
         ) : (
@@ -316,7 +316,7 @@ function IncentiveCard({
       : "flat ₹";
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
       <div className="flex flex-wrap items-center gap-3 px-5 py-4">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white">
           <Gift className="h-5 w-5" />
@@ -341,21 +341,21 @@ function IncentiveCard({
               setTierModal({ editing: null });
               setExpanded(true);
             }}
-            className="grid h-8 w-8 place-items-center rounded-lg text-amber-600 hover:bg-amber-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-amber-600 hover:bg-amber-50"
             title="Add reward tier"
           >
             <Layers className="h-4 w-4" />
           </button>
           <button
             onClick={() => setAssignOpen(true)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-violet-600 hover:bg-violet-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-violet-600 hover:bg-violet-50"
             title="Assign users"
           >
             <Users className="h-4 w-4" />
           </button>
           <button
             onClick={() => setRunOpen(true)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-emerald-600 hover:bg-emerald-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-emerald-600 hover:bg-emerald-50"
             title="Run / preview payout"
           >
             <PlayCircle className="h-4 w-4" />
@@ -364,7 +364,7 @@ function IncentiveCard({
           <button
             onClick={toggleActive}
             disabled={busy}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-50 disabled:opacity-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-50 disabled:opacity-50"
             title={scheme.active ? "Deactivate" : "Activate"}
           >
             <Power className="h-4 w-4" />
@@ -372,14 +372,14 @@ function IncentiveCard({
           <button
             onClick={() => setDeleteOpen(true)}
             disabled={busy}
-            className="grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-rose-50 disabled:opacity-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-rose-500 hover:bg-rose-50 disabled:opacity-50"
             title="Delete incentive"
           >
             <Trash2 className="h-4 w-4" />
           </button>
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-50"
+            className="grid h-8 w-8 place-items-center rounded-xl text-ink-500 hover:bg-ink-50"
             title={expanded ? "Collapse" : "Expand"}
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
@@ -402,7 +402,7 @@ function IncentiveCard({
                 {tiers && tiers.length > 0 ? (
                   <div className="overflow-x-auto rounded-xl border border-ink-100 bg-white">
                     <table className="w-full min-w-max text-sm">
-                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-wider text-ink-500">
+                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                         <tr>
                           <th className="px-4 py-2 font-semibold">Tier</th>
                           <th className="px-4 py-2 font-semibold">Monthly volume band</th>
@@ -474,7 +474,7 @@ function IncentiveCard({
                 {assigned.length > 0 ? (
                   <div className="overflow-x-auto rounded-xl border border-ink-100 bg-white">
                     <table className="w-full min-w-max text-sm">
-                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-wider text-ink-500">
+                      <thead className="bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
                         <tr>
                           <th className="px-4 py-2 font-semibold">Name</th>
                           <th className="px-4 py-2 font-semibold">Role</th>
@@ -618,7 +618,7 @@ function CreateModal({ onClose, onSaved }: { onClose: () => void; onSaved: (msg:
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <h3 className="flex items-center gap-2 font-display text-base font-semibold text-ink-900">
             <Gift className="h-5 w-5 text-amber-600" /> Create incentive
@@ -776,7 +776,7 @@ function TierModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <h3 className="flex items-center gap-2 font-display text-base font-semibold text-ink-900">
             <Layers className="h-5 w-5 text-amber-600" /> {isEdit ? "Edit reward tier" : "Add reward tier"}
@@ -802,7 +802,7 @@ function TierModal({
             </div>
           </div>
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">Reward</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Reward</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Type</Label>
@@ -944,7 +944,7 @@ function AssignModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink-100 bg-white px-5 py-4">
           <h3 className="flex items-center gap-2 font-display text-base font-semibold text-ink-900">
             <Users className="h-5 w-5 text-violet-600" /> Assign — {scheme.name}
@@ -961,7 +961,7 @@ function AssignModal({
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs font-bold uppercase tracking-widest text-ink-500">Available users</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Available users</p>
               {visibleUsers.length > 0 && (
                 <Button size="sm" onClick={() => assign(visibleUsers.map((u) => u.id))} disabled={busy}>
                   {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Users className="h-3.5 w-3.5" />} Assign all ({visibleUsers.length})
@@ -979,7 +979,7 @@ function AssignModal({
           </div>
 
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-500">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">
               Currently assigned ({assigned.length})
             </p>
             {loading ? (
@@ -1101,7 +1101,7 @@ function OverrideModal({
 
   return (
     <div className="fixed inset-0 z-[55] grid place-items-center bg-ink-900/50 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <h3 className="flex items-center gap-2 font-display text-base font-semibold text-ink-900">
             <Settings2 className="h-5 w-5 text-brand-600" /> Override — {user.name}
@@ -1226,7 +1226,7 @@ function RunModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/40 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-ink-100 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
           <h3 className="flex items-center gap-2 font-display text-base font-semibold text-ink-900">
             <PlayCircle className="h-5 w-5 text-emerald-600" /> Run payout

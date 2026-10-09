@@ -365,7 +365,7 @@ function BankTransfersTab() {
 
   if (!configured) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
+      <div className="rounded-3xl bg-amber-50 ring-1 ring-inset ring-amber-200 p-6 text-sm text-amber-800">
         <p className="font-semibold">Settlement rail not configured</p>
         <p className="mt-1">
           Set <code className="rounded bg-amber-100 px-1">PARTNER_SETTLEMENT_ENABLED=&quot;true&quot;</code> and the{" "}
@@ -381,7 +381,7 @@ function BankTransfersTab() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Balance + accounts */}
         <div className="space-y-4">
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-ink-500">
                 Partner wallet (Same Day)
@@ -390,7 +390,7 @@ function BankTransfersTab() {
                 <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
               </Button>
             </div>
-            <p className="mt-2 font-display text-2xl font-bold text-ink-900">
+            <p className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
               {balance ? formatINR(balance.balance) : loading ? "Loading…" : "—"}
             </p>
             {balance?.isFrozen && (
@@ -398,7 +398,7 @@ function BankTransfersTab() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
+          <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-ink-900">Settlement accounts</p>
               <Button variant="outline" onClick={() => setShowAdd((s) => !s)} className="h-8 px-2">
@@ -485,7 +485,7 @@ function BankTransfersTab() {
                       ? { variant: "danger" as const, label: a.verificationLabel || "Verification failed" }
                       : { variant: "warning" as const, label: a.verificationLabel || "Pending verification" };
                 return (
-                  <li key={a.id} className="flex items-center justify-between rounded-xl border border-ink-100 p-3">
+                  <li key={a.id} className="flex items-center justify-between rounded-2xl p-3 ring-1 ring-inset ring-ink-100">
                     <div>
                       <p className="text-sm font-medium text-ink-900">
                         {a.verifiedName || a.accountHolderName}
@@ -501,7 +501,7 @@ function BankTransfersTab() {
                     <button
                       type="button"
                       onClick={() => setRemoveTarget(a)}
-                      className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 hover:bg-rose-50 hover:text-rose-600"
+                      className="grid h-8 w-8 place-items-center rounded-xl text-ink-400 hover:bg-rose-50 hover:text-rose-600"
                       title="Deactivate account"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -514,7 +514,7 @@ function BankTransfersTab() {
         </div>
 
         {/* Transfer form */}
-        <div className="lg:col-span-2 rounded-2xl border border-ink-100 bg-white p-5">
+        <div className="lg:col-span-2 rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
           <div className="flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-50 text-brand-700">
               <Landmark className="h-4 w-4" />
@@ -698,7 +698,7 @@ export default function AdminSettlementsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Money & Ops"
         title="Settlements"
         description="Live bank transfers from the Same Day partner wallet, plus derived T+1 settlement cycles."
       />

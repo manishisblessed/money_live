@@ -89,8 +89,9 @@ const config: Config = {
         }
       },
       fontFamily: {
+        // Satoshi is the Emoney body/UI face — distinct from Nextgen's probable Inter.
         sans: [
-          "var(--font-sans)",
+          '"Satoshi"',
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
@@ -98,12 +99,19 @@ const config: Config = {
           "Roboto",
           "sans-serif"
         ],
+        // Clash Display is the Emoney headline face — editorial, confident, bold.
         display: [
-          "var(--font-display)",
+          '"Clash Display"',
+          '"Satoshi"',
           "ui-sans-serif",
           "system-ui",
           "sans-serif"
         ]
+      },
+      // Extended radius scale — Emoney leans on larger, squircle-style corners.
+      borderRadius: {
+        "4xl": "2rem",
+        "5xl": "2.5rem"
       },
       backgroundImage: {
         // eMoney premium mesh: purple → blue → green → coral
@@ -114,14 +122,31 @@ const config: Config = {
         // Primary premium gradient: purple → blue → green → coral
         "brand-gradient":
           "linear-gradient(120deg, #7c3aed 0%, #2563eb 38%, #22c55e 72%, #fb7185 100%)",
+        // Signature Emoney "energy" gradient — purple → coral, used on primary
+        // CTAs, active states and focus rings. The single thing that makes a
+        // page feel immediately "Emoney".
+        "energy-gradient":
+          "linear-gradient(135deg, #7c3aed 0%, #2563eb 45%, #f43f5e 100%)",
+        "energy-gradient-x":
+          "linear-gradient(90deg, #7c3aed 0%, #2563eb 50%, #f43f5e 100%)",
         "aurora-gradient":
-          "conic-gradient(from 140deg at 50% 50%, #7c3aed 0deg, #2563eb 95deg, #22c55e 205deg, #fb7185 300deg, #7c3aed 360deg)"
+          "conic-gradient(from 140deg at 50% 50%, #7c3aed 0deg, #2563eb 95deg, #22c55e 205deg, #fb7185 300deg, #7c3aed 360deg)",
+        // Fine SVG noise for premium grain overlays (base64 inline keeps it
+        // zero-request).
+        "grain":
+          "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>\")"
       },
       boxShadow: {
         soft: "0 10px 30px -12px rgba(15,23,42,0.18)",
         glow: "0 20px 50px -12px rgba(124,58,237,0.40)",
         "glow-brand": "0 20px 50px -12px rgba(37,99,235,0.45)",
-        "glow-coral": "0 20px 50px -12px rgba(244,63,94,0.40)"
+        "glow-coral": "0 20px 50px -12px rgba(244,63,94,0.40)",
+        // Signature Emoney colored shadow — purple→coral spread, used on hover
+        // of primary surfaces (cards, CTAs). This is the main "shape-language"
+        // differentiator from Nextgen's probably flat gray shadows.
+        "energy": "0 24px 60px -18px rgba(124,58,237,0.45), 0 10px 24px -12px rgba(244,63,94,0.25)",
+        "energy-sm": "0 12px 28px -14px rgba(124,58,237,0.40), 0 4px 12px -6px rgba(244,63,94,0.20)",
+        "inner-ring": "inset 0 0 0 1px rgba(255,255,255,0.6)"
       },
       keyframes: {
         "fade-up": {
@@ -159,6 +184,16 @@ const config: Config = {
         "scroll-y": {
           "0%": { transform: "translateY(0)" },
           "100%": { transform: "translateY(-50%)" }
+        },
+        // Signature Emoney gradient sweep used on logo + headlines.
+        "gradient-sweep": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" }
+        },
+        // Soft brand-dot pulse used on Logo + online indicators.
+        "ping-soft": {
+          "0%": { transform: "scale(1)", opacity: "0.75" },
+          "80%, 100%": { transform: "scale(2.4)", opacity: "0" }
         }
       },
       animation: {
@@ -170,7 +205,9 @@ const config: Config = {
         spin3d: "spin3d 20s linear infinite",
         "pulse-ring": "pulse-ring 2.4s ease-out infinite",
         "gradient-x": "gradient-x 8s ease infinite",
-        "scroll-y": "scroll-y 40s linear infinite"
+        "scroll-y": "scroll-y 40s linear infinite",
+        "gradient-sweep": "gradient-sweep 6s ease-in-out infinite",
+        "ping-soft": "ping-soft 2.4s cubic-bezier(0,0,0.2,1) infinite"
       }
     }
   },

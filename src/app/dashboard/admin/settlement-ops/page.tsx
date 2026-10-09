@@ -57,14 +57,14 @@ type Overview = {
 };
 
 const inputCls =
-  "rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
+  "rounded-2xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "good" | "bad" }) {
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">{label}</p>
+    <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
       <p
-        className={`mt-1 text-xl font-bold ${
+        className={`mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] ${
           tone === "good" ? "text-emerald-600" : tone === "bad" ? "text-rose-600" : "text-ink-900"
         }`}
       >
@@ -302,7 +302,7 @@ export default function SettlementOpsPage() {
       )}
 
       {data && data.alerts.length > 0 && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5">
+        <div className="rounded-3xl bg-amber-50 ring-1 ring-inset ring-amber-200/50 p-5">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-800">
             <AlertTriangle className="h-4 w-4" /> Open alerts ({data.alerts.length})
           </p>

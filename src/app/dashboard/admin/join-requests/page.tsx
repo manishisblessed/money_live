@@ -20,6 +20,8 @@ import {
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select } from "@/components/ui/Input";
+import { EmptyState, FilterBar, SectionCard, StatusChip } from "@/components/dashboard/patterns";
+import { UserPlus as UserPlusPh } from "@phosphor-icons/react";
 import {
   CreateInviteForm,
   type CreateInviteResult,
@@ -45,12 +47,12 @@ type JoinRequest = {
 
 const STATUS_OPTIONS = ["NEW", "CONTACTED", "INVITED", "CLOSED", "REJECTED"];
 
-const STATUS_COLORS: Record<string, string> = {
-  NEW: "bg-amber-100 text-amber-800",
-  CONTACTED: "bg-blue-100 text-blue-800",
-  INVITED: "bg-indigo-100 text-indigo-800",
-  CLOSED: "bg-gray-100 text-gray-600",
-  REJECTED: "bg-rose-100 text-rose-800",
+const STATUS_VARIANT: Record<string, "warning" | "brand" | "royal" | "default" | "danger"> = {
+  NEW: "warning",
+  CONTACTED: "brand",
+  INVITED: "royal",
+  CLOSED: "default",
+  REJECTED: "danger",
 };
 
 function fmtRole(role: string) {
@@ -134,16 +136,17 @@ export default function AdminJoinRequestsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
-        title="Join Requests"
+        eyebrow="Admin · People"
+        title="Join requests"
         description="Leads from the public Join Form. Connect with each applicant and convert them into an onboarding invite."
       />
 
-      <div className="flex flex-wrap items-center gap-3">
+      <FilterBar title="Leads" count={total}>
         <Select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-44"
+          className="h-10 w-44"
+          aria-label="Filter by status"
         >
           <option value="">All statuses</option>
           {STATUS_OPTIONS.map((s) => (
@@ -158,92 +161,91 @@ export default function AdminJoinRequestsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, phone, email, shop..."
-            className="pl-9"
+            placeholder="Search name, phone, email, shop…"
+            className="h-10 pl-9"
+            aria-label="Search join requests"
           />
         </div>
-        <span className="ml-auto text-sm text-ink-500">
-          {total} request{total !== 1 ? "s" : ""}
-        </span>
-      </div>
+      </FilterBar>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
         </div>
       ) : requests.length === 0 ? (
-        <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center">
-          <p className="text-ink-500">No join requests found.</p>
-        </div>
+        <EmptyState
+          bordered
+          icon={UserPlusPh}
+          title="No join requests yet"
+          description="New leads from the public Join Form will show up here."
+        />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-ink-100 bg-white">
-          <table className="w-full min-w-[860px] text-sm">
-            <thead className="border-b border-ink-100 bg-ink-50/50">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Applicant</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Interested as</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Business</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Status</th>
-                <th className="px-4 py-3 text-left font-semibold text-ink-700">Submitted</th>
-                <th className="px-4 py-3 text-right font-semibold text-ink-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-50">
-              {requests.map((r) => (
-                <tr key={r.id} className="hover:bg-ink-50/30">
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-ink-900">{r.name}</div>
-                    <div className="text-xs text-ink-500">{r.phone}</div>
-                    <div className="text-xs text-ink-500">{r.email}</div>
-                  </td>
-                  <td className="px-4 py-3 text-ink-700">{fmtRole(r.role)}</td>
-                  <td className="px-4 py-3 text-ink-700">
-                    <div>{r.shopName || "—"}</div>
-                    <div className="text-xs text-ink-500">
-                      {[r.city, r.state].filter(Boolean).join(", ") || "—"}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        STATUS_COLORS[r.status] ?? "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-ink-500">
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Select
-                        value={r.status}
-                        onChange={(e) =>
-                          updateRequest(r.id, { status: e.target.value })
-                        }
-                        className="h-9 w-36"
-                      >
-                        {STATUS_OPTIONS.map((s) => (
-                          <option key={s} value={s}>
-                            {fmtRole(s)}
-                          </option>
-                        ))}
-                      </Select>
-                      <button
-                        onClick={() => setSelected(r)}
-                        title="View details"
-                        className="rounded-lg p-1.5 text-ink-500 hover:bg-ink-100 hover:text-ink-900"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+        <SectionCard padding="none">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[860px] text-sm">
+              <thead className="border-b border-ink-100 bg-ink-50/60 text-left text-[11px] uppercase tracking-[0.14em] text-ink-500">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Applicant</th>
+                  <th className="px-5 py-3 font-semibold">Interested as</th>
+                  <th className="px-5 py-3 font-semibold">Business</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3 font-semibold">Submitted</th>
+                  <th className="px-5 py-3 text-right font-semibold">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-ink-100">
+                {requests.map((r) => (
+                  <tr key={r.id} className="transition-colors hover:bg-ink-50/40">
+                    <td className="px-5 py-3">
+                      <div className="font-semibold text-ink-900">{r.name}</div>
+                      <div className="text-xs text-ink-500">{r.phone}</div>
+                      <div className="text-xs text-ink-500">{r.email}</div>
+                    </td>
+                    <td className="px-5 py-3 text-ink-700">{fmtRole(r.role)}</td>
+                    <td className="px-5 py-3 text-ink-700">
+                      <div>{r.shopName || "—"}</div>
+                      <div className="text-xs text-ink-500">
+                        {[r.city, r.state].filter(Boolean).join(", ") || "—"}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <StatusChip status={r.status} variant={STATUS_VARIANT[r.status]} label={fmtRole(r.status)} size="sm" />
+                    </td>
+                    <td className="px-5 py-3 text-ink-500">
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Select
+                          value={r.status}
+                          onChange={(e) =>
+                            updateRequest(r.id, { status: e.target.value })
+                          }
+                          className="h-9 w-36"
+                          aria-label={`Status for ${r.name}`}
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                              {fmtRole(s)}
+                            </option>
+                          ))}
+                        </Select>
+                        <button
+                          onClick={() => setSelected(r)}
+                          title="View details"
+                          aria-label={`View ${r.name}`}
+                          className="grid h-9 w-9 place-items-center rounded-xl text-ink-500 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 hover:text-ink-900 focus-energy"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
       )}
 
       {selected && (
@@ -343,10 +345,11 @@ function JoinRequestDetail({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink-900/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl">
+      <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100">
         <div className="flex items-center justify-between border-b border-ink-100 px-6 py-4">
           <div>
-            <h3 className="font-display text-lg font-bold text-ink-900">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Join request</p>
+            <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
               {request.name}
             </h3>
             <p className="text-xs text-ink-500">
@@ -356,10 +359,10 @@ function JoinRequestDetail({
           </div>
           <button
             onClick={onClose}
-            className="text-ink-400 hover:text-ink-700"
+            className="grid h-9 w-9 place-items-center rounded-xl text-ink-500 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
             aria-label="Close"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -402,7 +405,7 @@ function JoinRequestDetail({
               rows={3}
               maxLength={2000}
               placeholder="Add a note for your team..."
-              className="flex w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm transition placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-100"
+              className="flex w-full rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm px-4 py-2.5 text-sm text-ink-900 shadow-sm transition placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-100"
             />
           </div>
         </div>

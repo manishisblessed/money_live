@@ -3,19 +3,27 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  LifeBuoy,
   RefreshCw,
   Send,
   AlertCircle,
   ChevronLeft,
   Clock,
-  FileBarChart2,
   ArrowRight,
+  MessageSquare,
 } from "lucide-react";
-import { ServicePageHeader } from "@/components/dashboard/ServicePage";
+import { Lifebuoy, FileText, ChatCircleDots } from "@phosphor-icons/react";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
+import {
+  EmptyState,
+  FadeIn,
+  KeyValueList,
+  SectionCard,
+  StatusChip,
+} from "@/components/dashboard/patterns";
+import { cn } from "@/lib/utils";
 
 type DisputeRow = {
   id: string;
@@ -42,14 +50,6 @@ type DisputeDetail = DisputeRow & {
     authorName: string;
     createdAt: string;
   }>;
-};
-
-const STATUS_BADGE: Record<string, "default" | "success" | "warning" | "danger" | "brand" | "accent"> = {
-  OPEN: "brand",
-  UNDER_REVIEW: "warning",
-  AWAITING_USER: "accent",
-  RESOLVED: "success",
-  REJECTED: "danger",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -135,32 +135,40 @@ export default function DisputesPage() {
     }
   }
 
+  const isClosed = (s: string) => s === "RESOLVED" || s === "REJECTED";
+
   return (
-    <div className="mx-auto max-w-4xl">
-      <ServicePageHeader
-        icon={LifeBuoy}
-        title="Support Tickets"
-        description="Track and reply to your support tickets. To raise a new ticket, open the transaction in Reports and click “Raise ticket” — the details are filled in for you."
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageHeader
+        eyebrow="Account"
+        title="Support tickets"
+        description="Track and reply to your tickets. To raise a new one, open the transaction in Reports and click “Raise ticket” — the details fill in for you."
+        actions={
+          view === "list" ? (
+            <Button variant="outline" onClick={fetchList} disabled={loading} aria-label="Refresh tickets">
+              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+              Refresh
+            </Button>
+          ) : undefined
+        }
       />
 
       {error && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+        <div className="flex items-start gap-2 rounded-2xl bg-rose-50 p-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {view === "list" && (
-        <>
+        <FadeIn className="space-y-4">
           {/* Raising a ticket lives in Reports — deep-link users there. */}
           <Link
             href="/dashboard/reports"
-            className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-brand-100 bg-brand-50/60 px-5 py-4 transition hover:border-brand-200 hover:bg-brand-50"
+            className="group flex items-center justify-between gap-3 rounded-3xl bg-gradient-to-r from-brand-50/80 to-white px-5 py-4 ring-1 ring-brand-100 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-energy-sm focus-energy"
           >
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-brand-700 ring-1 ring-brand-100">
-                <FileBarChart2 className="h-4.5 w-4.5" />
-              </span>
+              <IconTile icon={FileText} tone="brand" size="md" />
               <div>
                 <p className="text-sm font-semibold text-ink-900">Need to raise a ticket?</p>
                 <p className="text-xs text-ink-500">
@@ -168,36 +176,39 @@ export default function DisputesPage() {
                 </p>
               </div>
             </div>
-            <span className="flex items-center gap-1 text-xs font-semibold text-brand-700">
-              Go to Reports <ArrowRight className="h-3.5 w-3.5" />
+            <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-brand-700">
+              Go to Reports <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </Link>
 
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-xs text-ink-500">
-              {loading ? "Loading…" : `${disputes.length} ticket(s)`} · Urgent tickets are answered within 4 hours,
-              normal within 48 hours.
-            </p>
-            <Button variant="outline" onClick={fetchList} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+          <SectionCard
+            icon={<IconTile icon={Lifebuoy} tone="royal" size="sm" />}
+            title="Your tickets"
+            description={
+              loading
+                ? "Loading…"
+                : `${disputes.length} ticket(s) · Urgent tickets are answered within 4 hours, normal within 48 hours.`
+            }
+            padding="none"
+          >
             {disputes.length === 0 ? (
-              <div className="p-12 text-center text-sm text-ink-500">
-                {loading ? (
-                  "Loading…"
-                ) : (
-                  <>
-                    No tickets yet. Go to{" "}
-                    <Link href="/dashboard/reports" className="font-semibold text-brand-700 hover:underline">
-                      Reports
-                    </Link>{" "}
-                    and raise one from a transaction if something went wrong.
-                  </>
-                )}
-              </div>
+              loading ? (
+                <div className="p-12 text-center text-sm text-ink-500">Loading…</div>
+              ) : (
+                <EmptyState
+                  icon={ChatCircleDots}
+                  tone="royal"
+                  title="No tickets yet"
+                  description="If something went wrong with a transaction, raise a ticket from Reports and we'll pick it up."
+                  action={
+                    <Link href="/dashboard/reports">
+                      <Button variant="outline" size="sm">
+                        Open Reports <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  }
+                />
+              )
             ) : (
               <ul className="divide-y divide-ink-100">
                 {disputes.map((d) => (
@@ -205,98 +216,130 @@ export default function DisputesPage() {
                     <button
                       type="button"
                       onClick={() => openDetail(d.id)}
-                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-ink-50/50"
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-brand-50/30 focus-energy md:px-6"
                     >
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-xs text-ink-500">{d.ticketNo}</span>
-                          <Badge variant={STATUS_BADGE[d.status] ?? "default"}>
-                            {STATUS_LABELS[d.status] ?? d.status}
-                          </Badge>
+                          <StatusChip status={d.status} label={STATUS_LABELS[d.status] ?? d.status} size="sm" />
+                          {d.priority && d.priority !== "NORMAL" && (
+                            <StatusChip status={d.priority} size="sm" />
+                          )}
                         </div>
-                        <p className="mt-1 truncate text-sm font-medium text-ink-900">{d.subject}</p>
+                        <p className="mt-1 truncate text-sm font-semibold text-ink-900">{d.subject}</p>
                         <p className="text-xs text-ink-500">
                           {CATEGORIES.find((c) => c.id === d.category)?.label ?? d.category}
-                          {d.txnRefId && <> · {d.txnRefId}</>} · {d.messageCount} message(s)
+                          {d.txnRefId && <> · <span className="font-mono">{d.txnRefId}</span></>}
                         </p>
                       </div>
                       <div className="shrink-0 text-right text-xs text-ink-500">
-                        {new Date(d.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })}
+                        <div>{new Date(d.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })}</div>
+                        <div className="mt-1 inline-flex items-center gap-1 text-ink-400">
+                          <MessageSquare className="h-3 w-3" /> {d.messageCount}
+                        </div>
                       </div>
                     </button>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
-        </>
+          </SectionCard>
+        </FadeIn>
       )}
 
       {view === "detail" && detail && (
-        <div className="space-y-4">
+        <FadeIn className="space-y-4">
           <button
             type="button"
             onClick={() => {
               setView("list");
               setDetail(null);
             }}
-            className="flex items-center gap-1 text-xs font-semibold text-ink-500 hover:text-ink-800"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-ink-500 hover:text-ink-900"
           >
             <ChevronLeft className="h-3.5 w-3.5" /> Back to tickets
           </button>
 
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs text-ink-500">{detail.ticketNo}</span>
-              <Badge variant={STATUS_BADGE[detail.status] ?? "default"}>
-                {STATUS_LABELS[detail.status] ?? detail.status}
-              </Badge>
-              {detail.status !== "RESOLVED" && detail.status !== "REJECTED" && (
-                <span className="flex items-center gap-1 text-xs text-ink-500">
-                  <Clock className="h-3 w-3" />
-                  Response due {new Date(detail.slaDueAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                </span>
-              )}
-            </div>
-            <h2 className="mt-2 font-display text-lg font-semibold text-ink-900">{detail.subject}</h2>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-ink-700">{detail.description}</p>
-            {detail.txnRefId && (
-              <p className="mt-2 text-xs text-ink-500">
-                Linked transaction: <span className="font-mono">{detail.txnRefId}</span>
-              </p>
-            )}
+          <SectionCard
+            eyebrow={detail.ticketNo}
+            title={detail.subject}
+            action={
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusChip status={detail.status} label={STATUS_LABELS[detail.status] ?? detail.status} />
+                {!isClosed(detail.status) && (
+                  <span className="inline-flex items-center gap-1 text-xs text-ink-500">
+                    <Clock className="h-3 w-3" />
+                    Due {new Date(detail.slaDueAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                  </span>
+                )}
+              </div>
+            }
+          >
+            <p className="whitespace-pre-wrap text-sm text-ink-700">{detail.description}</p>
+
+            <KeyValueList
+              className="mt-4"
+              layout="grid"
+              items={[
+                {
+                  label: "Category",
+                  value: CATEGORIES.find((c) => c.id === detail.category)?.label ?? detail.category,
+                },
+                { label: "Priority", value: <StatusChip status={detail.priority} size="sm" /> },
+                ...(detail.txnRefId
+                  ? [{ label: "Linked transaction", value: detail.txnRefId, mono: true }]
+                  : []),
+                {
+                  label: "Raised on",
+                  value: new Date(detail.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }),
+                },
+              ]}
+            />
+
             {detail.resolution && (
               <div
-                className={`mt-3 rounded-xl border p-3 text-sm ${
+                className={cn(
+                  "mt-4 rounded-2xl p-4 text-sm ring-1 ring-inset",
                   detail.status === "RESOLVED"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-rose-200 bg-rose-50 text-rose-800"
-                }`}
+                    ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
+                    : "bg-rose-50 text-rose-800 ring-rose-200"
+                )}
               >
-                <p className="text-xs font-semibold uppercase tracking-wide">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em]">
                   {detail.status === "RESOLVED" ? "Resolution" : "Closure note"}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap">{detail.resolution}</p>
               </div>
             )}
-          </div>
+          </SectionCard>
 
-          <div className="rounded-2xl border border-ink-100 bg-white p-5">
-            <p className="text-sm font-semibold text-ink-900">Conversation</p>
-            <ul className="mt-3 space-y-3">
+          <SectionCard
+            icon={<IconTile icon={ChatCircleDots} tone="brand" size="sm" />}
+            title="Conversation"
+            description={`${detail.messages.length} message(s)`}
+          >
+            <ul className="space-y-3">
               {detail.messages.length === 0 && (
-                <li className="text-xs text-ink-500">No replies yet — support will respond within the SLA.</li>
+                <li className="rounded-2xl bg-ink-50/70 px-4 py-3 text-xs text-ink-500">
+                  No replies yet — support will respond within the SLA.
+                </li>
               )}
               {detail.messages.map((m) => (
                 <li
                   key={m.id}
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
+                  className={cn(
+                    "max-w-[85%] rounded-2xl px-4 py-3 text-sm",
                     m.fromSupport
-                      ? "bg-brand-50 text-ink-800"
-                      : "ml-auto bg-ink-100 text-ink-800"
-                  }`}
+                      ? "bg-brand-50 text-ink-800 ring-1 ring-inset ring-brand-100"
+                      : "ml-auto bg-ink-900 text-white"
+                  )}
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-400">
+                  <p
+                    className={cn(
+                      "text-[10px] font-bold uppercase tracking-[0.16em]",
+                      m.fromSupport ? "text-brand-700" : "text-white/60"
+                    )}
+                  >
                     {m.fromSupport ? "Support" : m.authorName} ·{" "}
                     {new Date(m.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                   </p>
@@ -305,23 +348,20 @@ export default function DisputesPage() {
               ))}
             </ul>
 
-            <form onSubmit={sendReply} className="mt-4 flex gap-2">
+            <form onSubmit={sendReply} className="mt-5 flex gap-2">
               <Input
-                placeholder={
-                  detail.status === "RESOLVED" || detail.status === "REJECTED"
-                    ? "Reply to reopen this ticket…"
-                    : "Write a reply…"
-                }
+                placeholder={isClosed(detail.status) ? "Reply to reopen this ticket…" : "Write a reply…"}
                 value={reply}
                 onChange={(e) => setReply(e.target.value)}
+                aria-label="Reply"
               />
               <Button type="submit" disabled={replying || !reply.trim()}>
                 <Send className="h-4 w-4" />
                 {replying ? "Sending…" : "Send"}
               </Button>
             </form>
-          </div>
-        </div>
+          </SectionCard>
+        </FadeIn>
       )}
     </div>
   );

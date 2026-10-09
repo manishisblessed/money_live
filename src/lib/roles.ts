@@ -68,32 +68,35 @@ export type NavGroup = {
   items: NavItem[];
 };
 
+// Emoney nav labels — deliberately re-worded away from Nextgen's defaults
+// (verbs over nouns, friendlier shorthand). Routes remain unchanged so
+// bookmarks and muscle memory are preserved.
 const baseServices: NavItem[] = [
   { href: "/dashboard/pg", label: "Payment Gateway", icon: CreditCard, badge: "New" },
   { href: "/dashboard/pos", label: "POS Terminals", icon: Monitor, badge: "New" },
-  { href: "/dashboard/qr", label: "QR Payments", icon: QrCode, badge: "New" },
-  { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-  { href: "/dashboard/money-transfer", label: "Money Transfer", icon: Send },
-  { href: "/dashboard/payout", label: "Payout", icon: Landmark, badge: "New" },
-  { href: "/dashboard/aadhaar-pay", label: "AePS / Aadhaar Pay", icon: Fingerprint },
-  { href: "/dashboard/upi", label: "UPI Collect", icon: Send },
-  { href: "/dashboard/recharge/mobile", label: "Recharges", icon: Smartphone },
-  { href: "/dashboard/travel/flight", label: "Travel", icon: Plane },
+  { href: "/dashboard/qr", label: "QR Collect", icon: QrCode, badge: "New" },
+  { href: "/dashboard/wallet", label: "My Wallet", icon: Wallet },
+  { href: "/dashboard/money-transfer", label: "Send Money", icon: Send },
+  { href: "/dashboard/payout", label: "Instant Payout", icon: Landmark, badge: "New" },
+  { href: "/dashboard/aadhaar-pay", label: "Aadhaar Pay (AePS)", icon: Fingerprint },
+  { href: "/dashboard/upi", label: "UPI Request", icon: Send },
+  { href: "/dashboard/recharge/mobile", label: "Top-ups", icon: Smartphone },
+  { href: "/dashboard/travel/flight", label: "Travel Desk", icon: Plane },
   { href: "/dashboard/virtual-account", label: "Virtual Account", icon: Building2 }
 ];
 
 const bbpsServices: NavItem[] = [
-  { href: "/dashboard/bill-pay/credit-card", label: "Credit Card Bill Payment", icon: CreditCard, badge: "New" },
-  { href: "/dashboard/bill-pay/cc-pay", label: "Credit Card Bill Payment-2", icon: CreditCard, badge: "New" },
-  { href: "/dashboard/bill-pay/offline-cc-pay", label: "Offline CC Bill Payment", icon: CreditCard, badge: "New" },
-  { href: "/dashboard/bill-pay/bbps-1", label: "BBPS-Bharat BillPay", icon: Receipt, badge: "New" },
-  { href: "/dashboard/bill-pay/bbps-2", label: "Unified Bill Payment Platform", icon: Receipt, badge: "New" },
+  { href: "/dashboard/bill-pay/credit-card", label: "Credit Card Bill", icon: CreditCard, badge: "New" },
+  { href: "/dashboard/bill-pay/cc-pay", label: "Credit Card Bill · Rail 2", icon: CreditCard, badge: "New" },
+  { href: "/dashboard/bill-pay/offline-cc-pay", label: "Offline CC Bill", icon: CreditCard, badge: "New" },
+  { href: "/dashboard/bill-pay/bbps-1", label: "Bharat BillPay (BBPS)", icon: Receipt, badge: "New" },
+  { href: "/dashboard/bill-pay/bbps-2", label: "Unified Bill Platform", icon: Receipt, badge: "New" },
 ];
 
-/** All BBPS / bill-payment services collapsed under a single "BBPS" tab. */
+/** All BBPS / bill-payment services collapsed under a single "Pay Bills" tab. */
 const bbpsGroup: NavItem = {
   href: "/dashboard/bill-pay/credit-card",
-  label: "BBPS",
+  label: "Pay Bills",
   icon: Receipt,
   children: bbpsServices,
 };
@@ -107,11 +110,11 @@ const networkServices: NavItem[] = baseServices.filter((s) => s.href !== "/dashb
 
 const account: NavItem[] = [
   { href: "/dashboard/performance", label: "Performance", icon: Activity },
-  { href: "/dashboard/transactions", label: "Transactions", icon: History },
-  { href: "/dashboard/ledger", label: "Wallet Ledger", icon: BookOpenCheck, badge: "New" },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-  { href: "/dashboard/disputes", label: "Support Tickets", icon: LifeBuoy, badge: "New" }
+  { href: "/dashboard/transactions", label: "Activity", icon: History },
+  { href: "/dashboard/ledger", label: "Ledger", icon: BookOpenCheck, badge: "New" },
+  { href: "/dashboard/profile", label: "My Profile", icon: User },
+  { href: "/dashboard/settings", label: "Preferences", icon: Settings },
+  { href: "/dashboard/disputes", label: "Help & Support", icon: LifeBuoy, badge: "New" }
 ];
 
 /**
@@ -228,22 +231,22 @@ const onboardingGroup: NavItem = {
 /** Workspace tabs shared by admin and sub-admin. Sub-admins are scoped down
  *  through their allowedTabs; with none set they inherit the full menu. */
 const adminWorkspace: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   onboardingGroup,
   { href: "/dashboard/admin/sub-admins", label: "Sub-Admins", icon: UserCog },
   { href: "/dashboard/admin/pg", label: "Payment Gateway", icon: CreditCard, badge: "New" },
   { href: "/dashboard/admin/pos", label: "POS Fleet", icon: Monitor, badge: "New" },
   { href: "/dashboard/admin/qr", label: "QR Collections", icon: QrCode, badge: "New" },
-  { href: "/dashboard/admin/schemes", label: "Scheme Manager", icon: Layers, badge: "New" },
-  { href: "/dashboard/admin/incentives", label: "Reward Incentives", icon: Gift, badge: "New" },
-  { href: "/dashboard/admin/disputes", label: "Disputes & Support", icon: LifeBuoy, badge: "New" },
-  { href: "/dashboard/admin/aml", label: "AML Monitoring", icon: ShieldAlert, badge: "New" },
+  { href: "/dashboard/admin/schemes", label: "Schemes", icon: Layers, badge: "New" },
+  { href: "/dashboard/admin/incentives", label: "Incentives", icon: Gift, badge: "New" },
+  { href: "/dashboard/admin/disputes", label: "Help Desk", icon: LifeBuoy, badge: "New" },
+  { href: "/dashboard/admin/aml", label: "AML Monitor", icon: ShieldAlert, badge: "New" },
   { href: "/dashboard/payout-approvals", label: "Payout Approvals", icon: ListChecks },
-  { href: "/dashboard/admin/services", label: "On/Off Services", icon: Power, badge: "New" },
+  { href: "/dashboard/admin/services", label: "Service Control", icon: Power, badge: "New" },
   { href: "/dashboard/admin/slider", label: "Slider & Pop-ups", icon: Images, badge: "New" },
   { href: "/dashboard/admin/audit", label: "Audit Log", icon: ScrollText },
   { href: "/dashboard/admin/system", label: "System Health", icon: ServerCog },
-  { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+  { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
 ];
 
 export const navByRole: Record<Role, NavGroup[]> = {
@@ -251,23 +254,23 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       heading: "Workspace",
       items: [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/dashboard/admin/admins", label: "Manage Admins", icon: ShieldCheck, badge: "New" },
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+        { href: "/dashboard/admin/admins", label: "Admins", icon: ShieldCheck, badge: "New" },
         onboardingGroup,
         { href: "/dashboard/admin/sub-admins", label: "Sub-Admins", icon: UserCog },
         { href: "/dashboard/admin/pg", label: "Payment Gateway", icon: CreditCard, badge: "New" },
         { href: "/dashboard/admin/pos", label: "POS Fleet", icon: Monitor, badge: "New" },
         { href: "/dashboard/admin/qr", label: "QR Collections", icon: QrCode, badge: "New" },
-        { href: "/dashboard/admin/schemes", label: "Scheme Manager", icon: Layers, badge: "New" },
-        { href: "/dashboard/admin/incentives", label: "Reward Incentives", icon: Gift, badge: "New" },
-        { href: "/dashboard/admin/disputes", label: "Disputes & Support", icon: LifeBuoy, badge: "New" },
-        { href: "/dashboard/admin/aml", label: "AML Monitoring", icon: ShieldAlert, badge: "New" },
+        { href: "/dashboard/admin/schemes", label: "Schemes", icon: Layers, badge: "New" },
+        { href: "/dashboard/admin/incentives", label: "Incentives", icon: Gift, badge: "New" },
+        { href: "/dashboard/admin/disputes", label: "Help Desk", icon: LifeBuoy, badge: "New" },
+        { href: "/dashboard/admin/aml", label: "AML Monitor", icon: ShieldAlert, badge: "New" },
         { href: "/dashboard/payout-approvals", label: "Payout Approvals", icon: ListChecks },
-        { href: "/dashboard/admin/services", label: "On/Off Services", icon: Power, badge: "New" },
+        { href: "/dashboard/admin/services", label: "Service Control", icon: Power, badge: "New" },
         { href: "/dashboard/admin/slider", label: "Slider & Pop-ups", icon: Images, badge: "New" },
         { href: "/dashboard/admin/audit", label: "Audit Log", icon: ScrollText },
         { href: "/dashboard/admin/system", label: "System Health", icon: ServerCog },
-        { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
       ]
     },
     { heading: "Money & Ops", items: masterAdminMoneyOps },
@@ -278,14 +281,14 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       heading: "Workspace",
       items: [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/dashboard/my-scheme", label: "My Scheme", icon: Layers, badge: "New" },
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+        { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
         { href: "/dashboard/rewards", label: "Rewards", icon: Gift, badge: "New" },
-        { href: "/dashboard/pos-booking", label: "Book POS Machine", icon: PackagePlus, badge: "New" },
+        { href: "/dashboard/pos-booking", label: "Order POS", icon: PackagePlus, badge: "New" },
         { href: "/dashboard/pos-rental", label: "POS Rental", icon: ReceiptText, badge: "New" },
-        { href: "/dashboard/earnings", label: "My Earnings", icon: CircleDollarSign, badge: "New" },
-        { href: "/dashboard/funds-request", label: "Funds Request", icon: HandCoins },
-        { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+        { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
+        { href: "/dashboard/funds-request", label: "Add Funds", icon: HandCoins },
+        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
       ]
     },
     { heading: "Services", items: retailerServices },
@@ -296,13 +299,13 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       heading: "Workspace",
       items: [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
         { href: "/dashboard/network", label: "My Retailers", icon: Users },
         { href: "/dashboard/network/onboard", label: "Invite Retailer", icon: PackagePlus },
-        { href: "/dashboard/my-scheme", label: "My Scheme", icon: Layers, badge: "New" },
-        { href: "/dashboard/earnings", label: "My Earnings", icon: CircleDollarSign, badge: "New" },
-        { href: "/dashboard/approvals", label: "Declaration Approvals", icon: FileSignature },
-        { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+        { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
+        { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
+        { href: "/dashboard/approvals", label: "Approvals", icon: FileSignature },
+        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }
@@ -312,13 +315,13 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       heading: "Workspace",
       items: [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
         { href: "/dashboard/network", label: "My Network", icon: Users },
         { href: "/dashboard/network/onboard", label: "Invite Master Distributor", icon: PackagePlus },
-        { href: "/dashboard/my-scheme", label: "My Scheme", icon: Layers, badge: "New" },
-        { href: "/dashboard/earnings", label: "My Earnings", icon: CircleDollarSign, badge: "New" },
-        { href: "/dashboard/approvals", label: "Declaration Approvals", icon: FileSignature },
-        { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+        { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
+        { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
+        { href: "/dashboard/approvals", label: "Approvals", icon: FileSignature },
+        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }
@@ -328,13 +331,13 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       heading: "Workspace",
       items: [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
         { href: "/dashboard/network", label: "My Distributors", icon: Users },
         { href: "/dashboard/network/onboard", label: "Invite Distributor", icon: PackagePlus },
-        { href: "/dashboard/my-scheme", label: "My Scheme", icon: Layers, badge: "New" },
-        { href: "/dashboard/earnings", label: "My Earnings", icon: CircleDollarSign, badge: "New" },
-        { href: "/dashboard/approvals", label: "Declaration Approvals", icon: FileSignature },
-        { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+        { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
+        { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
+        { href: "/dashboard/approvals", label: "Approvals", icon: FileSignature },
+        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }
@@ -350,7 +353,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
     {
       heading: "Finance",
       items: [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/dashboard", label: "Home", icon: LayoutDashboard },
         { href: "/dashboard/admin/wallet-ops", label: "Wallet Balances", icon: Wallet },
         { href: "/dashboard/admin/ledger", label: "Ledger Explorer", icon: BookOpenCheck },
         // Read-only for finance: the queue is viewable but Approve/Reject is
@@ -358,10 +361,10 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/admin/pos-slips", label: "External POS Slips", icon: ListChecks },
         // "Company Earnings" (Revenue Wallet) is owner-only; finance uses the
         // Commission Distributed + Per-Txn Earnings reports instead.
-        { href: "/dashboard/admin/commission-report", label: "Commission Distributed", icon: HandCoins },
+        { href: "/dashboard/admin/commission-report", label: "Commission Paid", icon: HandCoins },
         { href: "/dashboard/admin/earnings", label: "Per-Txn Earnings", icon: TrendingUp },
-        { href: "/dashboard/admin/analytics", label: "Business Analytics", icon: LineChart },
-        { href: "/dashboard/reports", label: "Reports", icon: BarChart3 }
+        { href: "/dashboard/admin/analytics", label: "Analytics", icon: LineChart },
+        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }

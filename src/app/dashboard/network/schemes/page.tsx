@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowsClockwise } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { EmptyState } from "@/components/dashboard/patterns";
 
 /**
  * Network Schemes page has been deprecated. Schemes are now assigned by admin only.
@@ -19,16 +21,17 @@ export default function NetworkSchemesDeprecated() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Notice"
-        title="Scheme Management Moved"
-        description="Schemes are now managed and assigned by admin only. You will be redirected to your dashboard."
+        eyebrow="Network · Notice"
+        title="Scheme management has moved"
+        description="Schemes are now managed and assigned by admin only. Taking you back to your dashboard."
       />
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
-        <p className="text-sm text-amber-800">
-          The network scheme workspace has been removed. Your scheme is assigned directly by admin.
-          Contact your admin if you need scheme changes.
-        </p>
-      </div>
+      <EmptyState
+        bordered
+        tone="amber"
+        icon={ArrowsClockwise}
+        title="This workspace has been retired"
+        description="Your scheme is assigned directly by admin. Contact your admin if you need scheme changes — you'll be redirected in a moment."
+      />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { AlertCircle } from "lucide-react";
+import { WarningCircle, ArrowCounterClockwise } from "@phosphor-icons/react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { AuthCard } from "@/components/auth/AuthCard";
 
 export default function AuthError({
   error,
@@ -17,19 +19,22 @@ export default function AuthError({
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center p-4">
-      <div className="max-w-md rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-lg">
-        <AlertCircle className="mx-auto h-12 w-12 text-rose-500" />
-        <h2 className="mt-4 text-xl font-bold text-ink-900">
-          Something went wrong
-        </h2>
-        <p className="mt-2 text-sm text-ink-600">
-          {error.message || "An unexpected error occurred. Please try again."}
-        </p>
-        <Button className="mt-6" onClick={reset}>
-          Try again
-        </Button>
-      </div>
-    </div>
+    <AuthCard className="text-center">
+      <IconTile icon={WarningCircle} tone="coral" size="xl" className="mx-auto rounded-3xl" />
+      <p className="mt-6 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
+        <span className="brand-dot" aria-hidden />
+        Something went wrong
+      </p>
+      <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">
+        We hit a snag
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-ink-500" aria-live="polite">
+        {error.message || "An unexpected error occurred. Please try again."}
+      </p>
+      <Button size="lg" className="mt-6 w-full" onClick={reset}>
+        <ArrowCounterClockwise size={16} weight="bold" aria-hidden />
+        Try again
+      </Button>
+    </AuthCard>
   );
 }

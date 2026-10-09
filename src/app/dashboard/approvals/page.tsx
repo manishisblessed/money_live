@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
   XCircle,
-  Clock,
   Loader2,
   FileSignature,
   FileText,
@@ -13,10 +12,21 @@ import {
   RefreshCw,
   AlertTriangle,
   PenTool,
-  GitBranch,
 } from "lucide-react";
+import { CheckCircle, GitBranch as GitBranchPh, SealCheck } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { IconTile } from "@/components/ui/Icon";
+import {
+  EmptyState,
+  FadeIn,
+  KeyValueList,
+  SectionCard,
+  Stagger,
+  StaggerItem,
+  StatusChip,
+} from "@/components/dashboard/patterns";
 
 type Approval = {
   id: string;
@@ -116,9 +126,9 @@ export default function ApprovalsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Network"
-        title="Declaration Approvals"
-        description="Review and approve onboarding declarations from your network members."
+        eyebrow="Network · Approvals"
+        title="Declaration approvals"
+        description="Review and sign onboarding declarations and transfer requests from your network."
         actions={
           <Button variant="outline" onClick={fetchApprovals} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
@@ -128,8 +138,8 @@ export default function ApprovalsPage() {
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          <AlertTriangle className="mr-2 inline h-4 w-4" /> {error}
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
+          <AlertTriangle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
 
@@ -138,134 +148,135 @@ export default function ApprovalsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
         </div>
       ) : (
-        <>
+        <FadeIn className="space-y-8">
           {/* Pending Approvals */}
           {pending.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-lg font-bold text-ink-900">Pending Approvals ({pending.length})</h2>
-              <div className="grid gap-4 md:grid-cols-2">
+            <section className="space-y-3">
+              <SectionTitle icon={<IconTile icon={SealCheck} tone="amber" size="sm" />} title="Pending approvals" count={pending.length} />
+              <Stagger className="grid gap-4 md:grid-cols-2">
                 {pending.map((a) => (
-                  <ApprovalCard key={a.id} approval={a} onReview={() => startReview(a)} />
+                  <StaggerItem key={a.id}>
+                    <ApprovalCard approval={a} onReview={() => startReview(a)} />
+                  </StaggerItem>
                 ))}
-              </div>
-            </div>
+              </Stagger>
+            </section>
           )}
 
           {pending.length === 0 && (
-            <div className="rounded-2xl border border-ink-100 bg-white p-12 text-center">
-              <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-400" />
-              <p className="mt-3 text-lg font-semibold text-ink-900">All caught up!</p>
-              <p className="mt-1 text-ink-500">No pending declaration approvals.</p>
-            </div>
+            <EmptyState
+              bordered
+              tone="accent"
+              icon={CheckCircle}
+              title="All caught up"
+              description="No pending declaration approvals right now."
+            />
           )}
 
           {/* Pending Transfer Approvals */}
           {pendingTransfers.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-ink-900">
-                <GitBranch className="h-5 w-5 text-brand-600" />
-                Transfer Requests ({pendingTransfers.length})
-              </h2>
-              <div className="grid gap-4 md:grid-cols-2">
+            <section className="space-y-3">
+              <SectionTitle icon={<IconTile icon={GitBranchPh} tone="brand" size="sm" />} title="Transfer requests" count={pendingTransfers.length} />
+              <Stagger className="grid gap-4 md:grid-cols-2">
                 {pendingTransfers.map((t) => (
-                  <TransferCard key={t.id} transfer={t} onReview={() => startTransferReview(t)} />
+                  <StaggerItem key={t.id}>
+                    <TransferCard transfer={t} onReview={() => startTransferReview(t)} />
+                  </StaggerItem>
                 ))}
-              </div>
-            </div>
+              </Stagger>
+            </section>
           )}
 
           {/* Completed */}
           {completed.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-lg font-bold text-ink-900">History</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <section className="space-y-3">
+              <SectionTitle icon={<IconTile icon={SealCheck} tone="ink" size="sm" />} title="History" count={completed.length} />
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {completed.map((a) => (
                   <ApprovalCard key={a.id} approval={a} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Completed Transfers */}
           {completedTransfers.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-ink-900">
-                <GitBranch className="h-5 w-5 text-ink-400" />
-                Transfer History
-              </h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <section className="space-y-3">
+              <SectionTitle icon={<IconTile icon={GitBranchPh} tone="ink" size="sm" />} title="Transfer history" count={completedTransfers.length} />
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {completedTransfers.map((t) => (
                   <TransferCard key={t.id} transfer={t} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
-        </>
+        </FadeIn>
+      )}
+    </div>
+  );
+}
+
+function SectionTitle({ icon, title, count }: { icon: React.ReactNode; title: string; count?: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      {icon}
+      <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">{title}</h2>
+      {count !== undefined && (
+        <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-bold tabular-nums text-ink-600">{count}</span>
       )}
     </div>
   );
 }
 
 function ApprovalCard({ approval, onReview }: { approval: Approval; onReview?: () => void }) {
-  const statusConfig = {
-    PENDING: { color: "bg-amber-100 text-amber-800", icon: Clock, label: "Pending" },
-    APPROVED: { color: "bg-emerald-100 text-emerald-800", icon: CheckCircle2, label: "Approved" },
-    REJECTED: { color: "bg-rose-100 text-rose-800", icon: XCircle, label: "Rejected" },
-    EXPIRED: { color: "bg-ink-100 text-ink-600", icon: Clock, label: "Expired" },
-  }[approval.status] ?? { color: "bg-ink-100 text-ink-600", icon: Clock, label: approval.status };
-
-  const StatusIcon = statusConfig.icon;
-
+  const isPending = approval.status === "PENDING";
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="font-semibold text-ink-900">{approval.onboardeeName}</p>
-          <p className="text-xs text-ink-500">{approval.onboardeeRole.replace(/_/g, " ")}</p>
+    <div
+      className={`flex h-full flex-col rounded-3xl bg-white p-5 ring-1 shadow-sm ${
+        isPending ? "ring-amber-200" : "ring-ink-100"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{approval.onboardeeName}</p>
+          <p className="text-xs capitalize text-ink-500">{approval.onboardeeRole.replace(/_/g, " ").toLowerCase()}</p>
         </div>
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${statusConfig.color}`}>
-          <StatusIcon className="h-3 w-3" />
-          {statusConfig.label}
-        </span>
+        <StatusChip status={approval.status} size="sm" />
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-        <div>
-          <p className="text-ink-400 text-xs">Phone</p>
-          <p className="text-ink-700">{approval.onboardeePhone}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">Email</p>
-          <p className="text-ink-700 truncate">{approval.onboardeeEmail}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">Sent</p>
-          <p className="text-ink-700">{new Date(approval.sentAt).toLocaleDateString()}</p>
-        </div>
-        {approval.approvedAt && (
-          <div>
-            <p className="text-ink-400 text-xs">Approved</p>
-            <p className="text-ink-700">{new Date(approval.approvedAt).toLocaleDateString()}</p>
-          </div>
+      <KeyValueList
+        className="mt-4"
+        layout="grid"
+        items={[
+          { label: "Phone", value: approval.onboardeePhone },
+          { label: "Email", value: approval.onboardeeEmail },
+          { label: "Sent", value: new Date(approval.sentAt).toLocaleDateString() },
+          ...(approval.approvedAt
+            ? [{ label: "Approved", value: new Date(approval.approvedAt).toLocaleDateString() }]
+            : []),
+        ]}
+      />
+      {approval.rejectedReason && (
+        <p className="mt-3 rounded-2xl bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-inset ring-rose-100">
+          Reason: {approval.rejectedReason}
+        </p>
+      )}
+      <div className="mt-auto pt-4">
+        {onReview && isPending && (
+          <Button className="w-full" onClick={onReview}>
+            <FileSignature className="h-4 w-4" /> Review &amp; approve
+          </Button>
+        )}
+        {approval.status === "APPROVED" && (
+          <a
+            href={`/api/declarations/${approval.id}/document`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-ink-700 ring-1 ring-inset ring-ink-200 transition-colors hover:bg-ink-50 focus-energy"
+          >
+            <FileText className="h-4 w-4" /> View signed declaration
+          </a>
         )}
       </div>
-      {approval.rejectedReason && (
-        <p className="mt-2 text-xs text-rose-600">Reason: {approval.rejectedReason}</p>
-      )}
-      {onReview && approval.status === "PENDING" && (
-        <Button className="mt-4 w-full" onClick={onReview}>
-          <FileSignature className="h-4 w-4" /> Review & Approve
-        </Button>
-      )}
-      {approval.status === "APPROVED" && (
-        <a
-          href={`/api/declarations/${approval.id}/document`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ink-200 bg-white px-4 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors"
-        >
-          <FileText className="h-4 w-4" /> View Signed Declaration
-        </a>
-      )}
     </div>
   );
 }
@@ -595,32 +606,36 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
 
   if (success) {
     return (
-      <div className="mx-auto max-w-lg space-y-6 py-12 text-center">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500 text-white">
-          <CheckCircle2 className="h-8 w-8" />
-        </div>
-        <h2 className="text-xl font-bold text-ink-900">Declaration Approved</h2>
-        <p className="text-ink-600">
-          You have approved <strong>{approval.onboardeeName}</strong>&apos;s onboarding as a{" "}
-          <strong>{approval.onboardeeRole.replace(/_/g, " ")}</strong>.
-          They can now complete their registration.
-        </p>
-        <Button onClick={onBack}>Back to Approvals</Button>
+      <div className="mx-auto max-w-lg">
+        <FadeIn>
+          <SectionCard tone="accent" padding="lg" className="text-center">
+            <IconTile icon={CheckCircle} tone="accent" size="xl" className="mx-auto" />
+            <h2 className="mt-5 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">Declaration approved</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink-600">
+              You have approved <strong>{approval.onboardeeName}</strong>&apos;s onboarding as a{" "}
+              <strong className="capitalize">{approval.onboardeeRole.replace(/_/g, " ").toLowerCase()}</strong>.
+              They can now complete their registration.
+            </p>
+            <Button className="mt-6" onClick={onBack}>Back to approvals</Button>
+          </SectionCard>
+        </FadeIn>
       </div>
     );
   }
 
   if (rejected) {
     return (
-      <div className="mx-auto max-w-lg space-y-6 py-12 text-center">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-rose-500 text-white">
-          <XCircle className="h-8 w-8" />
-        </div>
-        <h2 className="text-xl font-bold text-ink-900">Declaration Rejected</h2>
-        <p className="text-ink-600">
-          You have rejected <strong>{approval.onboardeeName}</strong>&apos;s onboarding declaration.
-        </p>
-        <Button onClick={onBack}>Back to Approvals</Button>
+      <div className="mx-auto max-w-lg">
+        <FadeIn>
+          <SectionCard tone="coral" padding="lg" className="text-center">
+            <IconTile tone="coral" size="xl" className="mx-auto"><XCircle className="h-7 w-7" /></IconTile>
+            <h2 className="mt-5 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">Declaration rejected</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink-600">
+              You have rejected <strong>{approval.onboardeeName}</strong>&apos;s onboarding declaration.
+            </p>
+            <Button className="mt-6" onClick={onBack}>Back to approvals</Button>
+          </SectionCard>
+        </FadeIn>
       </div>
     );
   }
@@ -628,55 +643,43 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Network · Approvals"
         title={`Review: ${approval.onboardeeName}`}
-        description={`${approval.onboardeeRole.replace(/_/g, " ")} onboarding declaration approval`}
+        description={`${approval.onboardeeRole.replace(/_/g, " ").toLowerCase()} onboarding declaration approval`}
         actions={
           <Button variant="outline" onClick={onBack}>Back</Button>
         }
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          <AlertTriangle className="mr-2 inline h-4 w-4" /> {error}
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
+          <AlertTriangle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
 
       {/* Applicant Info */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <h3 className="mb-3 font-bold text-ink-900">Applicant Details</h3>
-        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
-          <div>
-            <p className="text-ink-400 text-xs">Name</p>
-            <p className="font-medium text-ink-900">{approval.onboardeeName}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Role</p>
-            <p className="font-medium text-ink-900">{approval.onboardeeRole.replace(/_/g, " ")}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Phone</p>
-            <p className="font-medium text-ink-900">{approval.onboardeePhone}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Email</p>
-            <p className="font-medium text-ink-900">{approval.onboardeeEmail}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Requested</p>
-            <p className="font-medium text-ink-900">{new Date(approval.sentAt).toLocaleString()}</p>
-          </div>
-        </div>
-      </div>
+      <SectionCard title="Applicant details">
+        <KeyValueList
+          layout="grid"
+          items={[
+            { label: "Name", value: approval.onboardeeName },
+            { label: "Role", value: <span className="capitalize">{approval.onboardeeRole.replace(/_/g, " ").toLowerCase()}</span> },
+            { label: "Phone", value: approval.onboardeePhone },
+            { label: "Email", value: approval.onboardeeEmail },
+            { label: "Requested", value: new Date(approval.sentAt).toLocaleString() },
+          ]}
+        />
+      </SectionCard>
 
       {/* Declaration Warning + document view */}
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+      <SectionCard tone="amber">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
-          <div className="text-sm text-amber-900">
-            <p className="font-semibold mb-2">Important: Responsibility Declaration</p>
-            <p>
+          <IconTile tone="amber" size="sm"><AlertTriangle className="h-4 w-4" /></IconTile>
+          <div className="text-sm text-ink-800">
+            <p className="mb-2 font-semibold text-ink-900">Important: responsibility declaration</p>
+            <p className="text-ink-700">
               By approving this declaration, you accept full responsibility for all activities,
-              transactions, and obligations of this {approval.onboardeeRole.replace(/_/g, " ")}.
+              transactions, and obligations of this {approval.onboardeeRole.replace(/_/g, " ").toLowerCase()}.
               This includes liability for chargebacks, fraud, disputes, and any financial
               losses as outlined in the declaration form.
             </p>
@@ -684,33 +687,31 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
               href={`/api/declarations/${approval.id}/document`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 transition-colors"
+              className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-amber-800 ring-1 ring-inset ring-amber-300 transition-colors hover:bg-amber-100 focus-energy"
             >
-              <FileText className="h-4 w-4" /> View / Download the responsibility declaration
+              <FileText className="h-4 w-4" /> View / download the responsibility declaration
             </a>
           </div>
         </div>
-      </div>
+      </SectionCard>
 
       {/* Signature */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <FileSignature className="h-5 w-5 text-brand-600" />
-            <h3 className="font-bold text-ink-900">Your Signature</h3>
-            {hasSigned && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-          </div>
-          {hasSigned && (
-            <button
-              type="button"
-              onClick={clearSignature}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-600 hover:bg-ink-50"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> Clear
-            </button>
-          )}
-        </div>
-        <div className="relative rounded-xl border-2 border-dashed border-ink-200 bg-white overflow-hidden">
+      <SectionCard
+        icon={<IconTile tone="brand" size="sm"><FileSignature className="h-4 w-4" /></IconTile>}
+        title="Your signature"
+        description="Draw with mouse or touch — captured exactly as drawn."
+        action={
+          <>
+            {hasSigned && <Badge variant="success" dot>Signed</Badge>}
+            {hasSigned && (
+              <Button type="button" variant="outline" size="sm" onClick={clearSignature}>
+                <RefreshCw className="h-3.5 w-3.5" /> Clear
+              </Button>
+            )}
+          </>
+        }
+      >
+        <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-ink-200 bg-white">
           <canvas
             ref={canvasRef}
             className="block w-full touch-none cursor-crosshair"
@@ -735,19 +736,15 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
             <PenTool className="h-3.5 w-3.5" />
           </div>
         </div>
-        <p className="mt-2 text-xs text-ink-400">
-          Draw your signature using mouse or touch. Signature is captured exactly as drawn.
-        </p>
-      </div>
+      </SectionCard>
 
       {/* Selfie */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <div className="flex items-center gap-2 mb-3">
-          <Camera className="h-5 w-5 text-brand-600" />
-          <h3 className="font-bold text-ink-900">Approval Selfie</h3>
-          {selfieDataUrl && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-        </div>
-
+      <SectionCard
+        icon={<IconTile tone="royal" size="sm"><Camera className="h-4 w-4" /></IconTile>}
+        title="Approval selfie"
+        description="A quick photo of you, taken now."
+        action={selfieDataUrl ? <Badge variant="success" dot>Captured</Badge> : undefined}
+      >
         {/* Native camera-app input (front-camera hint via capture="user"). */}
         <input
           ref={fileInputRef}
@@ -796,68 +793,68 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
 
         {selfieDataUrl && (
           <div className="space-y-3">
-            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-emerald-200">
+            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl ring-2 ring-emerald-200">
               <img src={selfieDataUrl} alt="Approval selfie" className="w-full" />
             </div>
-            <button type="button" onClick={retakeSelfie} className="text-xs text-brand-600 hover:underline">
+            <button type="button" onClick={retakeSelfie} className="text-xs font-semibold text-brand-600 hover:underline">
               Retake selfie
             </button>
           </div>
         )}
-      </div>
+      </SectionCard>
 
       {/* GPS Location */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <div className="flex items-center gap-2 mb-3">
-          <MapPin className="h-5 w-5 text-brand-600" />
-          <h3 className="font-bold text-ink-900">Location Verification</h3>
-          {gps && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-        </div>
-
+      <SectionCard
+        icon={<IconTile tone="accent" size="sm"><MapPin className="h-4 w-4" /></IconTile>}
+        title="Location verification"
+        description="We record where you approved from."
+        action={gps ? <Badge variant="success" dot>Captured</Badge> : undefined}
+      >
         {!gps && (
           <div className="space-y-2">
             <Button variant="outline" onClick={getLocation} disabled={gpsLoading}>
               {gpsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-              {gpsLoading ? "Getting location..." : "Capture My Location"}
+              {gpsLoading ? "Getting location…" : "Capture my location"}
             </Button>
             {gpsError && <p className="text-xs text-rose-600">{gpsError}</p>}
           </div>
         )}
 
         {gps && (
-          <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-sm">
-            <p className="text-emerald-800">
+          <div className="rounded-2xl bg-emerald-50 p-3 text-sm ring-1 ring-inset ring-emerald-200">
+            <p className="font-medium text-emerald-800">
               Location captured: {gps.lat.toFixed(6)}, {gps.lng.toFixed(6)}
             </p>
-            <p className="text-xs text-emerald-600 mt-1">
+            <p className="mt-1 text-xs text-emerald-600">
               {new Date().toLocaleString()}
             </p>
           </div>
         )}
-      </div>
+      </SectionCard>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-start gap-3 rounded-3xl bg-white p-4 ring-1 ring-ink-100 shadow-sm">
         <Button
           onClick={handleApprove}
           isLoading={submitting}
           disabled={!hasSigned || !selfieDataUrl || !gps}
           className="flex-1"
+          size="lg"
         >
           <CheckCircle2 className="h-4 w-4" />
-          Approve Declaration
+          Approve declaration
         </Button>
         {!showReject ? (
-          <Button variant="outline" onClick={() => setShowReject(true)} className="text-rose-600 border-rose-200 hover:bg-rose-50">
+          <Button variant="outline" size="lg" onClick={() => setShowReject(true)} className="border-rose-200 text-rose-600 hover:bg-rose-50">
             <XCircle className="h-4 w-4" /> Reject
           </Button>
         ) : (
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 basis-full space-y-2 sm:basis-auto">
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Reason for rejection (min 5 characters)..."
-              className="w-full rounded-lg border border-rose-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+              placeholder="Reason for rejection (min 5 characters)…"
+              className="w-full rounded-2xl border border-rose-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
               rows={2}
             />
             <div className="flex gap-2">
@@ -866,10 +863,10 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
                 onClick={handleReject}
                 isLoading={submitting}
                 disabled={rejectReason.length < 5}
-                className="text-rose-600 border-rose-200"
+                className="border-rose-200 text-rose-600"
               >
                 <XCircle className="h-4 w-4" />
-                Confirm Reject
+                Confirm reject
               </Button>
               <Button variant="outline" onClick={() => setShowReject(false)}>Cancel</Button>
             </div>
@@ -882,69 +879,65 @@ function ApprovalReviewPage({ approval, onBack }: { approval: Approval; onBack: 
 
 /* ─── Transfer Approval Card ─────────────────────────────────────────────── */
 
+const TRANSFER_STATUS_LABEL: Record<string, string> = {
+  PENDING_DECLARATION: "Pending approval",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  EXPIRED: "Expired",
+  CANCELLED: "Cancelled",
+};
+
 function TransferCard({ transfer, onReview }: { transfer: TransferRequest; onReview?: () => void }) {
-  const statusConfig = {
-    PENDING_DECLARATION: { color: "bg-amber-100 text-amber-800", icon: Clock, label: "Pending Approval" },
-    APPROVED: { color: "bg-emerald-100 text-emerald-800", icon: CheckCircle2, label: "Approved" },
-    REJECTED: { color: "bg-rose-100 text-rose-800", icon: XCircle, label: "Rejected" },
-    EXPIRED: { color: "bg-ink-100 text-ink-600", icon: Clock, label: "Expired" },
-    CANCELLED: { color: "bg-ink-100 text-ink-600", icon: XCircle, label: "Cancelled" },
-  }[transfer.status] ?? { color: "bg-ink-100 text-ink-600", icon: Clock, label: transfer.status };
-
-  const StatusIcon = statusConfig.icon;
-
+  const isPending = transfer.status === "PENDING_DECLARATION";
   return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <GitBranch className="h-4 w-4 text-brand-600" />
-            <p className="font-semibold text-ink-900">{transfer.user.name}</p>
-            {transfer.user.userCode && <span className="font-medium text-brand-600 text-sm">{transfer.user.userCode}</span>}
+    <div
+      className={`flex h-full flex-col rounded-3xl bg-white p-5 ring-1 shadow-sm ${
+        isPending ? "ring-brand-200" : "ring-ink-100"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <IconTile icon={GitBranchPh} tone="brand" size="sm" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{transfer.user.name}</p>
+              {transfer.user.userCode && <Badge variant="brand" size="sm" className="font-mono">{transfer.user.userCode}</Badge>}
+            </div>
+            <p className="text-xs capitalize text-ink-500">{transfer.user.role.replace(/_/g, " ").toLowerCase()} · transfer request</p>
           </div>
-          <p className="text-xs text-ink-500">{transfer.user.role.replace(/_/g, " ")} · Transfer Request</p>
         </div>
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${statusConfig.color}`}>
-          <StatusIcon className="h-3 w-3" />
-          {statusConfig.label}
-        </span>
+        <StatusChip
+          status={isPending ? "PENDING" : transfer.status}
+          label={TRANSFER_STATUS_LABEL[transfer.status] ?? transfer.status}
+          size="sm"
+        />
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-        <div>
-          <p className="text-ink-400 text-xs">Phone</p>
-          <p className="text-ink-700">{transfer.user.phone}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">Shop</p>
-          <p className="text-ink-700 truncate">{transfer.user.shopName ?? "—"}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">From (old parent)</p>
-          <p className="text-ink-700">{transfer.oldParent.name}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">Initiated by</p>
-          <p className="text-ink-700">{transfer.initiatedBy.name}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">Requested</p>
-          <p className="text-ink-700">{new Date(transfer.createdAt).toLocaleDateString("en-IN")}</p>
-        </div>
-        <div>
-          <p className="text-ink-400 text-xs">Expires</p>
-          <p className="text-ink-700">{new Date(transfer.expiresAt).toLocaleDateString("en-IN")}</p>
-        </div>
-      </div>
+      <KeyValueList
+        className="mt-4"
+        layout="grid"
+        items={[
+          { label: "Phone", value: transfer.user.phone },
+          { label: "Shop", value: transfer.user.shopName ?? "—" },
+          { label: "From (old parent)", value: transfer.oldParent.name },
+          { label: "Initiated by", value: transfer.initiatedBy.name },
+          { label: "Requested", value: new Date(transfer.createdAt).toLocaleDateString("en-IN") },
+          { label: "Expires", value: new Date(transfer.expiresAt).toLocaleDateString("en-IN") },
+        ]}
+      />
       {transfer.reason && (
-        <p className="mt-2 text-xs text-ink-500">Reason: {transfer.reason}</p>
+        <p className="mt-3 text-xs text-ink-500">Reason: {transfer.reason}</p>
       )}
       {transfer.rejectedReason && (
-        <p className="mt-2 text-xs text-rose-600">Rejected: {transfer.rejectedReason}</p>
+        <p className="mt-3 rounded-2xl bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-inset ring-rose-100">
+          Rejected: {transfer.rejectedReason}
+        </p>
       )}
-      {onReview && transfer.status === "PENDING_DECLARATION" && (
-        <Button className="mt-4 w-full" onClick={onReview}>
-          <FileSignature className="h-4 w-4" /> Review & Accept Transfer
-        </Button>
+      {onReview && isPending && (
+        <div className="mt-auto pt-4">
+          <Button className="w-full" onClick={onReview}>
+            <FileSignature className="h-4 w-4" /> Review &amp; accept transfer
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -1208,35 +1201,39 @@ function TransferReviewPage({ transfer, onBack }: { transfer: TransferRequest; o
 
   if (success) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-12 text-center">
-          <CheckCircle2 className="mx-auto h-16 w-16 text-emerald-500" />
-          <h2 className="mt-4 text-2xl font-bold text-emerald-800">Transfer Approved!</h2>
-          <p className="mt-2 text-emerald-700">
-            {transfer.user.name} has been successfully transferred under your account.
-            Their previous scheme has been cleared — you can now assign them a new one.
-          </p>
-          <Button className="mt-6" onClick={onBack}>
-            Back to Approvals
-          </Button>
-        </div>
+      <div className="mx-auto max-w-lg">
+        <FadeIn>
+          <SectionCard tone="accent" padding="lg" className="text-center">
+            <IconTile icon={CheckCircle} tone="accent" size="xl" className="mx-auto" />
+            <h2 className="mt-5 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">Transfer approved</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink-600">
+              {transfer.user.name} has been transferred under your account.
+              Their previous scheme has been cleared — you can now assign them a new one.
+            </p>
+            <Button className="mt-6" onClick={onBack}>
+              Back to approvals
+            </Button>
+          </SectionCard>
+        </FadeIn>
       </div>
     );
   }
 
   if (rejected) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-12 text-center">
-          <XCircle className="mx-auto h-16 w-16 text-rose-500" />
-          <h2 className="mt-4 text-2xl font-bold text-rose-800">Transfer Rejected</h2>
-          <p className="mt-2 text-rose-700">
-            You have rejected the transfer of {transfer.user.name}. The Master Admin has been notified.
-          </p>
-          <Button className="mt-6" onClick={onBack}>
-            Back to Approvals
-          </Button>
-        </div>
+      <div className="mx-auto max-w-lg">
+        <FadeIn>
+          <SectionCard tone="coral" padding="lg" className="text-center">
+            <IconTile tone="coral" size="xl" className="mx-auto"><XCircle className="h-7 w-7" /></IconTile>
+            <h2 className="mt-5 font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">Transfer rejected</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink-600">
+              You have rejected the transfer of {transfer.user.name}. The Master Admin has been notified.
+            </p>
+            <Button className="mt-6" onClick={onBack}>
+              Back to approvals
+            </Button>
+          </SectionCard>
+        </FadeIn>
       </div>
     );
   }
@@ -1244,9 +1241,9 @@ function TransferReviewPage({ transfer, onBack }: { transfer: TransferRequest; o
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Transfer Approval"
+        eyebrow="Network · Transfer approval"
         title={`Accept ${transfer.user.name}?`}
-        description={`Master Admin wants to transfer this ${transfer.user.role.replace(/_/g, " ")} under your account.`}
+        description={`Master Admin wants to transfer this ${transfer.user.role.replace(/_/g, " ").toLowerCase()} under your account.`}
         actions={
           <Button variant="outline" onClick={onBack}>
             Back to list
@@ -1255,63 +1252,53 @@ function TransferReviewPage({ transfer, onBack }: { transfer: TransferRequest; o
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          <AlertTriangle className="mr-2 inline h-4 w-4" /> {error}
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
+          <AlertTriangle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
 
       {/* Transfer Details */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <h3 className="font-bold text-ink-900 mb-3">Transfer Details</h3>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-ink-400 text-xs">User being transferred</p>
-            <p className="font-medium text-ink-900">
-              {transfer.user.name}
-              {transfer.user.userCode && <span className="ml-2 text-brand-600">{transfer.user.userCode}</span>}
-            </p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Role</p>
-            <p className="text-ink-700">{transfer.user.role.replace(/_/g, " ")}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Phone</p>
-            <p className="text-ink-700">{transfer.user.phone}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Email</p>
-            <p className="text-ink-700 truncate">{transfer.user.email}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Shop</p>
-            <p className="text-ink-700">{transfer.user.shopName ?? "—"}</p>
-          </div>
-          <div>
-            <p className="text-ink-400 text-xs">Previous parent</p>
-            <p className="text-ink-700">{transfer.oldParent.name} ({transfer.oldParent.role.replace(/_/g, " ")})</p>
-          </div>
-          {transfer.reason && (
-            <div className="col-span-2">
-              <p className="text-ink-400 text-xs">Reason for transfer</p>
-              <p className="text-ink-700">{transfer.reason}</p>
-            </div>
-          )}
-        </div>
-        <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
-          By approving, you accept responsibility for this user in your network. Their scheme 
+      <SectionCard
+        icon={<IconTile icon={GitBranchPh} tone="brand" size="sm" />}
+        title="Transfer details"
+      >
+        <KeyValueList
+          layout="grid"
+          items={[
+            {
+              label: "User being transferred",
+              value: (
+                <span className="inline-flex flex-wrap items-center gap-2">
+                  {transfer.user.name}
+                  {transfer.user.userCode && <Badge variant="brand" size="sm" className="font-mono">{transfer.user.userCode}</Badge>}
+                </span>
+              ),
+            },
+            { label: "Role", value: <span className="capitalize">{transfer.user.role.replace(/_/g, " ").toLowerCase()}</span> },
+            { label: "Phone", value: transfer.user.phone },
+            { label: "Email", value: transfer.user.email },
+            { label: "Shop", value: transfer.user.shopName ?? "—" },
+            {
+              label: "Previous parent",
+              value: `${transfer.oldParent.name} (${transfer.oldParent.role.replace(/_/g, " ").toLowerCase()})`,
+            },
+            ...(transfer.reason ? [{ label: "Reason for transfer", value: transfer.reason, wide: true }] : []),
+          ]}
+        />
+        <div className="mt-4 rounded-2xl bg-amber-50 p-3 text-xs text-amber-800 ring-1 ring-inset ring-amber-200">
+          By approving, you accept responsibility for this user in your network. Their scheme
           will be cleared and you can assign a new one from your commission structure.
         </div>
-      </div>
+      </SectionCard>
 
       {/* Signature */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <div className="flex items-center gap-2 mb-3">
-          <PenTool className="h-5 w-5 text-brand-600" />
-          <h3 className="font-bold text-ink-900">Your Signature</h3>
-          {hasSigned && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-        </div>
-        <div className="rounded-xl border-2 border-dashed border-ink-200 bg-ink-50">
+      <SectionCard
+        icon={<IconTile tone="brand" size="sm"><PenTool className="h-4 w-4" /></IconTile>}
+        title="Your signature"
+        description="Draw with mouse or touch."
+        action={hasSigned ? <Badge variant="success" dot>Signed</Badge> : undefined}
+      >
+        <div className="overflow-hidden rounded-2xl border-2 border-dashed border-ink-200 bg-ink-50">
           <canvas
             ref={canvasRef}
             className="w-full cursor-crosshair touch-none"
@@ -1325,19 +1312,18 @@ function TransferReviewPage({ transfer, onBack }: { transfer: TransferRequest; o
             onTouchEnd={stopDraw}
           />
         </div>
-        <button type="button" onClick={clearSignature} className="mt-2 text-xs text-brand-600 hover:underline">
+        <button type="button" onClick={clearSignature} className="mt-2 text-xs font-semibold text-brand-600 hover:underline">
           Clear signature
         </button>
-      </div>
+      </SectionCard>
 
       {/* Selfie */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <div className="flex items-center gap-2 mb-3">
-          <Camera className="h-5 w-5 text-brand-600" />
-          <h3 className="font-bold text-ink-900">Selfie Verification</h3>
-          {selfieDataUrl && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-        </div>
-
+      <SectionCard
+        icon={<IconTile tone="royal" size="sm"><Camera className="h-4 w-4" /></IconTile>}
+        title="Selfie verification"
+        description="A quick photo of you, taken now."
+        action={selfieDataUrl ? <Badge variant="success" dot>Captured</Badge> : undefined}
+      >
         {!selfieDataUrl && !cameraOpen && (
           <div className="flex flex-col gap-2">
             <Button variant="outline" onClick={startCamera} disabled={cameraStarting}>
@@ -1377,63 +1363,64 @@ function TransferReviewPage({ transfer, onBack }: { transfer: TransferRequest; o
 
         {selfieDataUrl && (
           <div className="space-y-3">
-            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-emerald-200">
+            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl ring-2 ring-emerald-200">
               <img src={selfieDataUrl} alt="Approval selfie" className="w-full" />
             </div>
-            <button type="button" onClick={retakeSelfie} className="text-xs text-brand-600 hover:underline">
+            <button type="button" onClick={retakeSelfie} className="text-xs font-semibold text-brand-600 hover:underline">
               Retake selfie
             </button>
           </div>
         )}
-      </div>
+      </SectionCard>
 
       {/* GPS */}
-      <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-soft">
-        <div className="flex items-center gap-2 mb-3">
-          <MapPin className="h-5 w-5 text-brand-600" />
-          <h3 className="font-bold text-ink-900">Location Verification</h3>
-          {gps && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-        </div>
+      <SectionCard
+        icon={<IconTile tone="accent" size="sm"><MapPin className="h-4 w-4" /></IconTile>}
+        title="Location verification"
+        description="We record where you approved from."
+        action={gps ? <Badge variant="success" dot>Captured</Badge> : undefined}
+      >
         {!gps && (
           <div className="space-y-2">
             <Button variant="outline" onClick={getLocation} disabled={gpsLoading}>
               {gpsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-              {gpsLoading ? "Getting location..." : "Capture My Location"}
+              {gpsLoading ? "Getting location…" : "Capture my location"}
             </Button>
             {gpsError && <p className="text-xs text-rose-600">{gpsError}</p>}
           </div>
         )}
         {gps && (
-          <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-sm">
-            <p className="text-emerald-800">
+          <div className="rounded-2xl bg-emerald-50 p-3 text-sm ring-1 ring-inset ring-emerald-200">
+            <p className="font-medium text-emerald-800">
               Location captured: {gps.lat.toFixed(6)}, {gps.lng.toFixed(6)}
             </p>
           </div>
         )}
-      </div>
+      </SectionCard>
 
       {/* Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-start gap-3 rounded-3xl bg-white p-4 ring-1 ring-ink-100 shadow-sm">
         <Button
           onClick={handleApprove}
           isLoading={submitting}
           disabled={!hasSigned || !selfieDataUrl || !gps}
           className="flex-1"
+          size="lg"
         >
           <CheckCircle2 className="h-4 w-4" />
-          Accept Transfer
+          Accept transfer
         </Button>
         {!showReject ? (
-          <Button variant="outline" onClick={() => setShowReject(true)} className="text-rose-600 border-rose-200 hover:bg-rose-50">
+          <Button variant="outline" size="lg" onClick={() => setShowReject(true)} className="border-rose-200 text-rose-600 hover:bg-rose-50">
             <XCircle className="h-4 w-4" /> Reject
           </Button>
         ) : (
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 basis-full space-y-2 sm:basis-auto">
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Reason for rejection (min 5 characters)..."
-              className="w-full rounded-lg border border-rose-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+              placeholder="Reason for rejection (min 5 characters)…"
+              className="w-full rounded-2xl border border-rose-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
               rows={2}
             />
             <div className="flex gap-2">
@@ -1442,10 +1429,10 @@ function TransferReviewPage({ transfer, onBack }: { transfer: TransferRequest; o
                 onClick={handleReject}
                 isLoading={submitting}
                 disabled={rejectReason.length < 5}
-                className="text-rose-600 border-rose-200"
+                className="border-rose-200 text-rose-600"
               >
                 <XCircle className="h-4 w-4" />
-                Confirm Reject
+                Confirm reject
               </Button>
               <Button variant="outline" onClick={() => setShowReject(false)}>Cancel</Button>
             </div>

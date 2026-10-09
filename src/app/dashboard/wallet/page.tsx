@@ -16,15 +16,28 @@ import {
   Ban,
 } from "lucide-react";
 import Link from "next/link";
+import { Lightning, QrCode, ShieldCheck } from "@phosphor-icons/react";
 import { ServicePageHeader } from "@/components/dashboard/ServicePage";
-import { Input, Label } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import {
   TransactionResult,
   type TxnResult,
 } from "@/components/dashboard/TransactionResult";
+import { DataTable, type Column } from "@/components/dashboard/DataTable";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { Badge } from "@/components/ui/Badge";
-import { generateRefId, formatINR } from "@/lib/utils";
+import {
+  ServiceLayout,
+  ServiceCard,
+  Field,
+  Notice,
+} from "@/components/dashboard/services/ServiceLayout";
+import { SummaryPanel, AsideTips } from "@/components/dashboard/services/SummaryPanel";
+import { AmountChips } from "@/components/dashboard/services/AmountChips";
+import { FloatField } from "@/components/dashboard/services/FloatField";
+import { OperatorGrid } from "@/components/dashboard/services/OperatorGrid";
+import { PillTabs } from "@/components/dashboard/services/StepHeader";
+import { generateRefId, formatINR, cn } from "@/lib/utils";
 import { useAuth } from "@/lib/useAuth";
 
 type WalletTxn = {
@@ -261,108 +274,255 @@ export default function WalletPage() {
     }
   }
 
+  const amountNum = Number(amount) || 0;
+  const selectedChannel = channels.find((c) => c.id === channel);
+  const allChannelsDown = channels.length > 0 && channels.every((c) => !c.healthy);
+
+  const historyColumns: Column<WalletTxn>[] = [
+    {
+      key: "direction",
+      header: "Type",
+      render: (t) => (
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "grid h-8 w-8 place-items-center rounded-xl ring-1 ring-inset",
+              t.direction === "CREDIT"
+                ? "bg-accent-50 text-accent-700 ring-accent-100"
+                : "bg-coral-50 text-coral-600 ring-coral-100"
+            )}
+          >
+            {t.direction === "CREDIT" ? (
+              <ArrowDownLeft className="h-3.5 w-3.5" />
+            ) : (
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            )}
+          </span>
+          <Badge size="sm" variant={t.direction === "CREDIT" ? "success" : "danger"}>
+            {t.direction}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      key: "reason",
+      header: "Description",
+      render: (t) => (
+        <div>
+          <div className="font-medium text-ink-900">{REASON_LABELS[t.reason] ?? t.reason}</div>
+          {t.note && <div className="text-xs text-ink-500">{t.note}</div>}
+        </div>
+      ),
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      align: "right",
+      render: (t) => (
+        <span
+          className={cn(
+            "font-display text-base font-semibold tabular-nums tracking-[-0.02em]",
+            t.direction === "CREDIT" ? "text-accent-700" : "text-coral-700"
+          )}
+        >
+          {t.direction === "CREDIT" ? "+" : "−"}
+          {formatINR(t.amount)}
+        </span>
+      ),
+    },
+    {
+      key: "balanceAfter",
+      header: "Balance after",
+      align: "right",
+      render: (t) => <span className="tabular-nums text-ink-600">{formatINR(t.balanceAfter)}</span>,
+    },
+    {
+      key: "createdAt",
+      header: "Date",
+      render: (t) => (
+        <span className="text-xs text-ink-500">
+          {new Date(t.createdAt).toLocaleString("en-IN", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div>
+    <div className="mx-auto max-w-6xl">
       <ServicePageHeader
         icon={Wallet}
         title="eMoney Wallet"
-        description="Top-up your wallet instantly via UPI, or view your balance history."
+        description="Add money in seconds via UPI or cards, and keep an eye on every rupee in and out."
       />
 
-      <div className="mb-8 grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-1 relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-accent-500 p-6 text-white shadow-glow">
-          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-              Available balance
-            </p>
+      {/* Balance band + monthly stats */}
+      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+        <div className="relative overflow-hidden rounded-4xl bg-ink-950 p-6 text-white grain lg:col-span-2 sm:p-8">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-energy-gradient opacity-40 blur-3xl"
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-brand-500/30 blur-3xl"
+          />
+          <div className="relative flex items-start justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">
+                <span className="brand-dot" />
+                Available balance
+              </p>
+              <p className="mt-3 font-display text-4xl font-semibold tracking-[-0.03em] tabular-nums sm:text-5xl">
+                {formatINR(balance)}
+              </p>
+              <p className="mt-2 text-xs text-white/60">
+                Paise-perfect, updated live. Every service debits from here.
+              </p>
+            </div>
             <button
+              type="button"
               onClick={fetchWallet}
               disabled={fetching}
-              className="grid h-7 w-7 place-items-center rounded-lg bg-white/15 text-white/80 transition hover:bg-white/25 disabled:animate-spin"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-white/80 ring-1 ring-white/15 transition hover:bg-white/20 disabled:opacity-60 focus-energy"
               title="Refresh balance"
+              aria-label="Refresh balance"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className={cn("h-4 w-4", fetching && "animate-spin")} />
             </button>
           </div>
-          <p className="mt-2 font-display text-3xl font-bold">
-            {formatINR(balance)}
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
-            <div className="rounded-xl bg-white/15 p-3">
-              <p className="opacity-80">This month in</p>
-              <p className="mt-1 font-display text-lg font-bold">
-                {formatINR(data?.monthlyIn ?? 0)}
-              </p>
-            </div>
-            <div className="rounded-xl bg-white/15 p-3">
-              <p className="opacity-80">This month out</p>
-              <p className="mt-1 font-display text-lg font-bold">
-                {formatINR(data?.monthlyOut ?? 0)}
-              </p>
-            </div>
+          <div className="relative mt-6 flex flex-wrap gap-2">
+            <Badge variant="energy" size="sm" dot>
+              Live
+            </Badge>
+            <Badge size="sm" className="bg-white/10 text-white ring-white/15">
+              UPI · Cards · Net banking
+            </Badge>
+            <Badge size="sm" className="bg-white/10 text-white ring-white/15">
+              Instant credit
+            </Badge>
           </div>
         </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <StatCard
+            label="This month in"
+            value={formatINR(data?.monthlyIn ?? 0)}
+            icon={ArrowDownLeft}
+            tone="accent"
+            loading={fetching && !data}
+          />
+          <StatCard
+            label="This month out"
+            value={formatINR(data?.monthlyOut ?? 0)}
+            icon={ArrowUpRight}
+            tone="coral"
+            loading={fetching && !data}
+          />
+        </div>
+      </div>
 
-        <div className="lg:col-span-2 rounded-2xl border border-ink-100 bg-white p-6">
-          <div className="grid grid-cols-2 gap-2">
-            {(
-              [
-                { id: "add", label: "Add money", icon: ArrowDownToLine },
-                {
-                  id: "withdraw",
-                  label: "Withdraw to bank",
-                  icon: ArrowUpFromLine,
-                },
-              ] as const
-            ).map((m) => {
-              const Icon = m.icon;
-              const active = mode === m.id;
-              return (
-                <button
-                  type="button"
-                  key={m.id}
-                  onClick={() => setMode(m.id)}
-                  className={`flex items-center justify-center gap-2 rounded-xl border-2 px-3 py-2.5 text-sm font-semibold transition ${
-                    active
-                      ? "border-brand-500 bg-brand-50 text-brand-700"
-                      : "border-ink-100 bg-white text-ink-700 hover:border-ink-200"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {m.label}
-                </button>
-              );
-            })}
-          </div>
+      <ServiceLayout
+        className="mb-6"
+        aside={
+          mode === "add" ? (
+            <>
+              <SummaryPanel
+                title="Top-up preview"
+                status={
+                  pending
+                    ? { label: "Awaiting payment", variant: "warning", dot: true }
+                    : amountNum > 0
+                      ? { label: "Ready", variant: "accent", dot: true }
+                      : { label: "Enter an amount", variant: "default" }
+                }
+                rows={[
+                  {
+                    label: "Gateway",
+                    value: selectedChannel?.label ?? (channels.length ? "—" : "Default"),
+                    muted: !selectedChannel && channels.length > 0,
+                  },
+                  {
+                    label: "Method",
+                    value: payVia === "vpa" ? "UPI collect" : "Payment page",
+                  },
+                  ...(payVia === "vpa"
+                    ? [{ label: "UPI ID", value: vpa || "—", mono: true, muted: !vpa }]
+                    : []),
+                  ...(pending
+                    ? [{ label: "Reference", value: pending.refId, mono: true }]
+                    : []),
+                ]}
+                total={formatINR(pending && pending.amount > 0 ? pending.amount : amountNum)}
+                totalLabel="Adds to wallet"
+                totalHint="No charges on wallet top-ups"
+              />
+              <AsideTips
+                items={[
+                  { icon: <Lightning weight="duotone" />, text: "Money lands in your wallet the moment the payment succeeds." },
+                  { icon: <QrCode weight="duotone" />, text: "UPI collect sends a request to your UPI app — approve it there." },
+                  { icon: <ShieldCheck weight="duotone" />, text: "Failed or expired payments are never debited." },
+                ]}
+              />
+            </>
+          ) : (
+            <AsideTips
+              title="About withdrawals"
+              items={[
+                { icon: <Lightning weight="duotone" />, text: "Payouts move wallet money to any bank account or UPI ID." },
+                { icon: <ShieldCheck weight="duotone" />, text: "Every payout comes with live status and a UTR receipt." },
+              ]}
+            />
+          )
+        }
+      >
+        <ServiceCard>
+          <PillTabs
+            fill
+            layoutId="wallet-mode"
+            tabs={[
+              { key: "add", label: "Add money", icon: <ArrowDownToLine className="h-4 w-4" /> },
+              { key: "withdraw", label: "Withdraw to bank", icon: <ArrowUpFromLine className="h-4 w-4" /> },
+            ]}
+            value={mode}
+            onChange={setMode}
+          />
 
           {mode === "withdraw" ? (
-            <div className="mt-5 rounded-xl border border-ink-100 bg-ink-50/60 p-5 text-sm text-ink-700">
-              <p className="font-semibold text-ink-900">
+            <div className="mt-5 rounded-3xl bg-ink-50/70 p-6 ring-1 ring-ink-100">
+              <p className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
                 Withdrawals run through Payouts
               </p>
-              <p className="mt-1 text-xs text-ink-600">
+              <p className="mt-1 text-sm text-ink-600">
                 Send money from your wallet to any bank account or UPI ID with
                 live status tracking and UTR receipts.
               </p>
               <Link href="/dashboard/payout">
-                <Button size="lg" className="mt-4 w-full">
+                <Button size="lg" className="mt-5 w-full">
                   Go to Payouts
                   <ArrowUpRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
           ) : pending ? (
-            <div className="mt-5 rounded-xl border border-brand-200 bg-brand-50/60 p-5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-brand-800">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Waiting for your payment…
+            <div className="mt-5 rounded-3xl bg-gradient-to-br from-brand-50 via-white to-royal-50/60 p-6 ring-1 ring-brand-100">
+              <div className="flex items-center gap-3">
+                <span className="relative grid h-10 w-10 place-items-center rounded-2xl bg-white text-brand-600 ring-1 ring-brand-100">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </span>
+                <div>
+                  <p className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
+                    Waiting for your payment…
+                  </p>
+                  <p className="text-xs text-ink-600">
+                    Reference <span className="font-mono">{pending.refId}</span>
+                    {pending.amount > 0 && <> · {formatINR(pending.amount)}</>}
+                  </p>
+                </div>
               </div>
-              <p className="mt-1 text-xs text-ink-600">
-                Reference <span className="font-mono">{pending.refId}</span>
-                {pending.amount > 0 && <> · {formatINR(pending.amount)}</>}.
-                Your wallet is credited automatically once the payment
-                completes.
+              <p className="mt-3 text-sm text-ink-600">
+                Your wallet is credited automatically once the payment completes.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {pending.paymentUrl && (
@@ -379,7 +539,7 @@ export default function WalletPage() {
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     stopPolling();
                     setPending(null);
@@ -390,49 +550,47 @@ export default function WalletPage() {
               </div>
             </div>
           ) : (
-            <form onSubmit={submitTopup} className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Label htmlFor="amount">Amount (₹)</Label>
-                <Input
+            <form onSubmit={submitTopup} className="mt-5 grid gap-5">
+              <div>
+                <FloatField
                   id="amount"
+                  label="Amount (₹)"
                   type="number"
                   required
+                  display
                   min={1}
                   max={200000}
+                  inputMode="numeric"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter amount"
+                  hint="Up to ₹2,00,000 per top-up"
                 />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[500, 1000, 2000, 5000, 10000, 25000].map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => setAmount(String(v))}
-                      className="rounded-full border border-ink-200 px-3 py-1 text-xs font-medium text-ink-700 hover:border-brand-300 hover:text-brand-700"
-                    >
-                      {formatINR(v)}
-                    </button>
-                  ))}
-                </div>
+                <AmountChips
+                  className="mt-3"
+                  amounts={[500, 1000, 2000, 5000, 10000, 25000]}
+                  value={amount}
+                  onPick={(v) => setAmount(String(v))}
+                />
               </div>
 
               {channels.length > 0 && (
-                <div className="sm:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Payment gateway</Label>
+                <Field
+                  label="Payment gateway"
+                  error={allChannelsDown ? "All payment gateways are currently unavailable. Please try again shortly." : undefined}
+                  action={
                     <button
                       type="button"
                       onClick={() => fetchChannels()}
                       disabled={channelsLoading}
-                      className="flex items-center gap-1 text-[11px] font-medium text-ink-500 hover:text-brand-600 disabled:opacity-60"
+                      className="flex items-center gap-1 text-[11px] font-medium text-ink-500 transition hover:text-brand-600 disabled:opacity-60"
                       title="Refresh gateway status"
                     >
-                      <RefreshCw className={`h-3 w-3 ${channelsLoading ? "animate-spin" : ""}`} />
+                      <RefreshCw className={cn("h-3 w-3", channelsLoading && "animate-spin")} />
                       Refresh status
                     </button>
-                  </div>
-                  <div className="mt-1 grid grid-cols-2 gap-2">
+                  }
+                >
+                  <div className="grid grid-cols-2 gap-2">
                     {channels.map((c) => {
                       const active = channel === c.id;
                       return (
@@ -441,121 +599,102 @@ export default function WalletPage() {
                           key={c.id}
                           disabled={!c.healthy}
                           onClick={() => c.healthy && setChannel(c.id)}
-                          className={`flex flex-col items-start gap-0.5 rounded-xl border-2 px-3 py-2 text-left transition ${
+                          data-active={active && c.healthy}
+                          aria-pressed={active}
+                          className={cn(
+                            "gradient-ring flex flex-col items-start gap-0.5 rounded-xl px-3 py-2.5 text-left ring-1 transition focus-energy",
                             !c.healthy
-                              ? "cursor-not-allowed border-ink-100 bg-ink-50/60 opacity-70"
+                              ? "cursor-not-allowed bg-ink-50/60 opacity-70 ring-ink-100"
                               : active
-                                ? "border-brand-500 bg-brand-50"
-                                : "border-ink-100 bg-white hover:border-ink-200"
-                          }`}
+                                ? "bg-gradient-to-br from-royal-50/70 via-white to-coral-50/50 shadow-energy-sm ring-transparent"
+                                : "bg-white ring-ink-100 hover:ring-ink-200"
+                          )}
                         >
-                          <span className="flex items-center gap-1.5 text-xs font-semibold text-ink-800">
+                          <span className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-ink-800">
                             {c.healthy ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                              <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
                             ) : (
-                              <Ban className="h-3.5 w-3.5 text-rose-500" />
+                              <Ban className="h-3.5 w-3.5 text-coral-500" />
                             )}
                             {c.label}
                             {c.primary && (
-                              <Badge variant="brand" className="ml-1">
+                              <Badge variant="brand" size="sm">
                                 Primary
                               </Badge>
                             )}
                           </span>
-                          <span className={`text-[11px] ${c.healthy ? "text-emerald-600" : "text-rose-500"}`}>
+                          <span className={cn("text-[11px]", c.healthy ? "text-accent-700" : "text-coral-600")}>
                             {c.healthy ? "Available" : c.detail || "Unavailable"}
                           </span>
                         </button>
                       );
                     })}
                   </div>
-                  {channels.every((c) => !c.healthy) && (
-                    <p className="mt-1.5 text-[11px] text-rose-600">
-                      All payment gateways are currently unavailable. Please try again shortly.
-                    </p>
-                  )}
-                </div>
+                </Field>
               )}
 
-              <div className="sm:col-span-2">
-                <Label>Payment method</Label>
-                <div className="mt-1 grid grid-cols-2 gap-2">
-                  {(
-                    [
-                      { id: "page", label: "Payment page (UPI / cards)" },
-                      { id: "vpa", label: "UPI collect to my VPA" },
-                    ] as const
-                  ).map((m) => (
-                    <button
-                      type="button"
-                      key={m.id}
-                      onClick={() => setPayVia(m.id)}
-                      className={`rounded-xl border-2 px-3 py-2 text-xs font-semibold transition ${
-                        payVia === m.id
-                          ? "border-brand-500 bg-brand-50 text-brand-700"
-                          : "border-ink-100 bg-white text-ink-700 hover:border-ink-200"
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Field label="Payment method">
+                <OperatorGrid
+                  name="Payment method"
+                  showLogo={false}
+                  columns={2}
+                  size="sm"
+                  options={[
+                    { value: "page", label: "Payment page", meta: "UPI / cards / net banking" },
+                    { value: "vpa", label: "UPI collect", meta: "Request sent to your VPA" },
+                  ]}
+                  value={payVia}
+                  onChange={(v) => setPayVia(v as "page" | "vpa")}
+                />
+              </Field>
 
               {payVia === "vpa" && (
-                <div className="sm:col-span-2">
-                  <Label htmlFor="vpa">Your UPI ID</Label>
-                  <Input
-                    id="vpa"
-                    required
-                    placeholder="name@bank"
-                    value={vpa}
-                    onChange={(e) => setVpa(e.target.value.trim())}
-                  />
-                  <p className="mt-1 text-[11px] text-ink-400">
-                    A collect request will be sent to this UPI ID — approve it
-                    in your UPI app.
-                  </p>
-                </div>
+                <FloatField
+                  id="vpa"
+                  label="Your UPI ID"
+                  required
+                  mono
+                  value={vpa}
+                  onChange={(e) => setVpa(e.target.value.trim())}
+                  hint="e.g. name@bank — approve the collect request in your UPI app."
+                />
               )}
 
               {error && (
-                <div className="sm:col-span-2 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
+                <Notice tone="danger" icon={<AlertCircle className="h-4 w-4" />}>
+                  {error}
+                </Notice>
               )}
 
-              <div className="sm:col-span-2">
-                <Button type="submit" size="lg" className="w-full" isLoading={loading} disabled={loading}>
-                  {loading
-                    ? "Starting top-up…"
-                    : `Add ${amount ? formatINR(Number(amount)) : "money"} to wallet`}
-                </Button>
-              </div>
+              <Button type="submit" size="xl" className="w-full" isLoading={loading} disabled={loading}>
+                {loading
+                  ? "Starting top-up…"
+                  : `Add ${amount ? formatINR(Number(amount)) : "money"} to wallet`}
+              </Button>
             </form>
           )}
-        </div>
-      </div>
+        </ServiceCard>
+      </ServiceLayout>
 
       {/* Wallet transaction history — real data from DB */}
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-5 py-4">
-          <div>
-            <h3 className="font-display text-base font-semibold text-ink-900">
-              Wallet history
-            </h3>
-            <p className="text-xs text-ink-500">
-              {data?.recentTxns.length
-                ? `Showing latest ${data.recentTxns.length} entries`
-                : "No wallet transactions yet"}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+      <DataTable<WalletTxn>
+        title="Wallet history"
+        description={
+          data?.recentTxns.length
+            ? `Showing latest ${data.recentTxns.length} entries`
+            : "No wallet transactions yet"
+        }
+        columns={historyColumns}
+        data={data?.recentTxns ?? []}
+        loading={fetching && !data}
+        emptyIcon={Wallet}
+        empty="No wallet transactions yet. Your history will show up here."
+        action={
+          <>
             <select
               value={stmtPeriod}
               onChange={(e) => setStmtPeriod(e.target.value as typeof stmtPeriod)}
-              className="rounded-xl border border-ink-200 bg-white px-3 py-2 text-xs font-medium text-ink-700 outline-none focus:border-brand-400"
+              className="h-10 rounded-xl bg-white px-3 text-xs font-medium text-ink-700 ring-1 ring-ink-200 outline-none focus-energy"
               title="Statement period"
             >
               <option value="this-month">This month</option>
@@ -563,97 +702,20 @@ export default function WalletPage() {
               <option value="last-90">Last 90 days</option>
             </select>
             <a href={statementUrl("pdf")} target="_blank" rel="noopener noreferrer">
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" size="sm">
                 <FileDown className="h-4 w-4" />
                 PDF
               </Button>
             </a>
             <a href={statementUrl("csv")} target="_blank" rel="noopener noreferrer">
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" size="sm">
                 <FileDown className="h-4 w-4" />
                 CSV
               </Button>
             </a>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-ink-50/60 text-left text-xs uppercase tracking-wider text-ink-500">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Type</th>
-                <th className="px-5 py-3 font-semibold">Description</th>
-                <th className="px-5 py-3 font-semibold text-right">Amount</th>
-                <th className="px-5 py-3 font-semibold text-right">
-                  Balance after
-                </th>
-                <th className="px-5 py-3 font-semibold">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100 text-ink-800">
-              {!data?.recentTxns.length ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-5 py-12 text-center text-sm text-ink-500"
-                  >
-                    {fetching
-                      ? "Loading..."
-                      : "No wallet transactions yet. Your transaction history will appear here."}
-                  </td>
-                </tr>
-              ) : (
-                data.recentTxns.map((t) => (
-                  <tr key={t.id} className="hover:bg-ink-50/40">
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
-                        {t.direction === "CREDIT" ? (
-                          <span className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-50 text-emerald-600">
-                            <ArrowDownLeft className="h-3.5 w-3.5" />
-                          </span>
-                        ) : (
-                          <span className="grid h-7 w-7 place-items-center rounded-lg bg-rose-50 text-rose-600">
-                            <ArrowUpRight className="h-3.5 w-3.5" />
-                          </span>
-                        )}
-                        <Badge
-                          variant={
-                            t.direction === "CREDIT" ? "success" : "danger"
-                          }
-                        >
-                          {t.direction}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="font-medium text-ink-900">
-                        {REASON_LABELS[t.reason] ?? t.reason}
-                      </div>
-                      {t.note && (
-                        <div className="text-xs text-ink-500">{t.note}</div>
-                      )}
-                    </td>
-                    <td
-                      className={`px-5 py-3 text-right font-semibold ${t.direction === "CREDIT" ? "text-emerald-700" : "text-rose-700"}`}
-                    >
-                      {t.direction === "CREDIT" ? "+" : "−"}
-                      {formatINR(t.amount)}
-                    </td>
-                    <td className="px-5 py-3 text-right text-ink-600">
-                      {formatINR(t.balanceAfter)}
-                    </td>
-                    <td className="px-5 py-3 text-xs text-ink-500 whitespace-nowrap">
-                      {new Date(t.createdAt).toLocaleString("en-IN", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <TransactionResult result={result} onClose={() => setResult(null)} />
     </div>

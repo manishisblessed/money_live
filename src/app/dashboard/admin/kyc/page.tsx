@@ -16,11 +16,13 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { DataTable, type Column } from "@/components/dashboard/DataTable";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ReportActions } from "@/components/dashboard/ReportActions";
 import { Pagination } from "@/components/ui/Pagination";
+import { Stagger, StaggerItem, StatusChip } from "@/components/dashboard/patterns";
 import {
   KycDetailView,
   STATUS_MAP,
@@ -213,7 +215,7 @@ export default function AdminKycPage() {
       header: "Status",
       render: (r) => {
         const s = STATUS_MAP[r.status];
-        return <Badge variant={s?.variant ?? "default"}>{s?.label ?? r.status}</Badge>;
+        return <StatusChip status={r.status} variant={s?.variant ?? "default"} label={s?.label ?? r.status} size="sm" />;
       },
     },
     {
@@ -226,16 +228,18 @@ export default function AdminKycPage() {
           <div className="flex justify-end gap-1">
             <button
               onClick={() => setViewing(r)}
-              className="grid h-8 w-8 place-items-center rounded-lg text-brand-700 hover:bg-brand-50"
+              className="grid h-8 w-8 place-items-center rounded-xl text-brand-700 ring-1 ring-inset ring-brand-100 transition hover:bg-brand-50 focus-energy"
               title="View full details"
+              aria-label={`View ${r.user.name}`}
             >
               <Eye className="h-4 w-4" />
             </button>
             <button
               onClick={() => decide(r.id, "approve")}
               disabled={!isReviewable(r) || busy}
-              className="grid h-8 w-8 place-items-center rounded-lg text-emerald-700 hover:bg-emerald-50 disabled:opacity-30"
+              className="grid h-8 w-8 place-items-center rounded-xl text-emerald-700 ring-1 ring-inset ring-emerald-100 transition hover:bg-emerald-50 disabled:opacity-30 focus-energy"
               title="Approve"
+              aria-label={`Approve ${r.user.name}`}
             >
               {busy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -246,8 +250,9 @@ export default function AdminKycPage() {
             <button
               onClick={() => setRejectTarget(r.id)}
               disabled={!isReviewable(r) || busy}
-              className="grid h-8 w-8 place-items-center rounded-lg text-rose-700 hover:bg-rose-50 disabled:opacity-30"
+              className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 ring-1 ring-inset ring-rose-100 transition hover:bg-rose-50 disabled:opacity-30 focus-energy"
               title="Reject"
+              aria-label={`Reject ${r.user.name}`}
             >
               <XCircle className="h-4 w-4" />
             </button>
@@ -260,7 +265,7 @@ export default function AdminKycPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Compliance"
         title="KYC approvals"
         description="Review applicant documents, validate PAN/Aadhaar, and approve or reject."
         actions={
@@ -297,21 +302,30 @@ export default function AdminKycPage() {
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Awaiting review" value={stats.pending} tone="warning" />
-        <Stat label="Awaiting re-upload" value={stats.awaitingResubmission} tone="brand" />
-        <Stat label="Verified" value={stats.approved} tone="success" />
-        <Stat label="Rejected" value={stats.rejected} tone="danger" />
-      </div>
+      <Stagger className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StaggerItem>
+          <StatCard label="Awaiting review" value={String(stats.pending)} icon={AlertTriangle} accent="brand" />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label="Awaiting re-upload" value={String(stats.awaitingResubmission)} icon={RefreshCw} accent="violet" />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label="Verified" value={String(stats.approved)} icon={ShieldCheck} accent="emerald" />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label="Rejected" value={String(stats.rejected)} icon={XCircle} accent="accent" />
+        </StaggerItem>
+      </Stagger>
 
       <DataTable
         title="KYC queue"
+        description={`${total} application${total === 1 ? "" : "s"} · click a row's eye icon for full documents`}
         columns={cols}
         data={rows}
         loading={fetching}
@@ -410,29 +424,28 @@ function DetailDrawer({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-2xl"
+        className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-ink-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-ink-100 bg-gradient-to-br from-brand-50/60 to-white px-6 py-5">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-700">
-                KYC Review
+        <div className="relative flex items-start justify-between gap-4 overflow-hidden border-b border-ink-100 bg-white px-6 py-5">
+          <div className="pointer-events-none absolute -left-10 -top-16 h-40 w-40 rounded-full bg-energy-gradient opacity-10 blur-3xl" aria-hidden />
+          <div className="relative min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-700">
+                KYC review
               </p>
-              <Badge variant={s?.variant ?? "default"}>
-                {s?.label ?? kyc.status}
-              </Badge>
+              <StatusChip status={kyc.status} variant={s?.variant ?? "default"} label={s?.label ?? kyc.status} size="sm" />
               {kyc.nameMismatch && (
-                <Badge variant="warning">
-                  Name Mismatch{kyc.nameDeclarationAccepted ? " · Self-declared" : ""}
+                <Badge variant="warning" size="sm">
+                  Name mismatch{kyc.nameDeclarationAccepted ? " · Self-declared" : ""}
                 </Badge>
               )}
             </div>
-            <h3 className="mt-1 font-display text-xl font-bold text-ink-900 truncate">
+            <h3 className="mt-1 truncate font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
               {kyc.user.name}
               {kyc.user.userCode && (
-                <span className="ml-2 rounded-md bg-brand-50 px-2 py-0.5 text-sm font-semibold text-brand-600 align-middle">
+                <span className="ml-2 inline-flex items-center rounded-lg bg-brand-50 px-2 py-0.5 align-middle font-mono text-sm font-semibold text-brand-600 ring-1 ring-inset ring-brand-100">
                   {kyc.user.userCode}
                 </span>
               )}
@@ -451,7 +464,8 @@ function DetailDrawer({
           </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-500 hover:bg-ink-100"
+            aria-label="Close"
+            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl text-ink-500 ring-1 ring-inset ring-ink-100 transition hover:bg-ink-50 focus-energy"
           >
             <X className="h-4 w-4" />
           </button>
@@ -541,35 +555,6 @@ function DetailDrawer({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* ─── Helper Components ──────────────────────────────────────────────── */
-
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "success" | "danger" | "warning" | "brand";
-}) {
-  const map = {
-    success: "from-emerald-500 to-emerald-700 text-emerald-50",
-    danger: "from-rose-500 to-rose-700 text-rose-50",
-    warning: "from-amber-500 to-amber-700 text-amber-50",
-    brand: "from-brand-500 to-brand-700 text-brand-50",
-  };
-  return (
-    <div
-      className={`rounded-2xl bg-gradient-to-br ${map[tone]} p-5 shadow-soft`}
-    >
-      <p className="text-xs font-bold uppercase tracking-widest opacity-90">
-        {label}
-      </p>
-      <p className="mt-2 font-display text-3xl font-bold">{value}</p>
     </div>
   );
 }

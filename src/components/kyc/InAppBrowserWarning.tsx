@@ -51,11 +51,13 @@ export function InAppBrowserWarning() {
   }
 
   return (
-    <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-      <div className="flex items-start gap-2.5">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
-        <div className="space-y-1 text-sm text-rose-800">
-          <p className="font-semibold">
+    <div className="rounded-2xl bg-coral-50 p-4 ring-1 ring-coral-200" role="alert">
+      <div className="flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-coral-100 text-coral-600 ring-1 ring-inset ring-coral-200">
+          <AlertTriangle className="h-4 w-4" />
+        </span>
+        <div className="space-y-1 text-sm text-coral-800">
+          <p className="font-display text-base font-semibold tracking-[-0.01em]">
             You&apos;re viewing this page inside {appLabel}.
           </p>
           <p className="text-xs leading-relaxed">
@@ -71,7 +73,7 @@ export function InAppBrowserWarning() {
           <button
             type="button"
             onClick={openInChrome}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-700"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-ink-950 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-ink-800 focus-energy"
           >
             <ExternalLink className="h-3.5 w-3.5" /> Open in Chrome
           </button>
@@ -79,7 +81,7 @@ export function InAppBrowserWarning() {
         <button
           type="button"
           onClick={copyLink}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-semibold text-coral-700 ring-1 ring-coral-200 transition hover:bg-coral-100 focus-energy"
         >
           {copied ? (
             <>
@@ -94,7 +96,7 @@ export function InAppBrowserWarning() {
         </button>
       </div>
 
-      <p className="mt-2 text-[11px] text-rose-600">
+      <p className="mt-2 text-[11px] text-coral-600">
         Tip: look for an <strong>&quot;Open in browser&quot;</strong> option in the{" "}
         {info.appName ?? "app"} menu (usually the ⋮ or share icon at the top).
       </p>

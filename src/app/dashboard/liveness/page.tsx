@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { ShieldCheck, Loader2, ArrowRight, ScanFace } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { Notice } from "@/components/dashboard/services/ServiceLayout";
 import { LivenessVideoCapture } from "@/components/kyc/LivenessVideoCapture";
 import { InAppBrowserWarning } from "@/components/kyc/InAppBrowserWarning";
 
@@ -62,12 +64,12 @@ export default function LivenessPage() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4 rounded-3xl bg-white p-7 text-center shadow-soft ring-1 ring-emerald-100"
+            className="space-y-4 rounded-3xl bg-white p-7 text-center shadow-sm ring-1 ring-accent-100"
           >
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-emerald-50 to-brand-50 ring-1 ring-emerald-100">
-              <ShieldCheck className="h-8 w-8 text-emerald-600" />
-            </div>
-            <h2 className="text-xl font-bold text-ink-900">You&apos;re all set</h2>
+            <IconTile tone="accent" size="xl" className="mx-auto">
+              <ShieldCheck className="h-7 w-7" />
+            </IconTile>
+            <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">You&apos;re all set</h2>
             <p className="text-sm text-ink-500">
               {status?.status === "UPLOADED"
                 ? "Your liveness video is uploaded and your face baseline is being prepared."
@@ -83,17 +85,19 @@ export default function LivenessPage() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-5 rounded-3xl bg-white p-7 shadow-soft ring-1 ring-brand-100"
+            className="relative space-y-5 overflow-hidden rounded-3xl bg-white p-7 shadow-sm ring-1 ring-ink-100"
           >
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-brand-50 to-emerald-50 ring-1 ring-brand-100">
-                <ScanFace className="h-8 w-8 text-brand-600" />
-              </div>
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-energy-gradient-x" />
+            <div className="flex flex-col items-center gap-3 text-center">
+              <IconTile tone="energy" size="xl">
+                <ScanFace className="h-7 w-7" />
+              </IconTile>
+              <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Record your liveness video</h2>
               {status?.status === "FAILED" && (
-                <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                <Notice tone="warning" className="text-left">
                   We couldn&apos;t detect a clear face last time. Please record
                   again in good lighting with your face centered.
-                </p>
+                </Notice>
               )}
             </div>
             <InAppBrowserWarning />
@@ -105,12 +109,12 @@ export default function LivenessPage() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4 rounded-3xl bg-white p-7 text-center shadow-soft ring-1 ring-emerald-100"
+            className="space-y-4 rounded-3xl bg-white p-7 text-center shadow-sm ring-1 ring-accent-100"
           >
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-emerald-50 to-brand-50 ring-1 ring-emerald-100">
-              <ShieldCheck className="h-8 w-8 text-emerald-600" />
-            </div>
-            <h2 className="text-xl font-bold text-ink-900">Verification submitted</h2>
+            <IconTile tone="accent" size="xl" className="mx-auto">
+              <ShieldCheck className="h-7 w-7" />
+            </IconTile>
+            <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink-900">Verification submitted</h2>
             <p className="text-sm text-ink-500">
               Thanks! Your account is unlocked. We&apos;re finishing your secure
               face baseline in the background.

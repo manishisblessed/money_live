@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Loader2, CheckCircle2, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/Icon";
+import { Notice } from "@/components/dashboard/services/ServiceLayout";
 import { CameraPermissionGuide } from "@/components/kyc/CameraPermissionGuide";
 import {
   getMediaPermissionState,
@@ -271,24 +273,22 @@ export function SelfieCapture({
 
   return (
     <div
-      className={`rounded-xl border p-4 ${
-        uploaded ? "border-emerald-200 bg-emerald-50" : "border-ink-200 bg-white"
+      className={`rounded-3xl p-5 ring-1 transition ${
+        uploaded ? "bg-accent-50/70 ring-accent-200" : "bg-white ring-ink-200"
       }`}
     >
-      <div className="mb-3 flex items-center gap-2">
-        {uploaded ? (
-          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-        ) : (
-          <Camera className="h-5 w-5 text-ink-400" />
-        )}
-        <p className="text-sm font-medium text-ink-900">
-          Live Selfie Photo <span className="text-rose-500">*</span>
+      <div className="mb-3 flex items-center gap-3">
+        <IconTile tone={uploaded ? "accent" : "brand"} size="sm">
+          {uploaded ? <CheckCircle2 className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+        </IconTile>
+        <p className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
+          Live Selfie Photo <span className="text-coral-500">*</span>
         </p>
       </div>
 
       {/* Viewport / preview */}
       {(showCameraViewport || showPreviewImage) && (
-        <div className="relative mx-auto mb-3 aspect-[3/4] w-full max-w-xs overflow-hidden rounded-2xl border border-ink-200 bg-ink-900/90">
+        <div className="relative mx-auto mb-3 aspect-[3/4] w-full max-w-xs overflow-hidden rounded-3xl bg-ink-950 shadow-energy-sm ring-1 ring-ink-200">
           {showCameraViewport && (
             <video
               ref={videoRef}
@@ -318,17 +318,17 @@ export function SelfieCapture({
       )}
 
       {error && (
-        <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+        <Notice tone="danger" className="mb-3 text-xs">
           {error}
-        </div>
+        </Notice>
       )}
 
       {((phase === "error" && errorKind === "permission") ||
         (phase === "idle" && permState === "denied")) && (
         <div className="mb-3 space-y-3">
           {/* Zero-permission escape hatch — always works, even in WebViews. */}
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-            <p className="mb-2 text-xs text-emerald-800">
+          <div className="rounded-2xl bg-accent-50 p-3 ring-1 ring-accent-200">
+            <p className="mb-2 text-xs text-accent-800">
               <strong>No problem —</strong> you can take the selfie with your
               phone&apos;s camera app instead. No browser permission needed.
             </p>
@@ -352,14 +352,11 @@ export function SelfieCapture({
 
       {/* Priming: set expectations before the browser's permission prompt. */}
       {!uploaded && phase === "idle" && permState !== "denied" && permState !== "granted" && (
-        <div className="mb-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50/60 p-3 text-xs text-ink-600">
-          <Camera className="mt-0.5 h-4 w-4 shrink-0 text-ink-400" />
-          <span>
-            When you tap below, your browser will ask to use the{" "}
-            <strong>camera</strong>. Please tap <strong>Allow</strong> to take your
-            live selfie.
-          </span>
-        </div>
+        <Notice tone="info" icon={<Camera className="h-4 w-4" />} className="mb-3 text-xs">
+          When you tap below, your browser will ask to use the{" "}
+          <strong>camera</strong>. Please tap <strong>Allow</strong> to take your
+          live selfie.
+        </Notice>
       )}
 
       {/* Native camera-app input (front camera hint via capture="user"). */}
@@ -375,13 +372,13 @@ export function SelfieCapture({
       {/* Controls */}
       {uploaded ? (
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-emerald-700">Selfie uploaded successfully</p>
+          <p className="text-xs font-medium text-accent-700">Selfie uploaded successfully</p>
           {onRemove && (
             <button
               type="button"
               onClick={handleRemove}
               disabled={removing || uploading}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-rose-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-coral-600 ring-1 ring-coral-200 transition hover:bg-coral-50 disabled:opacity-50 focus-energy"
             >
               {removing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

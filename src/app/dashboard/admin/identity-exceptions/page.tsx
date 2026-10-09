@@ -97,7 +97,7 @@ export default function IdentityExceptionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Master Admin"
+        eyebrow="Admin · Compliance"
         title="Identity Exceptions"
         description="Approve, per identity value and tier, when the same PAN / Aadhaar / bank / GST / Udyam / shop name may onboard more than one account (max 4 — one per tier)."
       />
@@ -128,7 +128,7 @@ export default function IdentityExceptionsPage() {
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+      <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm">
         <table className="w-full text-sm">
           <thead className="bg-ink-50 text-left text-xs uppercase tracking-wide text-ink-500">
             <tr>

@@ -176,7 +176,7 @@ export default function AdminServicesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
+        eyebrow="Admin · Platform"
         title="On / Off Services"
         description="Master kill-switch for every money rail & platform flag. Turning a rail off blocks its mutations across the app immediately — every change is audit logged."
         actions={
@@ -192,26 +192,26 @@ export default function AdminServicesPage() {
       />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-ink-100 bg-white p-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-ink-500">Total rails</p>
-          <p className="mt-1 font-display text-xl font-bold text-ink-900">{services.length}</p>
+        <div className="rounded-3xl bg-white p-5 ring-1 ring-ink-100 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">Total rails</p>
+          <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">{services.length}</p>
         </div>
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+        <div className="rounded-3xl bg-emerald-50 ring-1 ring-inset ring-emerald-200 p-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Live</p>
           <p className="mt-1 font-display text-xl font-bold text-emerald-700">{enabledCount}</p>
         </div>
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+        <div className="rounded-3xl bg-rose-50 ring-1 ring-inset ring-rose-200 p-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600">Disabled</p>
           <p className="mt-1 font-display text-xl font-bold text-rose-700">{services.length - enabledCount}</p>
         </div>
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-ink-100 bg-white p-10 text-center text-sm text-ink-500">
+        <div className="rounded-3xl bg-white ring-1 ring-ink-100 shadow-sm p-10 text-center text-sm text-ink-500">
           Loading services…
         </div>
       ) : services.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-10 text-center">
+        <div className="rounded-3xl border border-dashed border-ink-200 bg-white p-10 text-center">
           <Power className="mx-auto h-8 w-8 text-ink-300" />
           <p className="mt-3 text-sm font-semibold text-ink-700">No service routes yet</p>
           <p className="mt-1 text-sm text-ink-500">Seed the known rails to populate the panel.</p>
@@ -235,7 +235,7 @@ export default function AdminServicesPage() {
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
-                    <h2 className="font-display text-base font-bold text-ink-900">{meta.label}</h2>
+                    <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">{meta.label}</h2>
                     <p className="text-xs text-ink-500">
                       {items.filter((i) => i.enabled).length}/{items.length} live
                     </p>
