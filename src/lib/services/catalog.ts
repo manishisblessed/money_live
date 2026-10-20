@@ -54,7 +54,6 @@ export const SERVICE_KEYS = {
   TRAVEL: "travel_booking",
   VERIFICATION: "verify_ekychub",
   VIRTUAL_ACCOUNT: "virtual_account",
-  RECHARGEKIT_CC: "rechargekit_cc",
 } as const;
 
 export type ServiceKey = (typeof SERVICE_KEYS)[keyof typeof SERVICE_KEYS];
@@ -87,7 +86,6 @@ export const SERVICE_KEY_TO_HREF: Record<string, string> = {
   [SERVICE_KEYS.BBPS]: "/dashboard/bill-pay/electricity",
   [SERVICE_KEYS.BBPS_SAMEDAY]: "/dashboard/bill-pay/bbps-1",
   [SERVICE_KEYS.BBPS_CREDIT_CARD]: "/dashboard/bill-pay/credit-card",
-  [SERVICE_KEYS.RECHARGEKIT_CC]: "/dashboard/bill-pay/cc-pay",
   [SERVICE_KEYS.DMT]: "/dashboard/money-transfer",
   [SERVICE_KEYS.TRAVEL]: "/dashboard/travel/flight",
   [SERVICE_KEYS.VIRTUAL_ACCOUNT]: "/dashboard/virtual-account",
@@ -108,7 +106,6 @@ const SERVICE_HREF_PREFIXES: Array<[prefix: string, key: string]> = [
   ["/dashboard/recharge", SERVICE_KEYS.RECHARGE],
   ["/dashboard/bill-pay/bbps-1", SERVICE_KEYS.BBPS_SAMEDAY],
   ["/dashboard/bill-pay/credit-card", SERVICE_KEYS.BBPS_CREDIT_CARD],
-  ["/dashboard/bill-pay/cc-pay", SERVICE_KEYS.RECHARGEKIT_CC],
   ["/dashboard/bill-pay", SERVICE_KEYS.BBPS],
   ["/dashboard/money-transfer", SERVICE_KEYS.DMT],
   ["/dashboard/travel", SERVICE_KEYS.TRAVEL],
@@ -241,16 +238,6 @@ export const KNOWN_SERVICE_ROUTES: ServiceRouteSeed[] = [
     enabled: true,
     note: "Dedicated credit card bill payment tab — Same Day Pay2New rail. Separate sidebar entry for credit card only.",
     sortOrder: 91,
-  },
-  {
-    key: SERVICE_KEYS.RECHARGEKIT_CC,
-    name: "Credit Card Bill Payment-2",
-    type: "SERVICE",
-    kind: "BBPS",
-    provider: "SAMEDAY",
-    enabled: true,
-    note: "Direct credit card payment via Same Day RechargeKit (CC-2). Full 16-digit card number + bank details — no bill fetch needed.",
-    sortOrder: 94,
   },
   {
     key: SERVICE_KEYS.TRAVEL,

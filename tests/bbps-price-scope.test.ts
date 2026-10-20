@@ -20,10 +20,6 @@ describe("bbpsServicesForProvider", () => {
     expect(bbpsServicesForProvider(BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD)).toEqual(["BILL_CREDIT_CARD"]);
   });
 
-  it("Credit Card Bill Payment-2 only prices BILL_CREDIT_CARD", () => {
-    expect(bbpsServicesForProvider(BBPS_PRICE_SCOPES.RECHARGEKIT_CC)).toEqual(["BILL_CREDIT_CARD"]);
-  });
-
   it("Bharat BillPay covers utilities but not credit card", () => {
     const services = bbpsServicesForProvider(BBPS_PRICE_SCOPES.BBPS_SAMEDAY);
     expect(services).not.toContain("BILL_CREDIT_CARD");
@@ -60,20 +56,19 @@ describe("isBbpsServiceProviderCompatible", () => {
 });
 
 describe("bbpsProvidersForService", () => {
-  it("credit card is served only by the dedicated CC products", () => {
+  it("credit card is served only by the dedicated CC product", () => {
     const keys = bbpsProvidersForService("BILL_CREDIT_CARD");
     expect(keys).toEqual(
-      expect.arrayContaining([BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD, BBPS_PRICE_SCOPES.RECHARGEKIT_CC])
+      expect.arrayContaining([BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD])
     );
     expect(keys).not.toContain(BBPS_PRICE_SCOPES.BBPS_SAMEDAY);
   });
 
-  it("electricity is served by Bharat BillPay, not the CC products", () => {
+  it("electricity is served by Bharat BillPay, not the CC product", () => {
     const keys = bbpsProvidersForService("BILL_ELECTRICITY");
     expect(keys).toEqual(
       expect.arrayContaining([BBPS_PRICE_SCOPES.BBPS_SAMEDAY])
     );
     expect(keys).not.toContain(BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD);
-    expect(keys).not.toContain(BBPS_PRICE_SCOPES.RECHARGEKIT_CC);
   });
 });

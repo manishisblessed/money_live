@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, Receipt, Landmark } from "lucide-react";
+import { ArrowRight, CreditCard, Receipt } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ServicePageHeader } from "@/components/dashboard/ServicePage";
 import { IconTile, type IconTone } from "@/components/ui/Icon";
@@ -36,17 +36,6 @@ const BILL_OPTIONS: BillOption[] = [
     icon: CreditCard,
     tone: "energy",
     tags: ["Live bill fetch", "All major banks"],
-  },
-  {
-    title: "Credit Card Bill Payment-2",
-    eyebrow: "Direct payment",
-    description:
-      "Enter the full card number, bank details and amount. Charges show before you confirm.",
-    href: "/dashboard/bill-pay/cc-pay",
-    maxAmount: 500000,
-    icon: Landmark,
-    tone: "royal",
-    tags: ["No bill fetch", "Charges upfront"],
   },
   {
     title: "BBPS-Bharat BillPay",

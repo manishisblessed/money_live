@@ -17,7 +17,7 @@ import type { PartnerResult } from "../partners/types";
  * Service rails that (a) have a provider status() API and (b) are drained by a
  * reconciliation sweep — i.e. rails where an INDETERMINATE pay outcome can be
  * safely HELD (NEEDS_REVIEW) and resolved out-of-band instead of blind-refunded.
- * Kept in sync with the recon coverage in src/lib/recon/bbps.ts + rechargekit.ts.
+ * Kept in sync with the recon coverage in src/lib/recon/bbps.ts.
  */
 const RECON_CAPABLE_BBPS_SERVICES: ServiceCode[] = [
   "BILL_ELECTRICITY", "BILL_WATER", "BILL_GAS",
@@ -26,12 +26,10 @@ const RECON_CAPABLE_BBPS_SERVICES: ServiceCode[] = [
 ];
 
 function railSupportsHoldAndRecon(partner: string, service: ServiceCode): boolean {
-  // Only rails that expose a provider status/poll API can safely HOLD an
-  // indeterminate outcome (funds retained, not refunded) and then auto-verify
-  // it in reconciliation. SameDay RechargeKit qualifies; other rails without a
-  // status endpoint keep prior behaviour (cannot be auto-reconciled).
-  if (partner === "SAMEDAY_RECHARGEKIT") return true; // RechargeKit CC-2 (has status)
-  if (partner === "SAMEDAY_PAY2NEW") return RECON_CAPABLE_BBPS_SERVICES.includes(service); // BBPS / Pay2New (has status)
+  // Only BBPS/Pay2New exposes a provider status() API and is drained by the
+  // reconciliation sweep — only that rail can safely HOLD an INDETERMINATE
+  // outcome (NEEDS_REVIEW) and resolve out-of-band.
+  if (partner === "SAMEDAY_PAY2NEW") return RECON_CAPABLE_BBPS_SERVICES.includes(service);
   return false;
 }
 

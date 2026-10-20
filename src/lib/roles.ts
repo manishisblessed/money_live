@@ -88,7 +88,6 @@ const baseServices: NavItem[] = [
 
 const bbpsServices: NavItem[] = [
   { href: "/dashboard/bill-pay/credit-card", label: "Credit Card Bill", icon: CreditCard, badge: "New" },
-  { href: "/dashboard/bill-pay/cc-pay", label: "Credit Card Bill · Rail 2", icon: CreditCard, badge: "New" },
   { href: "/dashboard/bill-pay/bbps-1", label: "Bharat BillPay (BBPS)", icon: Receipt, badge: "New" },
 ];
 

@@ -25,14 +25,12 @@ import type { ServiceCode } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { toNumber } from "@/lib/money";
 import { getPartner } from "@/lib/partners";
-import { rechargekitStatus } from "@/lib/partners/sameday-rechargekit";
 import { deriveTxnRefs } from "@/lib/recon/refs";
 import { sendOpsAlert } from "@/lib/monitoring/alerts";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "recon/clawbackDetect" });
 
-const RK_PARTNER = "SAMEDAY_RECHARGEKIT";
 const BBPS_SERVICES: ServiceCode[] = [
   "BILL_ELECTRICITY",
   "BILL_WATER",
@@ -147,10 +145,7 @@ export async function runOutcomeVerificationSweep(): Promise<OutcomeVerifySummar
     where: {
       status: { in: ["SUCCESS", "FAILED", "REFUNDED"] },
       isSettlement: false,
-      OR: [
-        { service: { in: BBPS_SERVICES }, partner: { not: RK_PARTNER } },
-        { partner: RK_PARTNER },
-      ],
+      service: { in: BBPS_SERVICES },
       createdAt: { gte: new Date(now - WINDOW_MS), lt: new Date(now - MIN_AGE_MS) },
     },
     select: {
@@ -180,29 +175,18 @@ export async function runOutcomeVerificationSweep(): Promise<OutcomeVerifySummar
     const refs = deriveTxnRefs({ partnerTxnId: txn.partnerTxnId, request: txn.request, response: txn.response });
     if (refs.length === 0) continue;
 
-    const isRk = txn.partner === RK_PARTNER;
     let provStatus: "SUCCESS" | "PENDING" | "FAILED" | "REFUNDED" | null = null;
     let provAmount: number | null = null;
     try {
       for (const ref of refs) {
-        if (isRk) {
-          let r = await rechargekitStatus({ txnId: ref });
-          if (!r.ok) r = await rechargekitStatus({ requestId: ref });
-          if (r.ok) {
-            provStatus = r.data.status;
-            provAmount = typeof r.data.amount === "number" && r.data.amount > 0 ? r.data.amount : null;
-            break;
-          }
-        } else {
-          if (!bbps?.status) break;
-          let r = await bbps.status({ orderId: ref });
-          if (!r.ok) r = await bbps.status({ requestId: ref });
-          if (!r.ok) r = await bbps.status({ billFetchRef: ref });
-          if (r.ok) {
-            provStatus = r.data.status;
-            provAmount = typeof r.data.amount === "number" && r.data.amount > 0 ? r.data.amount : null;
-            break;
-          }
+        if (!bbps?.status) break;
+        let r = await bbps.status({ orderId: ref });
+        if (!r.ok) r = await bbps.status({ requestId: ref });
+        if (!r.ok) r = await bbps.status({ billFetchRef: ref });
+        if (r.ok) {
+          provStatus = r.data.status;
+          provAmount = typeof r.data.amount === "number" && r.data.amount > 0 ? r.data.amount : null;
+          break;
         }
       }
     } catch (e) {

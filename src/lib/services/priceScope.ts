@@ -21,8 +21,6 @@ export const BBPS_PRICE_SCOPES = {
   BBPS_SAMEDAY: SERVICE_KEYS.BBPS_SAMEDAY,
   /** Credit Card Bill Payment (credit-card) — Same Day Pay2New. */
   BBPS_CREDIT_CARD: SERVICE_KEYS.BBPS_CREDIT_CARD,
-  /** Credit Card Bill Payment-2 (cc-pay) — Same Day RechargeKit. */
-  RECHARGEKIT_CC: SERVICE_KEYS.RECHARGEKIT_CC,
 } as const;
 
 export type BbpsPriceScope = (typeof BBPS_PRICE_SCOPES)[keyof typeof BBPS_PRICE_SCOPES];
@@ -33,7 +31,6 @@ const SCOPE_KEYS: readonly string[] = Object.values(BBPS_PRICE_SCOPES);
 const SCOPE_FAMILY: Record<string, "SAMEDAY"> = {
   [BBPS_PRICE_SCOPES.BBPS_SAMEDAY]: "SAMEDAY",
   [BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD]: "SAMEDAY",
-  [BBPS_PRICE_SCOPES.RECHARGEKIT_CC]: "SAMEDAY",
 };
 
 /** Friendly product name per scope, sourced from the service catalog. */
@@ -71,14 +68,12 @@ const BBPS_BILL_SERVICES: readonly string[] = SERVICE_FAMILIES.find((f) => f.key
 const CREDIT_CARD_SERVICE = "BILL_CREDIT_CARD";
 
 /**
- * Credit Card Bill Payment / Credit Card Bill Payment-2 are the only products
- * that may price BILL_CREDIT_CARD. Bharat BillPay and Unified Bill Payment
- * price utility categories only (electricity, water, gas, education, insurance)
- * — they must never fan out a credit-card slab.
+ * Credit Card Bill Payment is the only product that may price BILL_CREDIT_CARD.
+ * Bharat BillPay prices utility categories only (electricity, water, gas,
+ * education, insurance) — it must never fan out a credit-card slab.
  */
 const CC_ONLY_SCOPES = new Set<string>([
   BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD,
-  BBPS_PRICE_SCOPES.RECHARGEKIT_CC,
 ]);
 const UTILITY_ONLY_SCOPES = new Set<string>([
   BBPS_PRICE_SCOPES.BBPS_SAMEDAY,

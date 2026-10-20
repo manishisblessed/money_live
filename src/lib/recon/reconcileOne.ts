@@ -1,7 +1,6 @@
 import { type ServiceCode, type TxnStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getPartner } from "@/lib/partners";
-import { rechargekitStatus } from "@/lib/partners/sameday-rechargekit";
 import {
   finalizeServiceTransaction,
   correctTerminalToSuccess,
@@ -30,13 +29,10 @@ const BBPS_SERVICES: ServiceCode[] = [
   "RECHARGE_BROADBAND",
 ];
 
-type Rail = "bbps" | "rechargekit";
+type Rail = "bbps";
 type ProviderStatus = "SUCCESS" | "PENDING" | "FAILED" | "REFUNDED";
 
 function railFor(partner: string | null, service: ServiceCode): Rail | null {
-  if (partner === "SAMEDAY_RECHARGEKIT") return "rechargekit";
-  // BBPS is served only by Pay2New. BILL_CREDIT_CARD
-  // but has no status API, so it is not auto-resolvable here.
   if ((partner === "SAMEDAY_PAY2NEW" || partner === null) && BBPS_SERVICES.includes(service)) return "bbps";
   return null;
 }
@@ -46,20 +42,6 @@ async function resolveProviderStatus(
   rail: Rail,
   refs: string[]
 ): Promise<{ status: ProviderStatus; payRef: string | null; amount: number | null; raw: unknown } | null> {
-  if (rail === "rechargekit") {
-    for (const ref of refs) {
-      let r = await rechargekitStatus({ txnId: ref });
-      if (!r.ok) r = await rechargekitStatus({ requestId: ref });
-      if (r.ok)
-        return {
-          status: r.data.status,
-          payRef: r.data.txnId || r.data.requestId || ref,
-          amount: typeof r.data.amount === "number" && r.data.amount > 0 ? r.data.amount : null,
-          raw: r.raw,
-        };
-    }
-    return null;
-  }
   const bbps = getPartner("bbps");
   if (!bbps.status) return null;
   for (const ref of refs) {
