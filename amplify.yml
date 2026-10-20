@@ -10,6 +10,10 @@ applications:
             # Build-time tooling (typescript, @types/*, eslint) lives there.
             - npm ci --cache .npm --prefer-offline --include=dev
             - npx prisma generate
+            # Restore the webpack module cache from the previous build so that
+            # incremental compilation works. The cache lives in .next-webpack-cache
+            # (not .next/cache) to keep it out of the deployment artifact.
+            - 'if [ -d .next-webpack-cache/cache ]; then mkdir -p .next && mv .next-webpack-cache/cache .next/cache; echo "Webpack cache restored."; fi'
         build:
           commands:
             # AWS Amplify exposes console env vars at BUILD time but does NOT
@@ -33,12 +37,25 @@ applications:
             # OOMs (exit 134) even though the Amplify container has 8GiB. Raise
             # the heap to 6GB to leave headroom for the OS and worker threads.
             - NODE_OPTIONS=--max-old-space-size=6144 npm run build
+            # ── Artifact size reduction ─────────────────────────────────────
+            # 1. Move the webpack module cache OUT of .next/ into a sibling
+            #    directory. The artifact (baseDirectory: .next) will no longer
+            #    include it, saving 50-150 MB. The cache.paths entry below
+            #    preserves it for the next build.
+            - 'mkdir -p .next-webpack-cache && if [ -d .next/cache ]; then mv .next/cache .next-webpack-cache/cache; echo "Webpack cache moved out of artifact."; fi'
+            # 2. Remove any leftover source-map files. Sentry uploads them to
+            #    its servers during the build (deleteSourcemapsAfterUpload in
+            #    next.config.mjs) but a belt-and-suspenders wipe here ensures
+            #    no .map files inflate the deployed artifact.
+            - find .next -name '*.map' -delete && echo "Source maps removed from artifact."
       artifacts:
         baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
-          - .next/cache/**/*
+          # webpack module cache lives here (moved out of .next/ to avoid
+          # bloating the deployment artifact — see build phase above).
+          - .next-webpack-cache/**/*
           - .npm/**/*
           - node_modules/**/*

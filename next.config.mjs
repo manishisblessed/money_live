@@ -74,6 +74,11 @@ export default withSentryConfig(nextConfig, {
   // Upload a wider set of client files for better client-side stack traces.
   widenClientFileUpload: true,
 
+  // Delete source-map files from the build output after uploading them to
+  // Sentry. Source maps can add 20-40 MB to the .next artifact; once Sentry
+  // has them we have no need to ship them to AWS Amplify.
+  deleteSourcemapsAfterUpload: true,
+
   // Route browser events through our own origin (/monitoring) so they aren't
   // blocked by ad-blockers or the strict `connect-src` CSP set in middleware.
   // NOTE: /monitoring is excluded from the middleware matcher.
