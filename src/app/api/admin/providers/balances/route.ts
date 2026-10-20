@@ -9,7 +9,10 @@ import { checkBalance, ekychubConfigured } from "@/lib/partners/ekychub";
 export const fetchCache = "force-no-store";
 export const dynamic = "force-dynamic";
 
-const PROBE_TIMEOUT_MS = 8_000;
+// 20 s gives Same Day's balance endpoint enough headroom on cold API responses
+// without blocking the dashboard for too long. The underlying samedayRequest
+// still has its own 45 s AbortController timeout as the hard ceiling.
+const PROBE_TIMEOUT_MS = 20_000;
 
 export type ProviderBalance = {
   key: string;
@@ -91,14 +94,23 @@ async function probeSameday(): Promise<ProviderBalance> {
   if (!base.configured) return base;
   try {
     const r = await settlementBalance();
-    if (!r.ok) return { ...base, error: r.message };
+    if (!r.ok) {
+      // Log the raw API error so it surfaces in Amplify/server logs.
+      console.error(
+        `[providers/balances] Same Day balance probe failed — code=${r.code} message=${r.message}`,
+        r.raw ? JSON.stringify(r.raw).slice(0, 400) : "(no raw body)"
+      );
+      return { ...base, error: `[${r.code ?? "ERR"}] ${r.message}` };
+    }
     return {
       ...base,
       balance: r.data.balance,
       detail: r.data.isFrozen ? `FROZEN: ${r.data.freezeReason ?? "unknown"}` : null,
     };
   } catch (e) {
-    return { ...base, error: e instanceof Error ? e.message : "probe failed" };
+    const msg = e instanceof Error ? e.message : "probe failed";
+    console.error("[providers/balances] Same Day balance probe threw:", msg);
+    return { ...base, error: msg };
   }
 }
 

@@ -34,6 +34,8 @@ type TierBalance = {
   total: number;
 };
 
+type TierRow = { label: string; value: string; dim?: boolean; hint?: string };
+
 export type CumulativeData = {
   systemTotal: number;
   primaryTotal: number;
@@ -215,9 +217,10 @@ export function CumulativeWalletCard({
             value: !p.configured
               ? "not set"
               : p.error
-              ? "unreachable"
+              ? "error"
               : money(p.balance ?? 0),
             dim: !p.configured || !!p.error,
+            hint: p.error ?? undefined,
           }))}
           footer={
             <Link
@@ -266,7 +269,7 @@ function BucketCard({
   amount: string;
   icon: React.ReactNode;
   tint: "teal" | "amber" | "violet";
-  tiers: { label: string; value: string; dim?: boolean }[];
+  tiers: TierRow[];
   loading: boolean;
   footer?: React.ReactNode;
 }) {
@@ -318,6 +321,7 @@ function BucketCard({
           <li
             key={`${t.label}-${i}`}
             className="flex items-center justify-between px-3 py-2 text-xs"
+            title={t.hint ?? undefined}
           >
             <span className="truncate text-slate-300">{t.label}</span>
             <span
