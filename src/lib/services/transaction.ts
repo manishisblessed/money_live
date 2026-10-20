@@ -28,9 +28,8 @@ const RECON_CAPABLE_BBPS_SERVICES: ServiceCode[] = [
 function railSupportsHoldAndRecon(partner: string, service: ServiceCode): boolean {
   // Only rails that expose a provider status/poll API can safely HOLD an
   // indeterminate outcome (funds retained, not refunded) and then auto-verify
-  // it in reconciliation. The two SameDay rails qualify; RECHARGEKIT_DIRECT has
-  // no status endpoint, so it is intentionally excluded and keeps prior
-  // behaviour (it cannot be auto-reconciled, so holding it would strand funds).
+  // it in reconciliation. SameDay RechargeKit qualifies; other rails without a
+  // status endpoint keep prior behaviour (cannot be auto-reconciled).
   if (partner === "SAMEDAY_RECHARGEKIT") return true; // RechargeKit CC-2 (has status)
   if (partner === "SAMEDAY_PAY2NEW") return RECON_CAPABLE_BBPS_SERVICES.includes(service); // BBPS / Pay2New (has status)
   return false;

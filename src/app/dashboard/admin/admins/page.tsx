@@ -7,7 +7,6 @@ import {
   Plus,
   ShieldOff,
   ShieldCheck,
-  Trash2,
   KeyRound,
   X,
   Eye,
@@ -60,9 +59,6 @@ export default function ManageAdminsPage() {
   const [editingAdmin, setEditingAdmin] = useState<AdminRecord | null>(null);
   const [created, setCreated] = useState<{ admin: AdminRecord | MasterAdminRecord; password: string; isMaster: boolean } | null>(null);
   const [resetPwd, setResetPwd] = useState<{ name: string; password: string; isMaster: boolean } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<AdminRecord | null>(null);
-  const [deleteMasterTarget, setDeleteMasterTarget] = useState<MasterAdminRecord | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -166,33 +162,6 @@ export default function ManageAdminsPage() {
     }
   }
 
-  async function handleDelete(admin: AdminRecord) {
-    setDeleting(true);
-    try {
-      await fetch(`/api/admin/admins/${admin.id}`, { method: "DELETE" });
-      toast.success(`Admin ${admin.name} deleted.`);
-      refresh();
-    } finally {
-      setDeleting(false);
-    }
-  }
-
-  async function handleDeleteMaster(admin: MasterAdminRecord) {
-    setDeleting(true);
-    try {
-      const res = await fetch(`/api/admin/master-admins/${admin.id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error ?? "Failed to delete");
-        return;
-      }
-      toast.success(`Master admin ${admin.name} deleted.`);
-      refresh();
-    } finally {
-      setDeleting(false);
-    }
-  }
-
   const cols: Column<AdminRecord>[] = [
     {
       key: "name",
@@ -278,13 +247,6 @@ export default function ManageAdminsPage() {
               <ShieldCheck className="h-4 w-4" />
             </button>
           )}
-          <button
-            onClick={() => setDeleteTarget(r)}
-            className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
-            title="Delete"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
         </div>
       )
     }
@@ -365,13 +327,6 @@ export default function ManageAdminsPage() {
               <ShieldCheck className="h-4 w-4" />
             </button>
           )}
-          <button
-            onClick={() => setDeleteMasterTarget(r)}
-            className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
-            title="Delete"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
         </div>
       )
     }
@@ -493,33 +448,6 @@ export default function ManageAdminsPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        onClose={() => setDeleteTarget(null)}
-        busy={deleting}
-        title={deleteTarget ? `Delete admin ${deleteTarget.name}?` : "Delete admin?"}
-        description="This cannot be undone."
-        confirmLabel="Delete"
-        onConfirm={async () => {
-          if (!deleteTarget) return;
-          await handleDelete(deleteTarget);
-          setDeleteTarget(null);
-        }}
-      />
-
-      <ConfirmDialog
-        open={deleteMasterTarget !== null}
-        onClose={() => setDeleteMasterTarget(null)}
-        busy={deleting}
-        title={deleteMasterTarget ? `Delete master admin ${deleteMasterTarget.name}?` : "Delete master admin?"}
-        description="This master admin will lose all platform access. This cannot be undone."
-        confirmLabel="Delete"
-        onConfirm={async () => {
-          if (!deleteMasterTarget) return;
-          await handleDeleteMaster(deleteMasterTarget);
-          setDeleteMasterTarget(null);
-        }}
-      />
     </div>
   );
 }

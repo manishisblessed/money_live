@@ -202,15 +202,16 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
           });
           if (!scheme)
             return NextResponse.json({ error: "Scheme not found or inactive" }, { status: 404 });
+          const NETWORK_ROLES = new Set(["SUPER_DISTRIBUTOR", "MASTER_DISTRIBUTOR", "DISTRIBUTOR", "RETAILER"]);
           const allowed = scheme.ownerId
-            ? scheme.ownerId === target.parentId
-            : target.role === "SUPER_DISTRIBUTOR";
+            ? scheme.ownerId === target.parentId   // derived: must match parent
+            : NETWORK_ROLES.has(target.role);       // platform: any network tier
           if (!allowed)
             return NextResponse.json(
               {
                 error: scheme.ownerId
                   ? "Scheme belongs to a different parent — assign one of this user's parent's schemes"
-                  : "Platform schemes can only be assigned to super-distributors; lower tiers get schemes from their parent",
+                  : "Platform schemes can only be assigned to network users (RT / DT / MD / SD)",
               },
               { status: 400 }
             );

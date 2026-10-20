@@ -55,19 +55,27 @@ export async function POST(req: Request) {
     // Platform scheme (no owner) -> super-distributors only; derived scheme ->
     // only users whose parent owns it. Reject the whole batch on any violation
     // so a bulk assign can never silently mis-price part of the network.
+    // Network roles that are allowed to hold a scheme directly.
+    const NETWORK_ROLES = new Set(["SUPER_DISTRIBUTOR", "MASTER_DISTRIBUTOR", "DISTRIBUTOR", "RETAILER"]);
     const targets = await prisma.user.findMany({
       where: { id: { in: userIds } },
       select: { id: true, role: true, parentId: true },
     });
+    // Platform schemes (ownerId null) may be assigned to ANY network-tier user by
+    // admin. The old SD-only restriction only applied to the network cascade model
+    // (where SDs created derived child schemes) — since derived scheme creation
+    // was removed, admin assigns platform schemes directly to any tier.
     const invalid = targets.filter((u) =>
-      scheme.ownerId ? scheme.ownerId !== u.parentId : u.role !== "SUPER_DISTRIBUTOR"
+      scheme.ownerId
+        ? scheme.ownerId !== u.parentId          // derived: must match parent
+        : !NETWORK_ROLES.has(u.role)              // platform: any network role
     );
     if (invalid.length > 0) {
       return NextResponse.json(
         {
           error: scheme.ownerId
-            ? `This scheme belongs to a specific parent — ${invalid.length} of the selected user(s) are not that parent's direct children. Assign each user a scheme derived from their own parent.`
-            : `Platform schemes can only be assigned to super-distributors — ${invalid.length} of the selected user(s) are lower tiers, who must receive a scheme from their parent.`,
+            ? `This scheme belongs to a specific parent — ${invalid.length} of the selected user(s) are not that parent's direct children.`
+            : `Platform schemes can only be assigned to network users (RT / DT / MD / SD) — ${invalid.length} of the selected user(s) are admin/staff accounts.`,
         },
         { status: 400 }
       );

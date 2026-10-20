@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, Receipt, Landmark, Zap } from "lucide-react";
+import { ArrowRight, CreditCard, Receipt, Landmark } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ServicePageHeader } from "@/components/dashboard/ServicePage";
 import { IconTile, type IconTone } from "@/components/ui/Icon";
@@ -58,17 +58,6 @@ const BILL_OPTIONS: BillOption[] = [
     icon: Receipt,
     tone: "brand",
     tags: ["7 categories", "Instant confirmation"],
-  },
-  {
-    title: "Unified Bill Payment Platform",
-    eyebrow: "Utilities",
-    description:
-      "Electricity, water, gas, education, insurance and broadband via the Unified Bill Payment Platform.",
-    href: "/dashboard/bill-pay/bbps-2",
-    maxAmount: 500000,
-    icon: Zap,
-    tone: "accent",
-    tags: ["6 categories", "Utility bills"],
   },
 ];
 

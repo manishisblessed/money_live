@@ -89,9 +89,7 @@ const baseServices: NavItem[] = [
 const bbpsServices: NavItem[] = [
   { href: "/dashboard/bill-pay/credit-card", label: "Credit Card Bill", icon: CreditCard, badge: "New" },
   { href: "/dashboard/bill-pay/cc-pay", label: "Credit Card Bill · Rail 2", icon: CreditCard, badge: "New" },
-  { href: "/dashboard/bill-pay/offline-cc-pay", label: "Offline CC Bill", icon: CreditCard, badge: "New" },
   { href: "/dashboard/bill-pay/bbps-1", label: "Bharat BillPay (BBPS)", icon: Receipt, badge: "New" },
-  { href: "/dashboard/bill-pay/bbps-2", label: "Unified Bill Platform", icon: Receipt, badge: "New" },
 ];
 
 /** All BBPS / bill-payment services collapsed under a single "Pay Bills" tab. */

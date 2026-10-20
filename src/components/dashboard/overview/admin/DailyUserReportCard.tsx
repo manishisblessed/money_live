@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   CircleDollarSign,
+  ShieldCheck,
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { formatINRFull } from "./CumulativeWalletCard";
@@ -40,7 +41,10 @@ const ROLE_TABS = [
   { key: "SUPER_DISTRIBUTOR",   label: "Super Dist." },
 ] as const;
 
-type RoleKey = (typeof ROLE_TABS)[number]["key"];
+/** Special filter key for the reconciliation discrepancy view. */
+const DISCREPANCY_KEY = "DISCREPANCY" as const;
+
+type RoleKey = (typeof ROLE_TABS)[number]["key"] | typeof DISCREPANCY_KEY;
 
 type ServiceDebitRow = {
   service: string;
@@ -183,15 +187,21 @@ export function DailyUserReportCard() {
     };
   }, [qInput]);
 
+  // Derived flag — true when the "Discrepancy" special tab is selected.
+  const isDiscrepancy = role === DISCREPANCY_KEY;
+
   const load = useCallback(async () => {
+    const discMode = role === DISCREPANCY_KEY;
     setLoading(true);
     setError(null);
     try {
       const p = new URLSearchParams();
       p.set("date", date);
-      if (role !== "ALL") p.set("role", role);
+      // Discrepancy mode overrides role filter — we want ALL roles inspected.
+      if (!discMode && role !== "ALL") p.set("role", role);
       if (service) p.set("service", service);
       if (q) p.set("q", q);
+      if (discMode) p.set("discrepancy", "1");
       p.set("page", String(page));
       p.set("pageSize", String(pageSize));
       const res = await fetch(`/api/admin/reports/daily?${p.toString()}`);
@@ -325,7 +335,7 @@ export function DailyUserReportCard() {
 
       {/* ── filter strip ────────────────────────────────────────── */}
       <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2">
-        <RolePills value={role} onChange={(r) => { setRole(r); setPage(1); }} />
+        <RolePills value={role} onChange={(r) => { setRole(r as RoleKey); setPage(1); }} />
         <ServiceSelect
           value={service}
           onChange={(s) => { setService(s); setPage(1); }}
@@ -348,6 +358,38 @@ export function DailyUserReportCard() {
             : "—"}
         </span>
       </div>
+
+      {/* ── discrepancy banner ──────────────────────────────────── */}
+      {isDiscrepancy && !error && (
+        <div
+          className={cn(
+            "relative z-10 mt-3 flex items-start gap-3 rounded-xl border p-3 text-xs",
+            !loading && data && data.total === 0
+              ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
+              : "border-amber-400/30 bg-amber-500/10 text-amber-100"
+          )}
+        >
+          {!loading && data && data.total === 0 ? (
+            <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-400" />
+          ) : (
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+          )}
+          <div>
+            <p className="font-semibold">
+              {loading
+                ? "Scanning ledger for reconciliation drift…"
+                : data && data.total === 0
+                ? "All Clear — no reconciliation discrepancies"
+                : `${data?.total ?? "—"} discrepanc${(data?.total ?? 0) === 1 ? "y" : "ies"} detected`}
+            </p>
+            <p className={cn("mt-0.5", !loading && data && data.total === 0 ? "text-emerald-200/70" : "text-amber-200/70")}>
+              {!loading && data && data.total === 0
+                ? `Every user's closing balance matches opening + credits − debits for ${prettyDate(data.date)}.`
+                : "Closing balance does not match opening + credits − debits. Expand each row to inspect the ledger breakdown."}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── error banner ────────────────────────────────────────── */}
       {error && (
@@ -391,7 +433,12 @@ export function DailyUserReportCard() {
               {!loading && data && data.rows.length === 0 && (
                 <tr>
                   <td colSpan={11} className="px-4 py-14 text-center text-xs text-slate-500">
-                    No user activity for this filter on {prettyDate(data.date)}.
+                    {isDiscrepancy
+                      ? <span className="flex flex-col items-center gap-1.5">
+                          <ShieldCheck className="h-5 w-5 text-emerald-400/60" />
+                          <span>No reconciliation discrepancies on {prettyDate(data.date)}. Ledger is balanced.</span>
+                        </span>
+                      : `No user activity for this filter on ${prettyDate(data.date)}.`}
                   </td>
                 </tr>
               )}
@@ -534,26 +581,46 @@ function RolePills({
   value: RoleKey;
   onChange: (r: RoleKey) => void;
 }) {
+  const isDisc = value === DISCREPANCY_KEY;
   return (
-    <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.04] p-1">
-      {ROLE_TABS.map((t) => {
-        const active = t.key === value;
-        return (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => onChange(t.key)}
-            className={cn(
-              "rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition",
-              active
-                ? "bg-energy-gradient text-white shadow-energy-sm"
-                : "text-slate-300 hover:text-white"
-            )}
-          >
-            {t.label}
-          </button>
-        );
-      })}
+    <div className="flex flex-wrap items-center gap-1.5">
+      {/* Standard role tabs */}
+      <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.04] p-1">
+        {ROLE_TABS.map((t) => {
+          const active = t.key === value;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => onChange(t.key)}
+              className={cn(
+                "rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition",
+                active
+                  ? "bg-energy-gradient text-white shadow-energy-sm"
+                  : "text-slate-300 hover:text-white"
+              )}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Discrepancy tab — visually separated with an amber alert style */}
+      <button
+        type="button"
+        onClick={() => onChange(DISCREPANCY_KEY)}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[11px] font-semibold transition",
+          isDisc
+            ? "border-amber-400/50 bg-amber-500/20 text-amber-200 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
+            : "border-amber-400/20 bg-amber-500/[0.08] text-amber-400/70 hover:border-amber-400/40 hover:bg-amber-500/15 hover:text-amber-300"
+        )}
+        title="Show only users with a reconciliation discrepancy (closing ≠ opening + credits − debits)"
+      >
+        <AlertTriangle className={cn("h-3 w-3", isDisc ? "text-amber-300" : "text-amber-500/70")} />
+        Discrepancy
+      </button>
     </div>
   );
 }

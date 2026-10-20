@@ -14,7 +14,6 @@ import { samedayBbps, samedayBbpsConfigured } from "./sameday-bbps";
 import { samedaySettlementConfigured } from "./sameday-settlement";
 import { samedaySettlementPayout } from "./sameday-payout";
 import { rechargekitConfigured } from "./sameday-rechargekit";
-import { rechargekitDirectConfigured } from "./rechargekit-direct";
 import { leegalityConfigured } from "./leegality";
 import { msg91Configured, msg91Sms } from "./msg91";
 import { resendConfigured, resendEmail } from "./resend";
@@ -223,7 +222,6 @@ export function partnerStatus() {
     otpVerify: { live: isTwilioOtpEnabled(), provider: isTwilioOtpEnabled() ? "TWILIO_VERIFY" : "NONE" },
     settlement: { live: flags.settlement && samedaySettlementConfigured(), provider: flags.settlement && samedaySettlementConfigured() ? "SAMEDAY" : "NONE" },
     rechargekit: { live: flags.rechargekit && rechargekitConfigured(), provider: flags.rechargekit && rechargekitConfigured() ? "SAMEDAY_RECHARGEKIT" : "NONE" },
-    rechargekitDirect: { live: flags.rechargekitDirect && rechargekitDirectConfigured(), provider: flags.rechargekitDirect && rechargekitDirectConfigured() ? "RECHARGEKIT_DIRECT" : "NONE" },
     esign:    { live: flags.esign && leegalityConfigured(), provider: flags.esign && leegalityConfigured() ? "LEEGALITY" : "NONE" }
   };
 }

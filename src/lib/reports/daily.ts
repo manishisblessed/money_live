@@ -145,6 +145,13 @@ export type DailyReportParams = {
   pageSize?: number;
   /** When true, ignore page/pageSize and return every matching user (capped). */
   forExport?: boolean;
+  /**
+   * When true, return ONLY rows where |reconDelta| >= 0.01 — i.e. users whose
+   * closing balance does not match opening + credits − debits.  All users are
+   * fetched from the DB (up to EXPORT_ROW_CAP) so the delta can be computed,
+   * then the discrepant subset is paginated in memory.
+   */
+  discrepancyOnly?: boolean;
 };
 
 export type DailyReport = {
@@ -189,6 +196,8 @@ export async function getDailyUserReport(params: DailyReportParams): Promise<Dai
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE));
 
+  const isDiscrepancyMode = !!params.discrepancyOnly;
+
   // Role/scope where clause — used for both the paginated user page and
   // the totals count. Staff roles are always filtered out.
   const roleFilter =
@@ -216,11 +225,14 @@ export async function getDailyUserReport(params: DailyReportParams): Promise<Dai
   };
 
   const skip = (page - 1) * pageSize;
-  const take = params.forExport ? EXPORT_ROW_CAP : pageSize;
+  // In discrepancy mode we must load ALL matching users first so we can
+  // compute their reconDelta, filter the discrepant subset, then paginate
+  // that subset in memory.  Same cap as the CSV export path.
+  const take = (params.forExport || isDiscrepancyMode) ? EXPORT_ROW_CAP : pageSize;
 
   // 1) The user page for the current filter — sorted deterministically so
   //    pagination is stable across days.
-  const [users, total] = await Promise.all([
+  const [users, dbTotal] = await Promise.all([
     prisma.user.findMany({
       where: userWhere,
       select: {
@@ -231,11 +243,14 @@ export async function getDailyUserReport(params: DailyReportParams): Promise<Dai
         role: true,
       },
       orderBy: [{ role: "asc" }, { name: "asc" }, { id: "asc" }],
-      skip: params.forExport ? 0 : skip,
+      skip: (params.forExport || isDiscrepancyMode) ? 0 : skip,
       take,
     }),
     prisma.user.count({ where: userWhere }),
   ]);
+  // For normal (non-discrepancy) mode this is the DB count.  For discrepancy
+  // mode we'll override it below once we know how many rows actually drift.
+  let total = dbTotal;
 
   const userIds = users.map((u) => u.id);
 
@@ -499,11 +514,21 @@ export async function getDailyUserReport(params: DailyReportParams): Promise<Dai
   // Filter-in-place if a service filter is active and the user had zero
   // matching debits *and* zero matching commission — that user isn't
   // meaningful in the "used in service X" cut.
-  const filtered = params.service
+  let filtered = params.service
     ? rows.filter((r) => r.debitsByService.length > 0 || r.commissionByService.length > 0)
     : rows;
 
-  // Page totals — computed after the optional service filter.
+  // Discrepancy mode: keep only rows where the ledger genuinely drifts.
+  // We then re-paginate this smaller set in memory so the caller gets stable
+  // page/total semantics without re-querying the DB.
+  if (isDiscrepancyMode) {
+    filtered = filtered.filter((r) => Math.abs(r.reconDelta) >= 0.01);
+    total = filtered.length;          // override DB count with discrepant count
+    filtered = filtered.slice(skip, skip + pageSize);
+  }
+
+  // Page totals — computed after all filters (and after in-memory pagination
+  // for discrepancy mode so they reflect only the visible page).
   const totals = {
     opening: sumRound(filtered.map((r) => r.opening)),
     creditsTotal: sumRound(filtered.map((r) => r.credits.total)),

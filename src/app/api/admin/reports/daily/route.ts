@@ -31,6 +31,8 @@ const QuerySchema = z.object({
   q: z.string().trim().max(120).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(25),
+  /** Pass "1" to return only rows with a non-zero reconciliation delta. */
+  discrepancy: z.string().optional(),
 });
 
 export async function GET(req: Request) {
@@ -67,6 +69,7 @@ export async function GET(req: Request) {
       q: q.q ?? null,
       page: q.page,
       pageSize: q.pageSize,
+      discrepancyOnly: q.discrepancy === "1",
     });
     return NextResponse.json(report);
   } catch (e) {

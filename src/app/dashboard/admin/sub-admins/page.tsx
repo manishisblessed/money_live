@@ -9,7 +9,6 @@ import {
   Check,
   ShieldOff,
   ShieldCheck,
-  Trash2,
   KeyRound,
   X,
   Eye,
@@ -49,8 +48,6 @@ export default function AdminSubAdminsPage() {
     record: SubAdmin;
     password: string;
   } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<SubAdmin | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [resetPwd, setResetPwd] = useState<{ name: string; password: string } | null>(null);
 
   const refresh = useCallback(async () => {
@@ -74,19 +71,6 @@ export default function AdminSubAdminsPage() {
     const with2FA = rows.filter((r) => r.twoFactorEnabled).length;
     return { total: rows.length, active, with2FA };
   }, [rows]);
-
-  async function handleDelete(r: SubAdmin) {
-    setDeleting(true);
-    try {
-      await fetch(`/api/admin/sub-admins/${r.id}`, {
-        method: "DELETE",
-      });
-      toast.success(`Sub-admin ${r.name} deleted.`);
-      refresh();
-    } finally {
-      setDeleting(false);
-    }
-  }
 
   async function handleResetPassword(r: SubAdmin) {
     try {
@@ -252,13 +236,6 @@ export default function AdminSubAdminsPage() {
               <ShieldCheck className="h-4 w-4" />
             </button>
           ) : null}
-          <button
-            onClick={() => setDeleteTarget(r)}
-            className="grid h-8 w-8 place-items-center rounded-xl text-rose-700 hover:bg-rose-50"
-            title="Delete"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
         </div>
       ),
     },
@@ -354,19 +331,6 @@ export default function AdminSubAdminsPage() {
         empty="No sub-admins created yet. Click 'Create sub-admin' to issue the first credentials."
       />
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        onClose={() => setDeleteTarget(null)}
-        busy={deleting}
-        title={deleteTarget ? `Delete sub-admin ${deleteTarget.name}?` : "Delete sub-admin?"}
-        description="This cannot be undone."
-        confirmLabel="Delete"
-        onConfirm={async () => {
-          if (!deleteTarget) return;
-          await handleDelete(deleteTarget);
-          setDeleteTarget(null);
-        }}
-      />
     </div>
   );
 }

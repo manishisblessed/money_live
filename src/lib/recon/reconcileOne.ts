@@ -35,7 +35,7 @@ type ProviderStatus = "SUCCESS" | "PENDING" | "FAILED" | "REFUNDED";
 
 function railFor(partner: string | null, service: ServiceCode): Rail | null {
   if (partner === "SAMEDAY_RECHARGEKIT") return "rechargekit";
-  // BBPS is served only by Pay2New. RECHARGEKIT_DIRECT shares BILL_CREDIT_CARD
+  // BBPS is served only by Pay2New. BILL_CREDIT_CARD
   // but has no status API, so it is not auto-resolvable here.
   if ((partner === "SAMEDAY_PAY2NEW" || partner === null) && BBPS_SERVICES.includes(service)) return "bbps";
   return null;
