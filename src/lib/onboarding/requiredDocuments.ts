@@ -49,7 +49,7 @@ export const DOC_TYPE_LABELS: Record<string, string> = {
   SHOP_ESTABLISHMENT: "Shop & Establishment Certificate",
   GUMASTA_LICENSE: "Gumasta License",
   SIGNATURE: "Signature",
-  ELECTRICITY_BILL: "Household Electricity Bill",
+  ELECTRICITY_BILL: "Household / Shop Electricity Bill",
   ADDITIONAL_ID: "Additional ID Proof",
   FAMILY_REFERENCE: "Family Member Reference Document",
   PG_FORM: "PG Form",

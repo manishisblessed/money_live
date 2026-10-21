@@ -1797,7 +1797,7 @@ function OnboardContent() {
               <div className="space-y-2">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                   <div className="flex-1">
-                    <Label>GSTIN</Label>
+                    <Label>GSTIN <span className="text-xs font-normal text-ink-400">(Optional)</span></Label>
                     <Input
                       value={form.gstin}
                       onChange={(e) =>
