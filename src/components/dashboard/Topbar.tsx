@@ -57,6 +57,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [liveBalance, setLiveBalance] = useState<number | null>(null);
+  const [liveHeld, setLiveHeld] = useState<number>(0);
   const [payinToday, setPayinToday] = useState<number | null>(null);
   const [revenueBalance, setRevenueBalance] = useState<number | null>(null);
 
@@ -167,7 +168,8 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
       const res = await fetch("/api/wallet?balanceOnly=1");
       if (res.ok) {
         const data = await res.json();
-        setLiveBalance(data.balance ?? null);
+        setLiveBalance(data.spendable ?? data.balance ?? null);
+        setLiveHeld(data.held ?? 0);
       }
     } catch {}
   }, []);
@@ -407,11 +409,11 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
           ) : isAdminStaff ? null : (
             <div
               className="hidden items-center gap-2.5 rounded-2xl bg-ink-950 py-1.5 pl-3 pr-3.5 text-white shadow-[0_10px_30px_-12px_rgba(7,11,20,0.6)] md:flex"
-              title="Wallet balance"
+              title={liveHeld > 0 ? `Spendable balance (₹${liveHeld.toLocaleString("en-IN")} held for pending payouts)` : "Wallet balance"}
             >
               <span className="relative flex h-2 w-2" aria-hidden>
-                <span className="absolute inline-flex h-full w-full rounded-full bg-energy-gradient opacity-70 animate-ping-soft" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-energy-gradient" />
+                <span className={`absolute inline-flex h-full w-full rounded-full ${liveHeld > 0 ? "bg-amber-400" : "bg-energy-gradient"} opacity-70 animate-ping-soft`} />
+                <span className={`relative inline-flex h-2 w-2 rounded-full ${liveHeld > 0 ? "bg-amber-400" : "bg-energy-gradient"}`} />
               </span>
               <span className="flex flex-col leading-tight">
                 <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-400">
@@ -420,6 +422,11 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                 <span className="font-display text-sm font-semibold tabular-nums tracking-[-0.01em]">
                   {formatINR(liveBalance ?? user?.walletBalance ?? 0)}
                 </span>
+                {liveHeld > 0 && (
+                  <span className="text-[9px] font-medium text-amber-400">
+                    {formatINR(liveHeld)} held
+                  </span>
+                )}
               </span>
             </div>
           )}

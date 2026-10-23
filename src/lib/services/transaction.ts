@@ -1,7 +1,7 @@
 import { Prisma, type ServiceCode, type TxnStatus } from "@prisma/client";
 import { nanoid } from "@/lib/nanoid";
 import { prisma } from "../db";
-import { creditWallet, debitWallet, LedgerError } from "../ledger";
+import { creditWallet, debitWallet, getBalances, LedgerError } from "../ledger";
 import { add, sub, round } from "../money";
 import { assertTransactionRisk } from "../risk/engine";
 import { assertAccountActive } from "../security/accountGate";
@@ -181,7 +181,21 @@ export async function runTransaction<TIn, TOut>(
     });
   } catch (e) {
     if (e instanceof LedgerError && e.code === "INSUFFICIENT_FUNDS") {
-      return { status: "FAILED" as const, refId, error: "Insufficient wallet balance" };
+      // Read spendable balance to surface a helpful error with actual figures.
+      try {
+        const bal = await getBalances(input.userId);
+        const spendable = Number(bal.spendable);
+        const held = Number(bal.heldBalance);
+        const needed = Number(reserveAmount);
+        const heldNote = held > 0 ? ` (₹${held.toLocaleString("en-IN")} held for pending payouts)` : "";
+        return {
+          status: "FAILED" as const,
+          refId,
+          error: `Insufficient wallet balance. Available: ₹${spendable.toLocaleString("en-IN")}${heldNote}, required: ₹${needed.toLocaleString("en-IN")}.`,
+        };
+      } catch {
+        return { status: "FAILED" as const, refId, error: "Insufficient wallet balance" };
+      }
     }
     throw e;
   }

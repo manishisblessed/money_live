@@ -36,13 +36,22 @@ export async function GET(req: Request) {
 
   const dbUser = await prisma.user.findUniqueOrThrow({
     where: { id: user.id },
-    select: { walletBalance: true },
+    select: { walletBalance: true, heldBalance: true, lienBalance: true },
   });
+
+  const heldNum = Number(dbUser.heldBalance ?? 0);
+  const lienNum = Number(dbUser.lienBalance ?? 0);
+  const totalBalance = Number(dbUser.walletBalance);
+  const spendable = Math.max(0, totalBalance - heldNum - lienNum);
 
   // Light mode for the topbar poller — skips the txn/aggregate queries.
   const { searchParams } = new URL(req.url);
   if (searchParams.get("balanceOnly") === "1") {
-    return NextResponse.json({ balance: Number(dbUser.walletBalance) });
+    return NextResponse.json({
+      balance: totalBalance,
+      spendable,
+      held: heldNum,
+    });
   }
 
   const startOfMonth = new Date();
@@ -115,7 +124,9 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json({
-    balance: Number(dbUser.walletBalance),
+    balance: totalBalance,
+    spendable,
+    held: heldNum,
     monthlyIn,
     monthlyOut,
     recentTxns,

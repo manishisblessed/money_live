@@ -328,8 +328,20 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof IdempotencyInProgressError)
       return NextResponse.json({ error: e.message }, { status: e.statusCode });
-    if (e instanceof LedgerError && e.code === "INSUFFICIENT_FUNDS")
-      return NextResponse.json({ error: "Insufficient spendable balance for this payout" }, { status: 400 });
+    if (e instanceof LedgerError && e.code === "INSUFFICIENT_FUNDS") {
+      try {
+        const bal = await getBalances(user.id);
+        const spendable = Number(bal.spendable);
+        const held = Number(bal.heldBalance);
+        const heldNote = held > 0 ? ` (₹${held.toLocaleString("en-IN")} held for pending payouts)` : "";
+        return NextResponse.json(
+          { error: `Insufficient spendable balance. Available: ₹${spendable.toLocaleString("en-IN")}${heldNote}.` },
+          { status: 400 }
+        );
+      } catch {
+        return NextResponse.json({ error: "Insufficient spendable balance for this payout" }, { status: 400 });
+      }
+    }
     throw e;
   }
 }
