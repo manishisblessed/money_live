@@ -33,7 +33,6 @@ import { processKycVideoBaseline } from "@/lib/kyc/video/service";
 import { runLedgerIntegrityAudit } from "@/lib/recon/integrity";
 import { runDailyPayoutReconciliation } from "@/lib/recon/payouts";
 import { runBbpsReconciliation } from "@/lib/recon/bbps";
-import { runRechargekitReconciliation } from "@/lib/recon/rechargekit";
 import { runTopupReconciliation, runTopupIntegrityCheck } from "@/lib/recon/topups";
 import { runOutcomeVerificationSweep } from "@/lib/recon/clawbackDetect";
 import { runExposureThresholdAlert } from "@/lib/recon/exposure";
@@ -133,20 +132,6 @@ async function main() {
     }
   });
   await boss.schedule(QUEUES.BBPS_RECONCILE, "*/5 * * * *");
-
-  // QUEUES.RECHARGEKIT_RECONCILE — same sweep for the SameDay RechargeKit CC-2
-  // rail: drains PROCESSING + NEEDS_REVIEW rows and settles/refunds via the
-  // shared finalizer (held rows are NEVER blind-refunded).
-  await boss.work(QUEUES.RECHARGEKIT_RECONCILE, async () => {
-    const r = await runRechargekitReconciliation();
-    if (!r.skipped) {
-      log(
-        `rechargekit.reconcile: drained=${r.drained} settled=${r.settled} refunded=${r.refunded} ` +
-          `stuck=${r.stuck} heldEscalated=${r.heldEscalated}`
-      );
-    }
-  });
-  await boss.schedule(QUEUES.RECHARGEKIT_RECONCILE, "*/5 * * * *");
 
   // QUEUES.TOPUP_RECONCILE — wallet top-up / PG-collect reconciliation. Viable
   // PG has no webhook, so this sweep is the safety net that settles payins where

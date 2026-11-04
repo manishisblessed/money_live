@@ -86,6 +86,13 @@ export async function priceSchemeSettlement(args: {
    * CompanyMdrFloor applies. Omit for a rail-wide floor check.
    */
   scopeKey?: string | null;
+  /**
+   * When true, the instrument dimension is ignored for slab matching (passed
+   * through to MdrDimensions). Used for PG top-up enable-checks and quotes where
+   * the customer hasn't picked an instrument yet; a mode-pinned slab must still
+   * count as "priceable" so the retailer isn't incorrectly blocked.
+   */
+  anyPaymentMode?: boolean;
 }): Promise<SchemeSettlementPrice | null> {
   const gross = round(args.grossAmount);
   const paymentMode = args.paymentMode ?? "UPI";
@@ -98,6 +105,7 @@ export async function priceSchemeSettlement(args: {
     // provider scopeKey as the transaction-side company or a provider-scoped
     // slab is scored ineligible; a wildcard-company slab still matches.
     company: args.scopeKey ?? null,
+    anyPaymentMode: args.anyPaymentMode,
     cardType: args.cardType ?? null,
     brandType: args.brandType ?? null,
     classification: args.classification ?? null,

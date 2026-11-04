@@ -116,6 +116,12 @@ export interface UpiStatusOutput {
 }
 export interface UpiProvider {
   name: string;
+  /**
+   * When true, this provider has NO status-polling API — settlement is driven
+   * exclusively by an inbound webhook. The settle layer must NOT pull status
+   * and must NOT credit from a redirect for these providers.
+   */
+  webhookOnly?: boolean;
   collect(input: UpiCollectInput): Promise<PartnerResult<UpiCollectOutput>>;
   status(orderId: string): Promise<PartnerResult<UpiStatusOutput>>;
 }

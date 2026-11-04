@@ -622,8 +622,14 @@ async function reportPushPull(user: SessionUser, params: ReportParams): Promise<
 async function reportPg(user: SessionUser, params: ReportParams): Promise<ReportResult> {
   const ids = await allowedUserIds(user);
   const createdAt = dateFilter(params);
+  // PG partners — all providers that book WALLET_TOPUP via a PG rail.
+  // UPI_COLLECT is the legacy service code from older Razorpay flows.
+  const PG_PARTNERS = ["RAZORPAY", "CHAGANS_PG", "VIABLE_PG", "BULKPE_PG"];
   const pgMatch: Prisma.TransactionWhereInput = {
-    OR: [{ partner: "RAZORPAY" }, { service: "UPI_COLLECT" }],
+    OR: [
+      { partner: { in: PG_PARTNERS } },
+      { service: "UPI_COLLECT" },
+    ],
   };
   const where: Prisma.TransactionWhereInput = {
     AND: [
@@ -668,7 +674,7 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
   const trend = trendToSeries(
     await dailyTrend({
       table: "Transaction", dateCol: "createdAt", valueExpr: `"amount"`, userCol: "userId",
-      ids, from, to, extra: Prisma.sql`AND ("partner" = 'RAZORPAY' OR "service" = 'UPI_COLLECT')`,
+      ids, from, to, extra: Prisma.sql`AND ("partner" IN ('RAZORPAY','CHAGANS_PG','VIABLE_PG','BULKPE_PG') OR "service" = 'UPI_COLLECT')`,
     }),
     "Daily collections", "#185df5"
   );
@@ -687,7 +693,7 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
     ],
     trend,
     note: total === 0
-      ? "PG collections are recorded as Razorpay or UPI-collect transactions. None were found for this range."
+      ? "PG collections (Chagans, Viable, Razorpay) are recorded as WALLET_TOPUP transactions. None were found for this range."
       : null,
   };
 }

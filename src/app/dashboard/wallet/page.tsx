@@ -91,6 +91,8 @@ type PgChannel = {
   healthy: boolean;
   detail: string;
   checkedAt: string;
+  maxAmount?: number;
+  provider?: string;
 };
 
 export default function WalletPage() {
@@ -104,6 +106,8 @@ export default function WalletPage() {
   const [channels, setChannels] = useState<PgChannel[]>([]);
   const [channel, setChannel] = useState<string>("");
   const [channelsLoading, setChannelsLoading] = useState(false);
+  const [quote, setQuote] = useState<{ priceable: boolean; gross: number; mdr: number; net: number } | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<PendingTopup | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -172,20 +176,38 @@ export default function WalletPage() {
     }
   }, []);
 
+  /** Remove the ?topup= param from the address bar without a navigation. */
+  function clearTopupParam() {
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.delete("topup");
+      window.history.replaceState({}, "", u.toString());
+    } catch {
+      /* ignore — non-critical */
+    }
+  }
+
   const checkTopup = useCallback(
     async (topup: PendingTopup): Promise<boolean> => {
       try {
         const res = await fetch(`/api/wallet/topup?refId=${encodeURIComponent(topup.refId)}`);
         if (!res.ok) return false;
-        const d = (await res.json()) as { status: string };
+        const d = (await res.json()) as { status: string; amount?: number; net?: number };
         if (d.status === "SUCCESS") {
           stopPolling();
           setPending(null);
+          clearTopupParam();
+          // Show the credited amount (net-of-MDR for Chagans; same as gross for Viable).
+          const credited = d.net ?? d.amount ?? topup.amount;
+          const hasMdr = d.net !== undefined && d.amount !== undefined && d.net < d.amount;
           setResult({
             refId: topup.refId,
             service: "Wallet top-up",
-            amount: topup.amount,
-            meta: { Status: "Credited to wallet" },
+            amount: credited,
+            meta: {
+              Status: "Credited to wallet",
+              ...(hasMdr ? { "Amount paid": formatINR(d.amount!) } : {}),
+            },
           });
           fetchWallet();
           return true;
@@ -217,6 +239,33 @@ export default function WalletPage() {
     },
     [checkTopup, stopPolling]
   );
+
+  // Live quote — fetch whenever a Chagans channel is selected and the amount changes.
+  useEffect(() => {
+    const amt = Number(amount);
+    if (!amt || amt <= 0 || !channel) {
+      setQuote(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        setQuoteLoading(true);
+        const res = await fetch(`/api/wallet/topup/quote?amount=${amt}&gateway=${encodeURIComponent(channel)}`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled) setQuote(data);
+      } catch {
+        /* quote failure is non-blocking */
+      } finally {
+        if (!cancelled) setQuoteLoading(false);
+      }
+    }, 400); // 400 ms debounce — don't fire on every keystroke
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [amount, channel]);
 
   useEffect(() => {
     fetchWallet();
@@ -267,7 +316,18 @@ export default function WalletPage() {
       };
       setPending(topup);
       setAmount("");
-      if (d.paymentUrl) window.open(d.paymentUrl, "_blank", "noopener");
+      setQuote(null);
+      if (d.paymentUrl) {
+        // Chagans uses a redirect-based checkout — navigate in the SAME tab so
+        // the payment completes and the browser returns to /pay/return?ref=REFID
+        // (then auto-forwards to the wallet). Viable PG opens in a new tab as
+        // before (poll-based, no SameSite cookie issue).
+        if (d.provider === "CHAGANS_PG") {
+          window.location.assign(d.paymentUrl);
+        } else {
+          window.open(d.paymentUrl, "_blank", "noopener");
+        }
+      }
       startPolling(topup);
     } catch {
       setError("Network error — check your connection and try again.");
@@ -279,6 +339,7 @@ export default function WalletPage() {
   const amountNum = Number(amount) || 0;
   const selectedChannel = channels.find((c) => c.id === channel);
   const allChannelsDown = channels.length > 0 && channels.every((c) => !c.healthy);
+  const selectedMaxAmount = selectedChannel?.maxAmount;
 
   const historyColumns: Column<WalletTxn>[] = [
     {
@@ -474,13 +535,30 @@ export default function WalletPage() {
                   ...(payVia === "vpa"
                     ? [{ label: "UPI ID", value: vpa || "—", mono: true, muted: !vpa }]
                     : []),
+                  // Gateway MDR charge — shown only for Chagans (MDR-priced provider)
+                  ...(quote?.priceable && quote.mdr > 0
+                    ? [
+                        { label: "You pay", value: formatINR(quote.gross) },
+                        { label: "Gateway fee", value: `− ${formatINR(quote.mdr)}`, muted: true },
+                      ]
+                    : []),
                   ...(pending
                     ? [{ label: "Reference", value: pending.refId, mono: true }]
                     : []),
                 ]}
-                total={formatINR(pending && pending.amount > 0 ? pending.amount : amountNum)}
+                total={formatINR(
+                  pending && pending.amount > 0
+                    ? pending.amount
+                    : quote?.priceable && quote.net > 0
+                      ? quote.net
+                      : amountNum
+                )}
                 totalLabel="Adds to wallet"
-                totalHint="No charges on wallet top-ups"
+                totalHint={
+                  quote?.priceable && quote.mdr > 0
+                    ? `After ${((quote.mdr / quote.gross) * 100).toFixed(2)}% gateway fee`
+                    : "No charges on wallet top-ups"
+                }
               />
               <AsideTips
                 items={[
@@ -583,11 +661,15 @@ export default function WalletPage() {
                   required
                   display
                   min={1}
-                  max={200000}
+                  max={selectedMaxAmount ?? 200000}
                   inputMode="numeric"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  hint="Up to ₹2,00,000 per top-up"
+                  hint={
+                    selectedMaxAmount
+                      ? `Up to ${formatINR(selectedMaxAmount)} on this gateway`
+                      : "Up to ₹2,00,000 per top-up"
+                  }
                 />
                 <AmountChips
                   className="mt-3"

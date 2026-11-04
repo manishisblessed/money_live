@@ -532,3 +532,162 @@ export async function runPgInstantSettlementSweep(): Promise<{
 
   return { processed: entries.length, settled, failed, totalAmount };
 }
+
+
+// ---------------------------------------------------------------------------
+// Wallet top-up capture — PG-MDR pipeline for Chagans payin top-ups.
+// Always settles INSTANT (T0) because a retailer loading their own wallet
+// cannot wait T+1.
+// ---------------------------------------------------------------------------
+
+export type TopupCaptureInput = {
+  /** OUR top-up ref (= Transaction.refId, "TOPUP…") — the idempotency key. */
+  transactionRef: string;
+  /** The gateway order id (Chagans "CPG_…") for audit / support lookups. */
+  orderId?: string | null;
+  /** Retailer who owns the top-up. */
+  userId: string;
+  /** Gross the customer actually paid (the charge, random paise included). */
+  grossAmount: number;
+  /** Instrument from the webhook (UPI | CARD | NETBANKING | WALLET). */
+  paymentMode?: string;
+  /** Rail scope the top-up is priced against (e.g. "CHAGANS_COMET"). REQUIRED. */
+  scopeKey: string;
+  /** When the customer actually paid. Defaults to now. */
+  capturedAt?: Date | string;
+};
+
+export type TopupCaptureResult = {
+  /**
+   * SETTLED  — net credited now (the single money movement).
+   * QUEUED   — priced, but the credit failed mid-flight; parked PENDING/INSTANT
+   *            for the instant safety-net cron to retry (caller keeps polling).
+   * DUPLICATE— already captured (idempotent replay).
+   * NO_SCHEME— not priceable (no PG slab / below floor / below vendor cost);
+   *            the caller MUST HOLD and never credit (the HARD RULE).
+   * SKIPPED  — user inactive or non-positive net.
+   */
+  status: "SETTLED" | "QUEUED" | "DUPLICATE" | "NO_SCHEME" | "SKIPPED";
+  netAmount?: number;
+  mdrAmount?: number;
+};
+
+/**
+ * Settle a confirmed wallet top-up exactly like a PG acquiring capture, but
+ * ALWAYS instantly (T0): price the gross against the retailer's assigned scheme
+ * (PG slab for `scopeKey`), credit the NET, mirror the gross into the live payin
+ * monitor, create a SETTLED `PgSettlementEntry`, and distribute upline MDR
+ * commission (net of 2% TDS). Refuses to settle unpriced money — returns
+ * NO_SCHEME so the caller HOLDs it (never a full credit).
+ *
+ * Idempotent: the `PgSettlementEntry.transactionRef` unique row + the
+ * `pg-settle:<ref>` ledger key guarantee at-most-once credit under webhook
+ * replays. The net credit is the ONLY money movement for the top-up.
+ */
+export async function handleTopupCapture(input: TopupCaptureInput): Promise<TopupCaptureResult> {
+  // Idempotency — already captured? Report the settled figures, credit nothing.
+  const existing = await prisma.pgSettlementEntry.findUnique({
+    where: { transactionRef: input.transactionRef },
+  });
+  if (existing) {
+    return {
+      status: "DUPLICATE",
+      netAmount: toNumber(existing.netAmount),
+      mdrAmount: toNumber(existing.mdrAmount),
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: input.userId },
+    select: { status: true },
+  });
+  if (!user || user.status !== "ACTIVE") return { status: "SKIPPED" };
+
+  const paymentMode = input.paymentMode ?? "UPI";
+
+  // Price T0 against the scheme (with the rail acquirer-cost + floor guards).
+  // null => not priceable; the HARD RULE forbids crediting, so report NO_SCHEME.
+  const price = await priceSchemeSettlement({
+    userId: input.userId,
+    serviceKind: "PG",
+    grossAmount: input.grossAmount,
+    paymentMode,
+    settlementType: "T0",
+    scopeKey: input.scopeKey,
+    // Top-ups price by scope (gateway), not by the funding instrument — so a
+    // mode-pinned scheme slab settles regardless of how the customer paid.
+    anyPaymentMode: true,
+  });
+  if (!price) return { status: "NO_SCHEME" };
+
+  const netAmount = round(price.netAmount);
+  if (!gt(netAmount, 0)) return { status: "SKIPPED" };
+
+  // Mirror the GROSS into the company payin wallet (PG rail live monitor).
+  await recordPayin({
+    rail: "PG",
+    grossAmount: input.grossAmount,
+    refType: "PgSettlementEntry",
+    refId: input.transactionRef,
+    note: `PG top-up payin (${paymentMode})`,
+  });
+
+  const capturedAt = input.capturedAt ? new Date(input.capturedAt) : new Date();
+  const capturedAtValid = !Number.isNaN(capturedAt.getTime());
+
+  // Single money movement: credit the NET now. If the credit fails mid-flight,
+  // park a PENDING/INSTANT entry for the instant safety-net cron to retry.
+  let wtxnId: string | null = null;
+  try {
+    const wtxn = await creditWallet({
+      userId: input.userId,
+      amount: netAmount,
+      reason: "SETTLEMENT",
+      refType: "PgSettlementEntry",
+      refId: input.transactionRef,
+      note: `Wallet top-up — PG instant settlement (${paymentMode})`,
+      idempotencyKey: `pg-settle:${input.transactionRef}`,
+    });
+    wtxnId = wtxn.id;
+  } catch {
+    wtxnId = null;
+  }
+
+  await prisma.pgSettlementEntry.create({
+    data: {
+      transactionRef: input.transactionRef,
+      orderId: input.orderId ?? null,
+      userId: input.userId,
+      grossAmount: dec(input.grossAmount),
+      mdrAmount: round(price.mdrAmount),
+      netAmount,
+      vendorAmount: price.vendorAmount ?? null,
+      mode: "INSTANT",
+      status: wtxnId ? "SETTLED" : "PENDING",
+      settledAt: wtxnId ? new Date() : null,
+      settledVia: wtxnId ? SETTLED_VIA.INSTANT_AUTO : null,
+      walletTxnId: wtxnId,
+      paymentMode,
+      provider: input.scopeKey,
+      schemeId: price.schemeId,
+      slabId: price.slabId,
+      vendorRateId: price.vendorRateId,
+      capturedAt: capturedAtValid ? capturedAt : null,
+    },
+  });
+
+  // Book company margin + upline commission ONLY when actually credited now.
+  if (wtxnId) {
+    try {
+      await distributeCommissionForPg(input.transactionRef, input.userId, input.grossAmount, paymentMode, "T0");
+    } catch (e) {
+      console.error("[topup capture] commission distribution failed:", input.transactionRef, e);
+    }
+  }
+
+  return {
+    status: wtxnId ? "SETTLED" : "QUEUED",
+    netAmount: toNumber(netAmount),
+    mdrAmount: toNumber(price.mdrAmount),
+  };
+}

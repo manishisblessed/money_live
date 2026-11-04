@@ -2,18 +2,20 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-server";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/security/rateLimit";
 import { toErrorResponse } from "@/lib/security/apiErrors";
-import { getPartner } from "@/lib/partners";
-import { viableChannelHealth, hydrateHealthCache } from "@/lib/partners/viable-pg";
+import { flags } from "@/lib/env";
+import { viableConfigured, viableChannelHealth, hydrateHealthCache } from "@/lib/partners/viable-pg";
+import { chagansConfigured, chagansChannelHealth } from "@/lib/partners/chagans-pg";
 import { readGatewayHealth } from "@/lib/ops/telemetry";
 
 /**
  * PG gateway channels + live health for the wallet "add money" selector.
  *
- * Returns the list of Viable PG gateways the user can pay through, each flagged
- * healthy/unhealthy (probed + cached in-process) so a down gateway is shown as
- * unavailable and the user doesn't waste time on it. Only meaningful when the
- * active UPI provider is Viable PG; other providers return an empty list (the
- * UI then hides the selector and uses the default gateway).
+ * Returns a combined list of ALL selectable gateways across Viable PG and
+ * Chagans PG, each with a prefixed id (`viable:<route>` / `chagans:<id>`) so
+ * the wallet page and `resolveUpiSelection` route them correctly.
+ *
+ * Health is probed/cached server-side; the UI uses this to disable unavailable
+ * gateways so the retailer doesn't waste time on them.
  */
 export const fetchCache = "force-no-store";
 export const dynamic = "force-dynamic";
@@ -27,22 +29,60 @@ export async function GET() {
     return toErrorResponse(e);
   }
 
-  // Only Viable PG exposes multiple selectable gateways. If it isn't the active
-  // provider, return an empty list so the UI falls back to a single gateway.
-  const upi = getPartner("upi");
-  if (upi.name !== "VIABLE_PG") {
-    return NextResponse.json({ provider: upi.name, channels: [] });
+  const channels: {
+    id: string;
+    label: string;
+    route: string;
+    primary: boolean;
+    healthy: boolean;
+    detail: string;
+    checkedAt: string;
+    maxAmount?: number;
+    provider: string;
+  }[] = [];
+
+  // ── Viable PG gateways ──────────────────────────────────────────────────
+  if (flags.upi && viableConfigured()) {
+    try {
+      // No user-triggered force re-probe: an on-demand `force` would let any
+      // user mint ₹1 probe orders at will. Seed from the worker's shared
+      // snapshot first, then fall back to a single cold probe only if nothing
+      // is cached at all.
+      hydrateHealthCache(await readGatewayHealth());
+      const viableChannels = await viableChannelHealth(false);
+      for (const c of viableChannels) {
+        channels.push({
+          id: `viable:${c.route}`,   // prefixed so resolveUpiSelection routes correctly
+          label: c.label,
+          route: c.route,
+          primary: c.primary,
+          healthy: c.healthy,
+          detail: c.detail,
+          checkedAt: c.checkedAt,
+          provider: "VIABLE_PG",
+        });
+      }
+    } catch {
+      /* health unavailable — selector still shows; top-up still works on default */
+    }
   }
 
-  try {
-    // No user-triggered force re-probe: an on-demand `force` would let any user
-    // mint ₹1 probe orders at will. Seed from the worker's shared snapshot first
-    // (so a cold web instance shows the worker's health without probing), then
-    // fall back to a single cold probe only if nothing is cached at all.
-    hydrateHealthCache(await readGatewayHealth());
-    const channels = await viableChannelHealth(false);
-    return NextResponse.json({ provider: "VIABLE_PG", channels });
-  } catch (e) {
-    return toErrorResponse(e);
+  // ── Chagans PG gateways ─────────────────────────────────────────────────
+  if (flags.upi && chagansConfigured()) {
+    for (const c of chagansChannelHealth()) {
+      channels.push({
+        id: `chagans:${c.id}`,       // prefixed so resolveUpiSelection routes correctly
+        label: c.label,
+        route: c.id,
+        primary: c.primary,
+        healthy: c.healthy,
+        detail: c.detail,
+        checkedAt: c.checkedAt,
+        maxAmount: c.maxAmount,
+        provider: "CHAGANS_PG",
+      });
+    }
   }
+
+  return NextResponse.json({ channels });
 }

@@ -30,6 +30,13 @@ export type MdrDimensions = {
   classification?: string | null;
   /** T0 = instant settlement (uses mdrValueT0 when set); T1 = standard. */
   settlementType?: "T0" | "T1";
+  /**
+   * When true, the instrument dimension (paymentMode) is ignored for slab
+   * matching. Used for PG wallet top-ups where the customer picks their
+   * instrument on the hosted page: a mode-pinned slab (e.g. CARD-only) must
+   * still match when pricing by scope (gateway), not by instrument.
+   */
+  anyPaymentMode?: boolean;
 };
 
 export type EffectiveMdr = {
@@ -94,7 +101,14 @@ function slabScore(slab: MdrSlab, dims: MdrDimensions, useClassification: boolea
   // Card Category (cardType) + network + company, and tier-pinned slabs match as
   // if their tier were a wildcard.
   const pairs: Array<[string | null, string | null | undefined, (v: string | null | undefined) => string]> = [
-    [slab.paymentMode === "*" ? null : slab.paymentMode, dims.paymentMode === "*" ? null : dims.paymentMode, norm],
+    // Skip the instrument dimension when the caller prices by scope (PG top-ups):
+    // a mode-pinned slab (e.g. CARD) must still match regardless of how the
+    // customer funded the top-up.
+    ...(dims.anyPaymentMode === true
+      ? ([] as Array<[string | null, string | null | undefined, (v: string | null | undefined) => string]>)
+      : ([[slab.paymentMode === "*" ? null : slab.paymentMode, dims.paymentMode === "*" ? null : dims.paymentMode, norm]] as Array<
+          [string | null, string | null | undefined, (v: string | null | undefined) => string]
+        >)),
     [slab.company, dims.company, norm],
     [slab.cardType, dims.cardType, norm],
     [slab.brandType, dims.brandType, norm],
