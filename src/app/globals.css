@@ -31,6 +31,23 @@
   --dur-slow: 420ms;
 }
 
+/* ── Dark-mode overrides (toggled via ThemeProvider → .dark on <html>) ── */
+.dark {
+  --background: 7 11 20;
+  --foreground: 226 232 240;
+
+  --card: 14 22 38;
+  --card-foreground: 226 232 240;
+
+  --muted: 30 42 60;
+  --muted-foreground: 148 163 184;
+
+  --border: 46 58 79;
+  --input: 46 58 79;
+
+  --ring: 99 102 241;
+}
+
 * {
   border-color: rgb(var(--border));
 }

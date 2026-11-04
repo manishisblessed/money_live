@@ -79,7 +79,7 @@ export default function DashboardLayout({
   return (
     <StepUpProvider>
     <AdminActivityTracker />
-    <div className="min-h-screen bg-[#f6f7fb] text-ink-900">
+    <div className="min-h-screen bg-[#f6f7fb] text-ink-900 dark:bg-ink-950 dark:text-ink-100">
       <Toaster
         position="top-right"
         richColors

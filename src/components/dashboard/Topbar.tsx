@@ -18,7 +18,10 @@ import {
   ChevronDown,
   User as UserIcon,
   BellOff,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { Badge } from "@/components/ui/Badge";
 import { CommandPalette } from "@/components/dashboard/shell/CommandPalette";
 import { formatINR, cn } from "@/lib/utils";
@@ -55,6 +58,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const { data: session } = useSession();
+  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [liveBalance, setLiveBalance] = useState<number | null>(null);
   const [liveHeld, setLiveHeld] = useState<number>(0);
@@ -270,7 +274,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
         className={cn(
           "sticky top-0 z-30 flex h-16 items-center justify-between gap-3 px-4 transition-[background-color,box-shadow,border-color] duration-300 md:h-[72px] md:px-8",
           scrolled
-            ? "glass border-b border-ink-900/[0.06] shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset]"
+            ? "glass dark:bg-ink-950/80 dark:backdrop-blur border-b border-ink-900/[0.06] dark:border-ink-800 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset] dark:shadow-none"
             : "border-b border-transparent bg-transparent"
         )}
       >
@@ -279,7 +283,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
           <button
             type="button"
             onClick={onOpenSidebar}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300 hover:text-ink-900 focus-energy lg:hidden"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300 hover:text-ink-900 focus-energy lg:hidden dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:border-ink-600 dark:hover:text-white"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
@@ -289,7 +293,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl text-ink-500 transition hover:bg-ink-900/[0.05] hover:text-ink-900 focus-energy lg:inline-flex"
+              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl text-ink-500 transition hover:bg-ink-900/[0.05] hover:text-ink-900 focus-energy lg:inline-flex dark:text-ink-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -303,8 +307,8 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                 <Link
                   href="/dashboard"
                   className={cn(
-                    "rounded-lg px-1.5 py-0.5 transition hover:text-ink-900",
-                    crumbs.length === 0 ? "font-display font-semibold tracking-[-0.01em] text-ink-900" : "text-ink-500"
+                    "rounded-lg px-1.5 py-0.5 transition hover:text-ink-900 dark:hover:text-white",
+                    crumbs.length === 0 ? "font-display font-semibold tracking-[-0.01em] text-ink-900 dark:text-ink-100" : "text-ink-500 dark:text-ink-400"
                   )}
                   aria-current={crumbs.length === 0 ? "page" : undefined}
                 >
@@ -346,13 +350,13 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
         <button
           type="button"
           onClick={() => setPaletteOpen(true)}
-          className="group hidden h-10 w-full max-w-sm items-center gap-2.5 rounded-2xl border border-ink-200/80 bg-white/80 px-3.5 text-left text-sm text-ink-500 shadow-sm transition hover:border-ink-300 hover:bg-white hover:text-ink-700 focus-energy md:flex"
+          className="group hidden h-10 w-full max-w-sm items-center gap-2.5 rounded-2xl border border-ink-200/80 bg-white/80 px-3.5 text-left text-sm text-ink-500 shadow-sm transition hover:border-ink-300 hover:bg-white hover:text-ink-700 focus-energy md:flex dark:border-ink-700 dark:bg-ink-900/80 dark:text-ink-400 dark:hover:border-ink-600 dark:hover:bg-ink-900 dark:hover:text-ink-200"
           aria-label="Search pages (Ctrl K)"
           aria-keyshortcuts="Control+K Meta+K"
         >
           <Search className="h-4 w-4 shrink-0 text-ink-400 transition group-hover:text-brand-600" />
           <span className="flex-1 truncate">Search pages, services…</span>
-          <kbd className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-ink-500 lg:inline-flex">
+          <kbd className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-ink-500 lg:inline-flex dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400">
             ⌘K
           </kbd>
         </button>
@@ -362,7 +366,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300 focus-energy md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300 focus-energy md:hidden dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:border-ink-600"
             aria-label="Search"
           >
             <Search className="h-4 w-4" />
@@ -431,6 +435,21 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
             </div>
           )}
 
+          {/* Theme toggle — Day / Night */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to day mode" : "Switch to night mode"}
+            title={theme === "dark" ? "Switch to day mode" : "Switch to night mode"}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300 hover:text-ink-900 focus-energy dark:border-ink-700 dark:bg-ink-900 dark:text-ink-300 dark:hover:border-ink-600 dark:hover:text-white"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </button>
+
           {/* Notifications */}
           <div className="relative" ref={notifRef}>
             <button
@@ -440,8 +459,8 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
               aria-haspopup="dialog"
               onClick={() => { setNotifOpen((o) => !o); if (!notifOpen) fetchNotifs(); }}
               className={cn(
-                "relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border bg-white text-ink-700 transition focus-energy",
-                notifOpen ? "border-royal-300 text-royal-700" : "border-ink-200 hover:border-ink-300 hover:text-ink-900"
+                "relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border bg-white text-ink-700 transition focus-energy dark:bg-ink-900 dark:text-ink-300",
+                notifOpen ? "border-royal-300 text-royal-700 dark:border-royal-600 dark:text-royal-400" : "border-ink-200 hover:border-ink-300 hover:text-ink-900 dark:border-ink-700 dark:hover:border-ink-600 dark:hover:text-white"
               )}
             >
               <Bell className="h-4 w-4" />
@@ -460,13 +479,13 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                 <motion.div
                   key="notifs"
                   {...dropdownMotion}
-                  className="absolute right-0 top-full z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-energy"
+                  className="absolute right-0 top-full z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-energy dark:border-ink-800 dark:bg-ink-900"
                   role="dialog"
                   aria-label="Notifications"
                 >
-                  <div className="flex items-center justify-between border-b border-ink-100 px-4 py-3">
+                  <div className="flex items-center justify-between border-b border-ink-100 px-4 py-3 dark:border-ink-800">
                     <div className="flex items-center gap-2">
-                      <p className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900">Notifications</p>
+                      <p className="font-display text-sm font-semibold tracking-[-0.01em] text-ink-900 dark:text-ink-100">Notifications</p>
                       {unread > 0 && <Badge size="sm" variant="coral">{unread} new</Badge>}
                     </div>
                     {unread > 0 && (
@@ -481,19 +500,19 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-ink-50 text-ink-400 ring-1 ring-inset ring-ink-100">
                           <BellOff className="h-5 w-5" />
                         </span>
-                        <p className="mt-3 text-sm font-semibold text-ink-800">You&apos;re all caught up.</p>
-                        <p className="mt-0.5 text-xs text-ink-500">New alerts will land here.</p>
+                        <p className="mt-3 text-sm font-semibold text-ink-800 dark:text-ink-200">You&apos;re all caught up.</p>
+                        <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">New alerts will land here.</p>
                       </div>
                     ) : (
-                      <ul className="divide-y divide-ink-50">
+                      <ul className="divide-y divide-ink-50 dark:divide-ink-800">
                         {notifs.map((n) => (
                           <li key={n.id}>
                             <button
                               type="button"
                               onClick={() => onClickNotif(n)}
                               className={cn(
-                                "flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-ink-50",
-                                !n.read && "bg-royal-50/40"
+                                "flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-ink-50 dark:hover:bg-ink-800",
+                                !n.read && "bg-royal-50/40 dark:bg-royal-900/20"
                               )}
                             >
                               <span className="mt-1.5 flex h-2 w-2 shrink-0">
@@ -503,8 +522,8 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex items-center justify-between gap-2">
-                                  <span className={cn("truncate text-sm", n.read ? "font-medium text-ink-700" : "font-semibold text-ink-900")}>{n.title}</span>
-                                  <span className="shrink-0 text-[10px] text-ink-400">{timeAgo(n.createdAt)}</span>
+                                  <span className={cn("truncate text-sm", n.read ? "font-medium text-ink-700 dark:text-ink-300" : "font-semibold text-ink-900 dark:text-ink-100")}>{n.title}</span>
+                                  <span className="shrink-0 text-[10px] text-ink-400 dark:text-ink-500">{timeAgo(n.createdAt)}</span>
                                 </span>
                                 <span className="mt-0.5 line-clamp-2 block text-xs text-ink-500">{n.body}</span>
                               </span>
@@ -527,18 +546,18 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
               aria-expanded={open}
               aria-haspopup="menu"
               className={cn(
-                "flex h-10 items-center gap-2.5 rounded-2xl border bg-white pl-1 pr-1.5 transition focus-energy md:pr-3",
-                open ? "border-royal-300" : "border-ink-200 hover:border-ink-300"
+                "flex h-10 items-center gap-2.5 rounded-2xl border bg-white pl-1 pr-1.5 transition focus-energy md:pr-3 dark:bg-ink-900",
+                open ? "border-royal-300 dark:border-royal-600" : "border-ink-200 hover:border-ink-300 dark:border-ink-700 dark:hover:border-ink-600"
               )}
             >
               <span className="grid h-8 w-8 place-items-center rounded-xl bg-energy-gradient font-display text-[11px] font-semibold text-white shadow-energy-sm">
                 {initials}
               </span>
-              <span className="hidden flex-col text-left leading-tight md:flex">
-                <span className="max-w-[9rem] truncate text-sm font-semibold text-ink-900">
+                <span className="hidden flex-col text-left leading-tight md:flex">
+                <span className="max-w-[9rem] truncate text-sm font-semibold text-ink-900 dark:text-ink-100">
                   {user?.name ?? "Guest"}
                 </span>
-                <span className="text-[10px] uppercase tracking-[0.14em] text-ink-500">
+                <span className="text-[10px] uppercase tracking-[0.14em] text-ink-500 dark:text-ink-400">
                   {displayRole}{userCode ? ` · ${userCode}` : ""}
                 </span>
               </span>
