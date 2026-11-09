@@ -66,6 +66,10 @@ const schema = z.object({
   SAMEDAY_BBPS_API_SECRET: z.string().min(1).optional(),
   SAMEDAY_SETTLEMENT_API_KEY: z.string().min(1).optional(),
   SAMEDAY_SETTLEMENT_API_SECRET: z.string().min(1).optional(),
+  // Cooling-off window (minutes) before a provider-confirmed-failed SameDay
+  // recon-capable txn is actually refunded to the retailer. During this window
+  // a fresh status re-poll double-checks the outcome. 0 = no hold.
+  REFUND_HOLD_MINUTES: z.coerce.number().int().min(0).default(30),
 
   // Phase 3 — settlement automation. A daily worker job sweeps the Same Day
   // partner-wallet balance above the float you keep, into a verified account.
@@ -170,7 +174,27 @@ const schema = z.object({
   // flag is off, only an explicitly-assigned active scheme resolves (legacy
   // behaviour) and unassigned network users stay gate-blocked. Fail-safe: if no
   // active default exists, resolution returns NONE (never charges ₹0 silently).
-  SCHEME_DEFAULT_FALLBACK: z.string().default("false")
+  SCHEME_DEFAULT_FALLBACK: z.string().default("false"),
+
+  // ---------- Payout-2 / Knteer bank-transfer rail ----------
+  // Dedicated API credentials for the Knteer payout product (falls back to POS
+  // key pair when unset). Never commit these to version control — set via PM2
+  // env / secrets manager in production.
+  SAMEDAY_KNTEER_PAYOUT_API_KEY: z.string().min(1).optional(),
+  SAMEDAY_KNTEER_PAYOUT_API_SECRET: z.string().min(1).optional(),
+
+  // Feature flag: set to "true" to enable the Bank Transfer rail.
+  PARTNER_KNTEER_PAYOUT_ENABLED: z.string().default("false"),
+
+  // AES-256 hex key (64 hex chars / 32 bytes) for account-number encryption.
+  KNTEER_ACCOUNT_ENCRYPTION_KEY: z.string().min(1).optional(),
+
+  // Same-account duplicate-guard window (seconds). Default = 30 minutes.
+  KNTEER_DUP_GUARD_COOLDOWN_SEC: z.string().default("1800"),
+
+  // Minimum age (seconds) a KNTEER NEEDS_REVIEW row must be before an operator
+  // may force_failed it (prevents race with a delayed bank credit). Default 30 min.
+  KNTEER_MANUAL_REFUND_MIN_AGE_SEC: z.string().default("1800")
 });
 
 /**
@@ -253,7 +277,10 @@ export const flags = {
   stepUp: env.SECURITY_STEPUP_ENABLED === "true",
 
   // Scheme Manager — global default scheme fallback (see SCHEME_DEFAULT_FALLBACK).
-  schemeDefaultFallback: env.SCHEME_DEFAULT_FALLBACK === "true"
+  schemeDefaultFallback: env.SCHEME_DEFAULT_FALLBACK === "true",
+
+  // Payout-2 / Knteer bank-transfer rail.
+  knteerPayout: env.PARTNER_KNTEER_PAYOUT_ENABLED === "true"
 } as const;
 
 export const isProd = env.NODE_ENV === "production";

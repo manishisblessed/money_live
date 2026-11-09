@@ -63,17 +63,17 @@ export function DataTable<T>({
   const cellPad = dense ? "px-4 py-2" : "px-5 py-3";
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-sm dark:border-ink-800 dark:bg-ink-900">
       {(title || description || action) && (
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div className="min-w-0">
             {title && (
-              <h3 className="font-display text-base font-semibold tracking-[-0.02em] text-ink-950 md:text-lg">
+              <h3 className="font-display text-base font-semibold tracking-[-0.02em] text-ink-950 md:text-lg dark:text-ink-50">
                 {title}
               </h3>
             )}
             {description && (
-              <p className="mt-0.5 truncate text-xs text-ink-500">{description}</p>
+              <p className="mt-0.5 truncate text-xs text-ink-500 dark:text-ink-400">{description}</p>
             )}
           </div>
           {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
@@ -83,8 +83,8 @@ export function DataTable<T>({
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
           <thead
-            className={cn(
-              "text-left text-[11px] font-semibold uppercase tracking-wider text-ink-500",
+              className={cn(
+              "text-left text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400",
               stickyHeader && "sticky top-0 z-[1]"
             )}
           >
@@ -94,7 +94,7 @@ export function DataTable<T>({
                   key={String(c.key)}
                   scope="col"
                   className={cn(
-                    "whitespace-nowrap border-y border-ink-100 bg-ink-50/60 font-semibold backdrop-blur",
+                    "whitespace-nowrap border-y border-ink-100 bg-ink-50/60 font-semibold backdrop-blur dark:border-ink-800 dark:bg-ink-800/60",
                     cellPad,
                     c.align === "right" && "text-right",
                     c.align === "center" && "text-center"
@@ -106,14 +106,14 @@ export function DataTable<T>({
             </tr>
           </thead>
 
-          <tbody className="text-ink-800">
+          <tbody className="text-ink-800 dark:text-ink-200">
             {loading ? (
               Array.from({ length: loadingRows }).map((_, r) => (
                 <tr key={`sk-${r}`}>
                   {columns.map((c, i) => (
                     <td
                       key={String(c.key)}
-                      className={cn("border-b border-ink-100", cellPad)}
+                      className={cn("border-b border-ink-100 dark:border-ink-800", cellPad)}
                     >
                       <Skeleton
                         className={cn(
@@ -163,13 +163,13 @@ export function DataTable<T>({
               data.map((row, i) => (
                 <tr
                   key={(row as { id?: string | number }).id ?? i}
-                  className="group transition-colors hover:bg-brand-50/30"
+                  className="group transition-colors hover:bg-brand-50/30 dark:hover:bg-ink-800/60"
                 >
                   {columns.map((c, ci) => (
                     <td
                       key={String(c.key)}
-                      className={cn(
-                        "whitespace-nowrap border-b border-ink-100 transition-colors",
+                        className={cn(
+                        "whitespace-nowrap border-b border-ink-100 transition-colors dark:border-ink-800",
                         cellPad,
                         ci === 0 &&
                           "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:rounded-r-full before:bg-energy-gradient before:opacity-0 before:transition-opacity before:duration-200 before:content-[''] group-hover:before:opacity-100",
@@ -193,7 +193,7 @@ export function DataTable<T>({
       </div>
 
       {footer && (
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-ink-50/40 px-5 py-3 text-sm text-ink-600">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-ink-50/40 px-5 py-3 text-sm text-ink-600 dark:bg-ink-800/40 dark:text-ink-400">
           {footer}
         </div>
       )}

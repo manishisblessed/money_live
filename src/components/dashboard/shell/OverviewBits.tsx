@@ -31,23 +31,23 @@ export function DateRangeControl({
 }) {
   return (
     <>
-      <div className="flex h-9 items-center gap-1.5 rounded-2xl border border-ink-200 bg-white px-3 shadow-sm">
+      <div className="flex h-9 items-center gap-1.5 rounded-2xl border border-ink-200 bg-white px-3 shadow-sm dark:border-ink-700 dark:bg-ink-900">
         <input
           type="date"
           value={from}
           max={to}
           onChange={(e) => onFrom(e.target.value)}
-          className="bg-transparent text-xs font-semibold text-ink-700 outline-none"
+          className="bg-transparent text-xs font-semibold text-ink-700 outline-none dark:text-ink-200"
           aria-label="From date"
         />
-        <span className="text-ink-300">→</span>
+        <span className="text-ink-300 dark:text-ink-600">→</span>
         <input
           type="date"
           value={to}
           min={from}
           max={today}
           onChange={(e) => onTo(e.target.value)}
-          className="bg-transparent text-xs font-semibold text-ink-700 outline-none"
+          className="bg-transparent text-xs font-semibold text-ink-700 outline-none dark:text-ink-200"
           aria-label="To date"
         />
       </div>
@@ -55,7 +55,7 @@ export function DateRangeControl({
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex h-9 items-center rounded-2xl border border-ink-200 bg-white px-3 text-xs font-semibold text-ink-700 shadow-sm transition hover:border-brand-200 hover:text-brand-700 focus-energy"
+          className="inline-flex h-9 items-center rounded-2xl border border-ink-200 bg-white px-3 text-xs font-semibold text-ink-700 shadow-sm transition hover:border-brand-200 hover:text-brand-700 focus-energy dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:border-brand-700 dark:hover:text-brand-400"
         >
           Today
         </button>
@@ -70,7 +70,7 @@ export function RefreshPill({ onClick, loading }: { onClick: () => void; loading
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="inline-flex h-9 items-center gap-1.5 rounded-2xl border border-ink-200 bg-white px-3.5 text-xs font-semibold text-ink-700 shadow-sm transition hover:border-brand-200 hover:text-brand-700 focus-energy disabled:opacity-60"
+      className="inline-flex h-9 items-center gap-1.5 rounded-2xl border border-ink-200 bg-white px-3.5 text-xs font-semibold text-ink-700 shadow-sm transition hover:border-brand-200 hover:text-brand-700 focus-energy disabled:opacity-60 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:border-brand-700 dark:hover:text-brand-400"
     >
       <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
       Refresh
@@ -130,8 +130,8 @@ export function ServiceBreakdownList({
     return (
       <div className="flex flex-col items-center py-8 text-center">
         <IconTile icon={Stack} tone="ink" size="md" />
-        <p className="mt-3 text-sm font-semibold text-ink-800">{emptyText}</p>
-        <p className="mt-0.5 text-xs text-ink-500">Completed business shows up here as it clears.</p>
+        <p className="mt-3 text-sm font-semibold text-ink-800 dark:text-ink-200">{emptyText}</p>
+        <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">Completed business shows up here as it clears.</p>
       </div>
     );
   }
@@ -141,18 +141,18 @@ export function ServiceBreakdownList({
       {rows.map((s) => (
         <li
           key={s.service}
-          className="relative overflow-hidden rounded-xl bg-ink-50/70 px-3.5 py-2.5 ring-1 ring-inset ring-ink-100/60"
+          className="relative overflow-hidden rounded-xl bg-ink-50/70 px-3.5 py-2.5 ring-1 ring-inset ring-ink-100/60 dark:bg-ink-800/60 dark:ring-ink-700/60"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-ink-800">{s.label}</p>
-              <p className="text-[11px] text-ink-500">
+              <p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-200">{s.label}</p>
+              <p className="text-[11px] text-ink-500 dark:text-ink-400">
                 {formatNumber(s.count)} txn · {formatNumber(s.success)} ok
                 {s.pending > 0 ? ` · ${formatNumber(s.pending)} pending` : ""}
                 {s.failed > 0 ? ` · ${formatNumber(s.failed)} failed` : ""}
               </p>
             </div>
-            <span className="shrink-0 font-display text-sm font-semibold tabular-nums text-ink-900">
+            <span className="shrink-0 font-display text-sm font-semibold tabular-nums text-ink-900 dark:text-ink-100">
               {formatINR(s.amount)}
             </span>
           </div>

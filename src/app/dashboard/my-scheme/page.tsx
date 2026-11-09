@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Select } from "@/components/ui/Input";
 import { IconTile } from "@/components/ui/Icon";
 import { EmptyState, SectionCard } from "@/components/dashboard/patterns";
-import { SERVICE_FAMILIES, familyOf, schemeAssignerLabel, type ServiceFamily } from "@/lib/scheme/constants";
+import { SERVICE_FAMILIES, familyOf, schemeAssignerLabel, serviceLabel, type ServiceFamily } from "@/lib/scheme/constants";
 
 type RateType = "FLAT" | "PERCENT";
 
@@ -253,7 +253,7 @@ export default function MyAssignedSchemePage() {
                       <tbody className="divide-y divide-ink-100">
                         {list.map((s) => (
                           <tr key={s.id} className="transition-colors hover:bg-brand-50/30">
-                            <td className="px-4 py-2.5 font-medium text-ink-900">{s.service.replace(/_/g, " ")}</td>
+                            <td className="px-4 py-2.5 font-medium text-ink-900">{serviceLabel(s.service)}</td>
                             <td className="px-4 py-2.5 text-xs text-ink-600">{s.provider ?? "All"}</td>
                             <td className="px-4 py-2.5 tabular-nums text-ink-600">{fmtBand(s.minAmount, s.maxAmount)}</td>
                             <td className="px-4 py-2.5 text-right tabular-nums text-ink-900">{fmtServiceRate(s.chargeType, s.chargeValue)}</td>

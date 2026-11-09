@@ -21,7 +21,7 @@ import { AssignUserPicker, type PickerUser } from "@/components/ui/AssignUserPic
 import { IconTile } from "@/components/ui/Icon";
 import { EmptyState, FilterBar, StatusChip } from "@/components/dashboard/patterns";
 import { Stack } from "@phosphor-icons/react";
-import { SERVICE_FAMILIES, familyOf, type ServiceFamily } from "@/lib/scheme/constants";
+import { SERVICE_FAMILIES, familyOf, serviceLabel, type ServiceFamily } from "@/lib/scheme/constants";
 import { bbpsServicesForProvider } from "@/lib/services/priceScope";
 import {
   RefreshCw,
@@ -652,7 +652,7 @@ function SchemeCard({
                         <tbody className="divide-y divide-ink-100 text-ink-800">
                           {list.map((s) => (
                             <tr key={s.id} className="hover:bg-brand-50/30">
-                              <td className="px-4 py-2.5 font-medium">{s.service.replace(/_/g, " ")}</td>
+                              <td className="px-4 py-2.5 font-medium">{serviceLabel(s.service)}</td>
                               <td className="px-4 py-2.5 text-xs">{s.provider ?? "All"}</td>
                               <td className="px-4 py-2.5">{fmtBand(s.minAmount, s.maxAmount)}</td>
                               <td className="px-4 py-2.5 text-right">
@@ -1141,13 +1141,13 @@ function SlabModal({
                     {allowedServices.length > 1 && <option value="ALL">All Services</option>}
                     {allowedServices.map((c) => (
                       <option key={c} value={c}>
-                        {c.replace(/_/g, " ")}
+                        {serviceLabel(c)}
                       </option>
                     ))}
                   </Select>
                   {family.key === "BBPS" && allowedServices.length === 1 && (
                     <p className="mt-1 text-xs text-ink-400">
-                      This product only prices {allowedServices[0].replace(/_/g, " ")}.
+                      This product only prices {serviceLabel(allowedServices[0])}.
                     </p>
                   )}
                 </>

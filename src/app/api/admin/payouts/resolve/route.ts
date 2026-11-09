@@ -4,7 +4,7 @@ import { requireAdminActivity } from "@/lib/security/adminActivity";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/security/rateLimit";
 import { toErrorResponse } from "@/lib/security/apiErrors";
 import { enforceDualControl } from "@/lib/security/dualControl";
-import { resolveOnePayout } from "@/lib/payout/service";
+import { resolveOnePayout, PayoutResolveGateError } from "@/lib/payout/service";
 import { prisma } from "@/lib/db";
 import { toNumber } from "@/lib/money";
 
@@ -99,6 +99,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ result });
   } catch (e) {
+    if (e instanceof PayoutResolveGateError) {
+      return NextResponse.json({ error: e.message, code: e.code }, { status: e.statusCode });
+    }
     return toErrorResponse(e);
   }
 }

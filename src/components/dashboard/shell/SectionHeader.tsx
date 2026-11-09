@@ -33,14 +33,14 @@ export function SectionHeader({
         <div className="min-w-0">
           <h2
             className={cn(
-              "font-display font-semibold tracking-[-0.02em] text-ink-900",
+              "font-display font-semibold tracking-[-0.02em] text-ink-900 dark:text-ink-100",
               size === "sm" ? "text-base" : "text-lg md:text-xl"
             )}
           >
             {title}
           </h2>
           {description && (
-            <p className="mt-0.5 max-w-2xl text-sm text-ink-500">{description}</p>
+            <p className="mt-0.5 max-w-2xl text-sm text-ink-500 dark:text-ink-400">{description}</p>
           )}
         </div>
       </div>

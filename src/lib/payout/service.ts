@@ -5,10 +5,36 @@ import { decryptField } from "@/lib/crypto/fieldEncryption";
 import { toNumber, sub, round } from "@/lib/money";
 import { creditServiceMargin, reverseServiceMargin } from "@/lib/commission/revenue";
 import { getPartner, assertRealMoneyProvider } from "@/lib/partners";
+import { samedayKnteerPayout } from "@/lib/partners/sameday-knteer-payout";
 import { sendOpsAlert } from "@/lib/monitoring/alerts";
 import { enqueue, QUEUES } from "@/lib/queue";
 import { emitWebhookEvent } from "@/lib/platform/webhooks";
 import { logger } from "@/lib/logger";
+
+// ── Knteer constants ──────────────────────────────────────────────────────────
+/** Minimum age (seconds) a KNTEER NEEDS_REVIEW row must be before force_failed. */
+const KNTEER_MANUAL_REFUND_MIN_AGE_SEC = Number(
+  process.env.KNTEER_MANUAL_REFUND_MIN_AGE_SEC ?? "1800"
+);
+
+/**
+ * Thrown when an operator tries to force_failed a KNTEER payout that is too
+ * young for a safe refund (the bank may still credit the beneficiary).
+ */
+export class PayoutResolveGateError extends Error {
+  public statusCode = 409;
+  public code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "PayoutResolveGateError";
+    this.code = code;
+  }
+}
+
+/** Route a PayoutRequest to the correct provider adapter. */
+function payoutProviderForRow(row: { rail?: string | null }) {
+  return row.rail === "KNTEER" ? samedayKnteerPayout : getPartner("payout");
+}
 
 /**
  * Shared, provider-agnostic payout lifecycle logic. Used by the queue worker,
@@ -251,7 +277,11 @@ function payoutFailureReason(res: { code: string; message: string }): string {
 }
 
 /** Build the decrypted beneficiary block for the provider call. */
-function beneficiaryFor(row: PayoutRequest, contactMobile?: string) {
+function beneficiaryFor(
+  row: PayoutRequest,
+  contactMobile?: string,
+  knteer?: { bankName?: string | null; mobile?: string | null } | null
+) {
   if (row.mode === "UPI") {
     return { name: row.beneficiaryName, vpa: decryptField(row.accountNumber) };
   }
@@ -261,7 +291,8 @@ function beneficiaryFor(row: PayoutRequest, contactMobile?: string) {
     ifsc: row.ifsc ? decryptField(row.ifsc) : undefined,
     // Same Day requires a non-blank contact mobile on the registered account or
     // the transfer is rejected; the requester's own mobile is always present.
-    mobile: contactMobile,
+    mobile: knteer?.mobile ?? contactMobile,
+    ...(knteer?.bankName ? { bankName: knteer.bankName } : {}),
   };
 }
 
@@ -307,7 +338,17 @@ export async function processPayoutInitiate(payoutRequestId: string): Promise<vo
     select: { userCode: true, phone: true },
   });
 
-  const provider = getPartner("payout");
+  // For KNTEER rows, fetch the linked beneficiary so we can pass bankName/mobile.
+  let knteerBene: { bankName: string | null; contactMobile: string | null } | null = null;
+  if (row.rail === "KNTEER" && row.knteerBeneficiaryId) {
+    const kb = await prisma.knteerBeneficiary.findUnique({
+      where: { id: row.knteerBeneficiaryId },
+      select: { bankName: true, mobile: true },
+    });
+    if (kb) knteerBene = { bankName: kb.bankName, contactMobile: kb.mobile };
+  }
+
+  const provider = payoutProviderForRow(row);
   // Never push real money through a mock in production. A mock "PAID" would
   // capture the hold (debit the user) without any bank transfer. Refuse instead
   // — the request stays PROCESSING (funds held) for ops/recon to resolve.
@@ -320,7 +361,7 @@ export async function processPayoutInitiate(payoutRequestId: string): Promise<vo
     userId: row.userId,
     mode: row.mode,
     amount: toNumber(row.amount),
-    beneficiary: beneficiaryFor(row, toContactMobile(user?.phone)),
+    beneficiary: beneficiaryFor(row, toContactMobile(user?.phone), knteerBene),
     purpose: user?.userCode
       ? `Pay by NxtGenPay by RT Code - ${user.userCode}`
       : `Pay by NxtGenPay ${row.userId}`,
@@ -533,7 +574,7 @@ export async function reconcilePayout(payoutRequestId: string): Promise<void> {
     }
   }
 
-  const provider = getPartner("payout");
+  const provider = payoutProviderForRow(row);
   // A mock status poll unconditionally returns "PAID" — never let recon finalize
   // a phantom success (capture the hold with no real transfer) in production.
   assertRealMoneyProvider(
@@ -693,6 +734,30 @@ export async function resolveOnePayout(
       response: { operatorResolved: true, note: opts.note ?? null },
     });
   } else if (opts.action === "force_failed") {
+    // Rule #7 — KNTEER rows: a delayed bank credit can arrive up to 30 minutes
+    // after the transfer attempt. Block force_failed until the row is old enough
+    // AND re-verify its live status one more time (last chance to auto-resolve).
+    if (row.rail === "KNTEER") {
+      const ageMs = Date.now() - new Date(row.processedAt ?? row.createdAt).getTime();
+      const minMs = KNTEER_MANUAL_REFUND_MIN_AGE_SEC * 1000;
+      if (ageMs < minMs) {
+        const waitMin = Math.ceil((minMs - ageMs) / 60_000);
+        throw new PayoutResolveGateError(
+          "KNTEER_REFUND_TOO_SOON",
+          `Bank Transfer payouts must be at least ${KNTEER_MANUAL_REFUND_MIN_AGE_SEC / 60} minutes ` +
+            `old before a manual refund. Wait ${waitMin} more minute(s) or use 'poll' to check the live status.`
+        );
+      }
+      // Last chance: live-reconcile before force-failing. If the bank has by now
+      // settled the transfer this will finalize it SUCCESS and the caller gets back
+      // a 'changed' result without us releasing money for a successful payout.
+      await reconcilePayout(row.id);
+      const refreshed = await prisma.payoutRequest.findUnique({ where: { id: row.id }, select: { status: true } });
+      if (refreshed && refreshed.status !== "NEEDS_REVIEW") {
+        const after2 = await prisma.payoutRequest.findUnique({ where: { id: row.id }, select: { status: true, bulkpeTxnId: true } });
+        return { action: opts.action, status: after2?.status ?? row.status, recoveredReference: after2?.bulkpeTxnId ?? null, changed: true };
+      }
+    }
     await finalizePayoutFailure(row.id, {
       failureReason: opts.note?.trim() || "Operator confirmed bank did not disburse",
       response: { operatorResolved: true, note: opts.note ?? null },

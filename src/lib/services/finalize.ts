@@ -6,8 +6,14 @@ import { isChargeDrivenService } from "@/lib/scheme/constants";
 import { emitWebhookEvent } from "@/lib/platform/webhooks";
 import { add, sub, round, dec } from "@/lib/money";
 import { logger } from "@/lib/logger";
+import { env } from "@/lib/env";
 
 const log = logger.child({ module: "services/finalize" });
+
+/** Deferred-refund cooling-off window in milliseconds (from REFUND_HOLD_MINUTES env var). */
+function refundHoldMs(): number {
+  return Math.max(0, env.REFUND_HOLD_MINUTES) * 60_000;
+}
 
 // These finalizers run claim + ledger movements (which may trigger a lien sweep
 // touching several rows) in ONE interactive transaction. Prisma's 5s default is
@@ -47,6 +53,8 @@ export type FinalizableTxn = {
   status: TxnStatus;
   partner: string | null;
   partnerTxnId: string | null;
+  /** Populated when a deferred-refund cooling-off window was stamped earlier. */
+  refundEligibleAt?: Date | null;
 };
 
 // A held NEEDS_REVIEW txn is non-terminal: the out-of-band finalizer may still
@@ -65,6 +73,11 @@ export async function finalizeServiceTransaction(opts: {
   raw?: unknown;
   /** Provenance for the audit trail, e.g. "webhook" | "recon". */
   source: string;
+  /**
+   * When true, skip the deferred cooling-off window and credit immediately.
+   * Used for admin-triggered resolutions and recon not-found refunds.
+   */
+  immediate?: boolean;
 }): Promise<{ finalized: boolean; outcome: FinalizeOutcome }> {
   const { txn, status, source } = opts;
   const partnerTxnId = opts.partnerTxnId ?? txn.partnerTxnId ?? null;
@@ -76,7 +89,7 @@ export async function finalizeServiceTransaction(opts: {
     await prisma.$transaction(async (tx) => {
       const claim = await tx.transaction.updateMany({
         where: { id: txn.id, status: { in: NON_TERMINAL } },
-        data: { status: "SUCCESS", partnerTxnId, response: raw },
+        data: { status: "SUCCESS", partnerTxnId, response: raw, refundEligibleAt: null },
       });
       if (claim.count === 0) return; // someone finalized first
       finalized = true;
@@ -112,9 +125,97 @@ export async function finalizeServiceTransaction(opts: {
     return { finalized, outcome: finalized ? "settled" : "noop" };
   }
 
-  // ── FAILED / REFUNDED — refund the held reserve (amount + fee) ────────────
+  // ── FAILED / REFUNDED — deferred double-checked refund ───────────────────
+  //
+  // On SameDay recon-capable rails a synchronous "failure" may arrive while the
+  // payment actually charged (SameDay reverses our float separately, later).
+  // We NEVER credit the retailer on the first failure signal alone. Instead:
+  //
+  //   1st call (immediate=false, no refundEligibleAt stamped yet):
+  //       Stamp refundEligibleAt = now + REFUND_HOLD_MINUTES.
+  //       Keep the row NEEDS_REVIEW. Audit and return noop — do NOT credit yet.
+  //
+  //   Subsequent calls while window is still active:
+  //       noop — wait.
+  //
+  //   Subsequent call after window elapsed (double-check complete):
+  //       Guard against a prior REVERSAL (idempotent). If none, proceed to mark
+  //       terminal + creditWallet + audit.
+  //
+  // immediate=true bypasses the hold: used for admin-triggered "Not found in
+  // panel" refunds and reconcileOne admin force-refund, where the ops team has
+  // already verified with the provider.
+
   const reserveAmount = round(add(txn.amount.toNumber(), txn.fee.toNumber()));
   const terminal: TxnStatus = status === "REFUNDED" ? "REFUNDED" : "FAILED";
+
+  // ── Prior-reversal idempotency guard ────────────────────────────────────
+  const existingReversal = await prisma.walletTxn.findFirst({
+    where: {
+      userId: txn.userId,
+      direction: "CREDIT",
+      reason: "REVERSAL",
+      refType: "Transaction",
+      refId: txn.id,
+    },
+    select: { id: true },
+  });
+  if (existingReversal) {
+    log.info({ refId: txn.refId, source }, "refund skipped — REVERSAL already posted");
+    return { finalized: false, outcome: "noop" };
+  }
+
+  // ── Cooling-off gate (deferred double-check) ─────────────────────────────
+  if (!opts.immediate) {
+    const holdMs = refundHoldMs();
+    const now = Date.now();
+
+    if (!txn.refundEligibleAt) {
+      // First confirmed failure — stamp the cooling-off deadline, stay NEEDS_REVIEW.
+      const eligibleAt = new Date(now + holdMs);
+      await prisma.transaction.updateMany({
+        where: { id: txn.id, status: { in: NON_TERMINAL } },
+        data: {
+          refundEligibleAt: eligibleAt,
+          errorCode: opts.errorCode ?? `PROVIDER_${status}`,
+          errorMessage: opts.errorMessage || `Provider reported ${status} for ${txn.refId}`,
+          response: raw,
+        },
+      });
+      await prisma.auditLog.create({
+        data: {
+          userId: txn.userId,
+          action: `txn.${source}_refund_scheduled`,
+          entity: "Transaction",
+          entityId: txn.id,
+          meta: {
+            refId: txn.refId,
+            source,
+            providerStatus: status,
+            partner: txn.partner,
+            eligibleAt: eligibleAt.toISOString(),
+            holdMinutes: env.REFUND_HOLD_MINUTES,
+          },
+        },
+      });
+      log.info(
+        { refId: txn.refId, source, eligibleAt },
+        "refund cooling-off window stamped — will credit after double-check"
+      );
+      return { finalized: false, outcome: "noop" };
+    }
+
+    // Window still active — wait.
+    if (txn.refundEligibleAt.getTime() > now) {
+      log.info(
+        { refId: txn.refId, eligibleAt: txn.refundEligibleAt },
+        "refund cooling-off window still active — skipping"
+      );
+      return { finalized: false, outcome: "noop" };
+    }
+    // Window elapsed → fall through to credit.
+  }
+
   let finalized = false;
   await prisma.$transaction(async (tx) => {
     const claim = await tx.transaction.updateMany({
@@ -122,6 +223,7 @@ export async function finalizeServiceTransaction(opts: {
       data: {
         status: terminal,
         partnerTxnId,
+        refundEligibleAt: null,
         errorCode: opts.errorCode ?? `PROVIDER_${status}`,
         errorMessage: opts.errorMessage || `Provider reported ${status} for ${txn.refId}`,
         response: raw,
@@ -216,7 +318,7 @@ export async function correctTerminalToSuccess(opts: {
     // Claim ONLY a genuinely terminal-failed row → SUCCESS. At-most-once.
     const claim = await tx.transaction.updateMany({
       where: { id: txn.id, status: { in: ["FAILED", "REFUNDED"] } },
-      data: { status: "SUCCESS", partnerTxnId, errorCode: null, errorMessage: null, response: raw },
+      data: { status: "SUCCESS", partnerTxnId, errorCode: null, errorMessage: null, response: raw, refundEligibleAt: null },
     });
     if (claim.count === 0) return; // already corrected / not a terminal-failed row
     corrected = true;
@@ -326,4 +428,5 @@ export const FINALIZABLE_TXN_SELECT = {
   status: true,
   partner: true,
   partnerTxnId: true,
+  refundEligibleAt: true,
 } satisfies Prisma.TransactionSelect;

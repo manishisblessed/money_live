@@ -412,7 +412,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
             </Link>
           ) : isAdminStaff ? null : (
             <div
-              className="hidden items-center gap-2.5 rounded-2xl bg-ink-950 py-1.5 pl-3 pr-3.5 text-white shadow-[0_10px_30px_-12px_rgba(7,11,20,0.6)] md:flex"
+              className="hidden items-center gap-2.5 rounded-2xl bg-ink-950 py-1.5 pl-3 pr-3.5 text-white shadow-[0_10px_30px_-12px_rgba(7,11,20,0.6)] md:flex dark:bg-ink-800 dark:shadow-none dark:ring-1 dark:ring-ink-700"
               title={liveHeld > 0 ? `Spendable balance (₹${liveHeld.toLocaleString("en-IN")} held for pending payouts)` : "Wallet balance"}
             >
               <span className="relative flex h-2 w-2" aria-hidden>
@@ -568,7 +568,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                 <motion.div
                   key="user-menu"
                   {...dropdownMotion}
-                  className="absolute right-0 top-full z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-energy"
+                  className="absolute right-0 top-full z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-energy dark:border-ink-800 dark:bg-ink-900"
                   role="menu"
                 >
                   <div className="grain relative bg-ink-950 p-4 text-white">
@@ -597,7 +597,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                       href="/dashboard/profile"
                       role="menuitem"
                       onClick={() => setOpen(false)}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-700 transition hover:bg-ink-50 hover:text-ink-900"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-700 transition hover:bg-ink-50 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-white"
                     >
                       <UserIcon className="h-4 w-4 text-ink-400" />
                       My profile
@@ -606,7 +606,7 @@ export function Topbar({ onOpenSidebar, collapsed, onToggleCollapse }: { onOpenS
                       type="button"
                       role="menuitem"
                       onClick={logout}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-coral-700 transition hover:bg-coral-50"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-coral-700 transition hover:bg-coral-50 dark:text-coral-400 dark:hover:bg-coral-900/30"
                     >
                       <LogOut className="h-4 w-4" />
                       Sign out

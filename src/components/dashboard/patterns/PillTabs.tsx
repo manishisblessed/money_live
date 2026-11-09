@@ -44,7 +44,7 @@ export function PillTabs<V extends string = string>({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl bg-white p-1 ring-1 ring-ink-100 shadow-sm",
+        "inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl bg-white p-1 ring-1 ring-ink-100 shadow-sm dark:bg-ink-900 dark:ring-ink-800",
         className
       )}
     >
@@ -62,7 +62,7 @@ export function PillTabs<V extends string = string>({
             className={cn(
               "relative isolate inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl font-semibold transition-colors focus-energy",
               size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
-              active ? "text-white" : "text-ink-600 hover:bg-ink-50 hover:text-ink-900",
+              active ? "text-white" : "text-ink-600 hover:bg-ink-50 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-100",
               t.disabled && "cursor-not-allowed opacity-50"
             )}
           >
@@ -80,7 +80,7 @@ export function PillTabs<V extends string = string>({
               <span
                 className={cn(
                   "ml-0.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums",
-                  active ? "bg-white/20 text-white" : "bg-ink-100 text-ink-600"
+                  active ? "bg-white/20 text-white" : "bg-ink-100 text-ink-600 dark:bg-ink-800 dark:text-ink-400"
                 )}
               >
                 {t.count}

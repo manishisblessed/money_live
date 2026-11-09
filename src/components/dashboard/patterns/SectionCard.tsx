@@ -13,12 +13,12 @@ const paddings: Record<Padding, string> = {
 type Tone = "default" | "brand" | "accent" | "royal" | "coral" | "amber" | "ink";
 
 const tones: Record<Tone, string> = {
-  default: "bg-white ring-ink-100",
-  brand: "bg-gradient-to-br from-brand-50/80 to-white ring-brand-100",
-  accent: "bg-gradient-to-br from-accent-50/80 to-white ring-accent-100",
-  royal: "bg-gradient-to-br from-royal-50/80 to-white ring-royal-100",
-  coral: "bg-gradient-to-br from-coral-50/80 to-white ring-coral-100",
-  amber: "bg-gradient-to-br from-amber-50/80 to-white ring-amber-100",
+  default: "bg-white ring-ink-100 dark:bg-ink-900 dark:ring-ink-800",
+  brand: "bg-gradient-to-br from-brand-50/80 to-white ring-brand-100 dark:from-brand-950/40 dark:to-ink-900 dark:ring-brand-900",
+  accent: "bg-gradient-to-br from-accent-50/80 to-white ring-accent-100 dark:from-accent-950/40 dark:to-ink-900 dark:ring-accent-900",
+  royal: "bg-gradient-to-br from-royal-50/80 to-white ring-royal-100 dark:from-royal-950/40 dark:to-ink-900 dark:ring-royal-900",
+  coral: "bg-gradient-to-br from-coral-50/80 to-white ring-coral-100 dark:from-coral-950/40 dark:to-ink-900 dark:ring-coral-900",
+  amber: "bg-gradient-to-br from-amber-50/80 to-white ring-amber-100 dark:from-amber-950/40 dark:to-ink-900 dark:ring-amber-900",
   ink: "bg-ink-950 text-white ring-ink-900",
 };
 
@@ -67,7 +67,7 @@ export function SectionCard({
         <header
           className={cn(
             "flex flex-wrap items-start justify-between gap-3 px-5 py-4 md:px-6",
-            isInk ? "border-b border-white/10" : "border-b border-ink-100"
+            isInk ? "border-b border-white/10" : "border-b border-ink-100 dark:border-ink-800"
           )}
         >
           <div className="flex min-w-0 items-start gap-3">
@@ -86,8 +86,8 @@ export function SectionCard({
               {title && (
                 <h3
                   className={cn(
-                    "font-display text-base font-semibold tracking-[-0.02em] md:text-lg",
-                    isInk ? "text-white" : "text-ink-900"
+                  "font-display text-base font-semibold tracking-[-0.02em] md:text-lg",
+                  isInk ? "text-white" : "text-ink-900 dark:text-ink-100"
                   )}
                 >
                   {title}
@@ -96,8 +96,8 @@ export function SectionCard({
               {description && (
                 <p
                   className={cn(
-                    "mt-0.5 text-sm",
-                    isInk ? "text-white/70" : "text-ink-500"
+                  "mt-0.5 text-sm",
+                  isInk ? "text-white/70" : "text-ink-500 dark:text-ink-400"
                   )}
                 >
                   {description}

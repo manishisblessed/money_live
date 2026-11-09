@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useCallback,
@@ -197,21 +197,21 @@ export function CommandPalette({
             role="dialog"
             aria-modal="true"
             aria-label="Search and jump to a page"
-            className="grain relative w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-energy ring-1 ring-ink-100"
+            className="grain relative w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-energy ring-1 ring-ink-100 dark:bg-ink-900 dark:ring-ink-800"
             initial={reduce ? false : { opacity: 0, y: -12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: reduce ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
             onKeyDown={onKeyDown}
           >
-            <div className="relative z-10 flex items-center gap-3 border-b border-ink-100 px-4 py-3">
+            <div className="relative z-10 flex items-center gap-3 border-b border-ink-100 px-4 py-3 dark:border-ink-800">
               <IconTile icon={MagnifyingGlass} tone="energy" size="sm" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Jump to a page… try “payout” or “kyc”"
-                className="h-10 flex-1 bg-transparent font-sans text-[15px] text-ink-900 outline-none placeholder:text-ink-400"
+                className="h-10 flex-1 bg-transparent font-sans text-[15px] text-ink-900 outline-none placeholder:text-ink-400 dark:text-ink-100 dark:placeholder:text-ink-500"
                 role="combobox"
                 aria-expanded="true"
                 aria-controls="cmdk-list"
@@ -220,7 +220,7 @@ export function CommandPalette({
                 autoComplete="off"
                 spellCheck={false}
               />
-              <kbd className="hidden items-center gap-1 rounded-lg border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-ink-500 sm:inline-flex">
+              <kbd className="hidden items-center gap-1 rounded-lg border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-ink-500 sm:inline-flex dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400">
                 ESC
               </kbd>
             </div>
@@ -260,13 +260,13 @@ export function CommandPalette({
                             onClick={() => go(item.href)}
                             className={cn(
                               "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
-                              isActive ? "pill-active" : "text-ink-700 hover:bg-ink-50"
+                              isActive ? "pill-active dark:bg-royal-900/30 dark:text-royal-200" : "text-ink-700 hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-800"
                             )}
                           >
                             <span
                               className={cn(
                                 "grid h-8 w-8 shrink-0 place-items-center rounded-lg",
-                                isActive ? "bg-white/70 text-royal-700" : "bg-ink-50 text-ink-500"
+                                isActive ? "bg-white/70 text-royal-700 dark:bg-royal-900/40 dark:text-royal-300" : "bg-ink-50 text-ink-500 dark:bg-ink-800 dark:text-ink-400"
                               )}
                             >
                               <Icon className="h-4 w-4" />
@@ -299,20 +299,20 @@ export function CommandPalette({
               )}
             </ul>
 
-            <div className="relative z-10 flex items-center justify-between gap-3 border-t border-ink-100 bg-ink-50/60 px-4 py-2 text-[11px] text-ink-500">
+            <div className="relative z-10 flex items-center justify-between gap-3 border-t border-ink-100 bg-ink-50/60 px-4 py-2 text-[11px] text-ink-500 dark:border-ink-800 dark:bg-ink-800/60 dark:text-ink-400">
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded-md border border-ink-200 bg-white px-1 py-0.5"><ArrowUp className="h-3 w-3" /></kbd>
-                  <kbd className="rounded-md border border-ink-200 bg-white px-1 py-0.5"><ArrowDown className="h-3 w-3" /></kbd>
+                  <kbd className="rounded-md border border-ink-200 bg-white px-1 py-0.5 dark:border-ink-700 dark:bg-ink-900"><ArrowUp className="h-3 w-3" /></kbd>
+                  <kbd className="rounded-md border border-ink-200 bg-white px-1 py-0.5 dark:border-ink-700 dark:bg-ink-900"><ArrowDown className="h-3 w-3" /></kbd>
                   navigate
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <kbd className="rounded-md border border-ink-200 bg-white px-1 py-0.5"><CornerDownLeft className="h-3 w-3" /></kbd>
+                  <kbd className="rounded-md border border-ink-200 bg-white px-1 py-0.5 dark:border-ink-700 dark:bg-ink-900"><CornerDownLeft className="h-3 w-3" /></kbd>
                   open
                 </span>
               </div>
               <span className="inline-flex items-center gap-1 font-semibold">
-                <kbd className="rounded-md border border-ink-200 bg-white px-1.5 py-0.5 font-sans">⌘K</kbd>
+                <kbd className="rounded-md border border-ink-200 bg-white px-1.5 py-0.5 font-sans dark:border-ink-700 dark:bg-ink-900">⌘K</kbd>
                 <span className="text-ink-400">/ Ctrl K</span>
               </span>
             </div>

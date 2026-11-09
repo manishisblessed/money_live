@@ -32,6 +32,8 @@ export async function handlePayoutWebhookEvent(
         pick(data, ["reference_id", "referenceId"]),
         pick(data, ["transcation_id", "transaction_id", "txn_id", "txnId"]),
         pick(data, ["utr", "rrn"]),
+        // Knteer payout webhook shape: partner_trans_id / partnerTransId
+        pick(data, ["partner_trans_id", "partnerTransId"]),
       ].filter(Boolean) as string[]
     )
   );

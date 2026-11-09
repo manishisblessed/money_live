@@ -183,6 +183,7 @@ model User {
   notifications          Notification[]
   commissionSlabs        CommissionSlab[]
   payoutRequests         PayoutRequest[]         @relation("PayoutOwner")
+  knteerBeneficiaries    KnteerBeneficiary[]
   payoutBeneficiaries    PayoutBeneficiary[]     @relation("PayoutBeneficiaries")
   schemesCreated         Scheme[]                @relation("SchemeCreator")
   posMachines            PosMachine[]            @relation("PosAssignee")
@@ -670,6 +671,7 @@ enum ServiceCode {
   INSURANCE
   POS // POS acquirer settlement (first-class so earnings/commission attribute per-service)
   QR // Static QR collection settlement (first-class so revenue/commission attribute per-service, incl. per-leg split)
+  KNTEER_PAYOUT // Knteer bank-transfer rail (displayed as "Bank Transfer" in UI)
 }
 
 enum TxnStatus {
@@ -737,6 +739,13 @@ model Transaction {
   // refunds
   refundedAt     DateTime?
   refundRefId    String?
+  // Deferred-refund cooling-off (SameDay recon-capable rails). A provider
+  // "failure" can arrive while the payment was ACTUALLY charged, so the reserve
+  // is NEVER released on the first failure signal. The first confirmed failure
+  // stamps this timestamp (now + REFUND_HOLD_MINUTES); the reserve is credited
+  // back only after it passes AND a fresh status re-check still reports failure
+  // AND no REVERSAL was already posted. Cleared on settle.
+  refundEligibleAt DateTime?
 
   ipAddress String?
   device    String?
@@ -1456,6 +1465,18 @@ model PayoutRequest {
   checkerId String? // who approved/rejected
   remarks   String? // checker remarks on approve/reject
 
+  // Rail tag: "SETTLEMENT" = standard payout, "KNTEER" = Knteer bank-transfer.
+  // Defaults to SETTLEMENT for all pre-existing rows.
+  rail              String  @default("SETTLEMENT")
+
+  // Knteer beneficiary link (populated only for rail="KNTEER" rows).
+  knteerBeneficiaryId String?
+  knteerBeneficiary   KnteerBeneficiary? @relation(fields: [knteerBeneficiaryId], references: [id])
+
+  // GST rate basis points used at quote time (0 = no GST, 1800 = 18%). Only
+  // non-zero for KNTEER_PAYOUT service rows where vendor charges attract GST.
+  gstRate Int @default(0)
+
   // Provider correlation (column names retained for backward compatibility)
   bulkpeReferenceId String  @unique // our idempotency reference_id sent to the provider
   bulkpeTxnId       String? // provider's transaction id
@@ -1475,6 +1496,9 @@ model PayoutRequest {
   @@index([userId, status])
   @@index([status, createdAt])
   @@index([checkerId, status])
+  // Cooldown index: query the most recent KNTEER transfer to the same last-4
+  // within the duplicate-guard window.
+  @@index([userId, rail, accountLast4, status, createdAt])
 }
 
 // ---------- Payout beneficiary book (penny-drop verified) ----------
@@ -1530,6 +1554,53 @@ model PayoutBeneficiary {
   @@unique([userId, accountNumber, ifsc])
   @@index([userId, isVerified])
   @@index([userId, verificationStatus])
+}
+
+// =====================================================================
+// Knteer bank-transfer beneficiary book (Phase: Payout-2)
+//
+// One row per unique bank account per user. The accountNumber is stored
+// AES-256-GCM encrypted (fieldEncryption.ts); the plain accountLast4 is
+// always available for safe display. A beneficiary must be verified via
+// Knteer's bank-verify API before it can receive a transfer.
+// =====================================================================
+
+model KnteerBeneficiary {
+  id     String @id @default(cuid())
+
+  // Owner (the retailer/network user whose book this account belongs to).
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Full account number — AES-256-GCM encrypted (fieldEncryption.ts).
+  accountNumber     String // ENCRYPTED at rest
+  accountLast4      String // plain — display-only
+  ifscCode          String
+  accountHolderName String // bank-verified name when isBankVerified = true
+  bankName          String
+  mobile            String
+
+  // Same Day partner reference id (KBENE_…). Not unique — metadata only.
+  referenceId String?
+
+  // Registration state
+  registrationType   String  @default("register")
+  verificationCharge Decimal @default(0) @db.Decimal(8, 2)
+  isRegistered       Boolean @default(true)
+  isBankVerified     Boolean @default(false)
+
+  // Optional contact fields
+  email String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payoutRequests PayoutRequest[]
+
+  @@unique([userId, accountLast4, ifscCode])
+  @@index([userId])
+  @@index([ifscCode])
+  @@map("knteer_beneficiaries")
 }
 
 // =====================================================================

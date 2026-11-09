@@ -220,9 +220,9 @@ export function StatCard({
   const card = (
     <div
       className={cn(
-        "group relative h-full overflow-hidden rounded-3xl border border-ink-100 bg-white p-5 shadow-sm shadow-inner-ring",
+        "group relative h-full overflow-hidden rounded-3xl border border-ink-100 bg-white p-5 shadow-sm shadow-inner-ring dark:border-ink-800 dark:bg-ink-900",
         "transition-[transform,box-shadow,border-color] duration-300 ease-out",
-        href && "cursor-pointer hover:-translate-y-1 hover:border-brand-200 hover:shadow-energy-sm"
+        href && "cursor-pointer hover:-translate-y-1 hover:border-brand-200 hover:shadow-energy-sm dark:hover:border-ink-600"
       )}
     >
       {/* Tone glow — the "inner highlight" */}
@@ -271,13 +271,13 @@ export function StatCard({
           </>
         ) : (
           <>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500 dark:text-ink-400">
               {label}
             </p>
-            <p className="mt-1 font-display text-2xl font-semibold leading-none tracking-[-0.02em] text-ink-950 tabular-nums md:text-3xl">
+            <p className="mt-1 font-display text-2xl font-semibold leading-none tracking-[-0.02em] text-ink-950 tabular-nums md:text-3xl dark:text-ink-50">
               <CountUp value={value} />
             </p>
-            {hint && <p className="mt-1.5 text-xs text-ink-500">{hint}</p>}
+            {hint && <p className="mt-1.5 text-xs text-ink-500 dark:text-ink-400">{hint}</p>}
           </>
         )}
       </div>

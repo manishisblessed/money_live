@@ -58,7 +58,7 @@ export function PageHeader({
     <header className="mb-8 animate-fade-up motion-reduce:animate-none">
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav aria-label="Breadcrumb" className="mb-3">
-          <ol className="flex flex-wrap items-center gap-1 text-xs text-ink-500">
+          <ol className="flex flex-wrap items-center gap-1 text-xs text-ink-500 dark:text-ink-400">
             {breadcrumbs.map((b, i) => {
               const last = i === breadcrumbs.length - 1;
               return (
@@ -67,14 +67,14 @@ export function PageHeader({
                   {b.href && !last ? (
                     <Link
                       href={b.href}
-                      className="rounded-md px-1 py-0.5 font-medium text-ink-500 transition hover:bg-ink-100 hover:text-ink-900"
+                      className="rounded-md px-1 py-0.5 font-medium text-ink-500 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-100"
                     >
                       {b.label}
                     </Link>
                   ) : (
                     <span
                       aria-current={last ? "page" : undefined}
-                      className={cn("px-1 py-0.5", last ? "font-semibold text-ink-800" : "font-medium")}
+                      className={cn("px-1 py-0.5", last ? "font-semibold text-ink-800 dark:text-ink-200" : "font-medium")}
                     >
                       {b.label}
                     </span>
@@ -113,7 +113,7 @@ export function PageHeader({
             )}
             <h1
               className={cn(
-                "font-display text-2xl font-semibold leading-[1.1] tracking-[-0.02em] text-ink-950 md:text-[2rem]",
+                "font-display text-2xl font-semibold leading-[1.1] tracking-[-0.02em] text-ink-950 md:text-[2rem] dark:text-ink-50",
                 eyebrow && "mt-1.5"
               )}
             >
@@ -124,7 +124,7 @@ export function PageHeader({
               className="mt-3 block h-1 w-12 rounded-full bg-energy-gradient-x"
             />
             {description && (
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-600">{description}</p>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-600 dark:text-ink-400">{description}</p>
             )}
             {meta && <div className="mt-3 flex flex-wrap items-center gap-2">{meta}</div>}
           </div>
