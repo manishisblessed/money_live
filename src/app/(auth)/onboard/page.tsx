@@ -220,6 +220,19 @@ function OnboardContent() {
     !namesMatch(bankRefName, bankResult.nameAtBank) &&
     !(gstTradeName && namesMatch(gstTradeName, bankResult.nameAtBank))
   );
+  // Partial match: bank name differs but shares at least one word with Aadhaar/PAN or GST name.
+  const bankNamePartialMatch = bankNameMismatch && !!(
+    bankResult?.nameAtBank && (
+      (bankRefName && namesShareAnyWord(bankRefName, bankResult.nameAtBank)) ||
+      (gstTradeName && namesShareAnyWord(gstTradeName, bankResult.nameAtBank))
+    )
+  );
+  // Hard block: zero words in common — likely a completely wrong bank account.
+  const bankNameHardBlock = bankNameMismatch && !bankNamePartialMatch;
+
+  // Bank name mismatch declaration (when partial match allows it)
+  const [bankNameDeclChecked, setBankNameDeclChecked] = useState(false);
+
   const nameMismatch = panAadhaarMismatch || bankNameMismatch;
 
   // Name-mismatch self-declaration popup
@@ -888,6 +901,7 @@ function OnboardContent() {
 
   function editBank() {
     setBankResult(null);
+    setBankNameDeclChecked(false);
     setForm((f) => ({ ...f, bankName: "", bankAccountStatus: "" }));
     setError("");
   }
@@ -1124,6 +1138,7 @@ function OnboardContent() {
           nameMismatch,
           nameDeclarationAccepted: nameMismatch && nameDeclarationChecked,
           panNameDeclarationAccepted: panAadhaarPartialMatch && panNameDeclChecked,
+          bankNameDeclarationAccepted: bankNamePartialMatch && bankNameDeclChecked,
           dob: form.dob || form.aadhaarDob || undefined,
         }),
       });
@@ -1165,8 +1180,12 @@ function OnboardContent() {
         // self-declaration and final registration have a firm name.
         return form.shopName.trim().length >= 2;
       case 6:
-        // Bank must be verified AND account-holder name must match Aadhaar/PAN or GST company name.
-        return !!bankResult && !bankNameMismatch;
+        // Bank must be verified. If names mismatch but share a word, user can
+        // self-declare; if zero words match it's a hard block (wrong account).
+        return !!bankResult && (
+          !bankNameMismatch ||
+          (bankNamePartialMatch && bankNameDeclChecked)
+        );
       case 7:
         return selfieUploaded && videoCompleted;
       case 8: {
@@ -2079,8 +2098,47 @@ function OnboardContent() {
                       name2={bankResult.nameAtBank}
                     />
                   )}
-                  {/* Hard block if name doesn't match any reference */}
-                  {bankNameMismatch && (
+                  {/* Partial match: let user self-declare all names belong to them */}
+                  {bankNamePartialMatch && (
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
+                        <strong>Name mismatch detected.</strong> The bank account holder name differs
+                        from your Aadhaar / PAN. If all names belong to you, please confirm below.
+                        <div className="mt-3 space-y-1.5">
+                          {aadhaarResult?.name && (
+                            <p className="font-medium">
+                              Aadhaar: <span className="font-semibold text-ink-900">{aadhaarResult.name}</span>
+                            </p>
+                          )}
+                          {panResult?.registered_name && (
+                            <p className="font-medium">
+                              PAN: <span className="font-semibold text-ink-900">{panResult.registered_name}</span>
+                            </p>
+                          )}
+                          <p className="font-medium">
+                            Bank: <span className="font-semibold text-ink-900">{bankResult?.nameAtBank}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm transition hover:bg-amber-50/50">
+                        <input
+                          type="checkbox"
+                          checked={bankNameDeclChecked}
+                          onChange={(e) => setBankNameDeclChecked(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                        />
+                        <span className="text-ink-800">
+                          I declare that{" "}
+                          {aadhaarResult?.name && <><strong>{aadhaarResult.name}</strong> (Aadhaar), </>}
+                          {panResult?.registered_name && <><strong>{panResult.registered_name}</strong> (PAN), and </>}
+                          <strong>{bankResult?.nameAtBank}</strong> (Bank Account) all belong to me and are my legal names.
+                        </span>
+                      </label>
+                    </div>
+                  )}
+                  {/* Hard block: zero words in common — likely a completely wrong account */}
+                  {bankNameHardBlock && (
                     <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
                       <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
                       <strong>Name mismatch — Continue is blocked.</strong> The bank account holder name
