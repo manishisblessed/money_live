@@ -89,7 +89,10 @@ export function chagansConfigured(): boolean {
 export type ChagansGateway = {
   /** Stable id used by the UI + persisted selection ("comet" | "star"). */
   id: "comet" | "star";
+  /** Internal / admin label (e.g. "Comet PG"). */
   label: string;
+  /** Neutral label shown to non-admin users — hides vendor names. */
+  userLabel: string;
   /**
    * MDR scopeKey this gateway prices against — its OWN PG MdrSlab `company` +
    * RailMdrRate `scopeKey`. Comet and Star settle on DIFFERENT acquiring legs
@@ -132,6 +135,7 @@ export function chagansGateways(): ChagansGateway[] {
     {
       id: "comet",
       label: "Comet PG",
+      userLabel: "PG-1",
       scopeKey: "CHAGANS_COMET",
       pgType: "chagans3",
       mode: "t1",
@@ -146,6 +150,7 @@ export function chagansGateways(): ChagansGateway[] {
     {
       id: "star",
       label: "Star PG",
+      userLabel: "PG-2",
       scopeKey: "CHAGANS_STAR",
       pgType: "chagans2",
       mode: "t0",
@@ -554,6 +559,8 @@ export function isChagansWebhookIp(ip: string | null | undefined): boolean {
 export type ChagansChannelHealth = {
   id: string;
   label: string;
+  /** Neutral label for non-admin users (e.g. "PG-1"). */
+  userLabel: string;
   route: string; // gateway id (parallels Viable's shape for the UI)
   primary: boolean;
   healthy: boolean;
@@ -582,6 +589,7 @@ export function chagansChannelHealth(): ChagansChannelHealth[] {
     const base = {
       id: g.id,
       label: g.label,
+      userLabel: g.userLabel,
       route: g.id,
       primary: !!g.primary,
       maxAmount: g.maxAmount,

@@ -72,14 +72,14 @@ export async function GET() {
     for (const c of chagansChannelHealth()) {
       channels.push({
         id: `chagans:${c.id}`,       // prefixed so resolveUpiSelection routes correctly
-        label: c.label,
+        label: c.userLabel,           // user-facing neutral label ("PG-1" / "PG-2")
         route: c.id,
         primary: c.primary,
         healthy: c.healthy,
         detail: c.detail,
         checkedAt: c.checkedAt,
         maxAmount: c.maxAmount,
-        provider: "CHAGANS_PG",
+        provider: "PG",               // neutral — hides vendor name from users
       });
     }
   }

@@ -54,11 +54,12 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "brand">
   FAILED: "danger",
 };
 
+/** User-facing gateway labels — never exposes vendor names. */
 const GATEWAY_LABELS: Record<string, string> = {
-  CHAGANS_COMET: "Comet",
-  CHAGANS_STAR: "Star",
-  RAZORPAY: "Razorpay",
-  VIABLE_PG: "Viable",
+  CHAGANS_COMET: "PG-1",
+  CHAGANS_STAR: "PG-2",
+  RAZORPAY: "PG",
+  VIABLE_PG: "PG",
 };
 
 export default function PgPage() {

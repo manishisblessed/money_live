@@ -619,11 +619,29 @@ async function reportPushPull(user: SessionUser, params: ReportParams): Promise<
 /*  3 · Payment Gateway (Razorpay / UPI-collect transactions)            */
 /* --------------------------------------------------------------------- */
 
+/** Map a PG transaction to a user-friendly gateway label.
+ *  Admin sees "Comet" / "Star"; users see "PG-1" / "PG-2". */
+function pgGatewayLabel(r: { partner: string | null; request: Prisma.JsonValue }, admin: boolean): string {
+  const req =
+    r.request && typeof r.request === "object" && !Array.isArray(r.request)
+      ? (r.request as Record<string, unknown>)
+      : {};
+  const scope = typeof req.pgScope === "string" ? req.pgScope : "";
+  if (scope === "CHAGANS_COMET") return admin ? "Comet" : "PG-1";
+  if (scope === "CHAGANS_STAR") return admin ? "Star" : "PG-2";
+  if (r.partner === "CHAGANS_PG") return admin ? "Chagans" : "PG";
+  if (r.partner === "VIABLE_PG") return admin ? "Viable" : "PG";
+  if (r.partner === "RAZORPAY") return admin ? "Razorpay" : "PG";
+  return admin ? (r.partner ?? "—") : "PG";
+}
+
+/** Reverse-map the user-facing gateway filter value to a pgScope. */
+const GATEWAY_FILTER_MAP: Record<string, string> = { "PG-1": "CHAGANS_COMET", "PG-2": "CHAGANS_STAR" };
+
 async function reportPg(user: SessionUser, params: ReportParams): Promise<ReportResult> {
+  const admin = isAdminRole(user.role);
   const ids = await allowedUserIds(user);
   const createdAt = dateFilter(params);
-  // PG partners — all providers that book WALLET_TOPUP via a PG rail.
-  // UPI_COLLECT is the legacy service code from older Razorpay flows.
   const PG_PARTNERS = ["RAZORPAY", "CHAGANS_PG", "VIABLE_PG", "BULKPE_PG"];
   const pgMatch: Prisma.TransactionWhereInput = {
     OR: [
@@ -631,12 +649,19 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
       { service: "UPI_COLLECT" },
     ],
   };
+
+  // Gateway filter — "PG-1" maps to pgScope CHAGANS_COMET in the request JSON.
+  const gatewayScope = params.mode ? GATEWAY_FILTER_MAP[params.mode] : null;
+
   const where: Prisma.TransactionWhereInput = {
     AND: [
       pgMatch,
       ...(ids ? [{ userId: { in: ids } }] : []),
       ...(createdAt ? [{ createdAt }] : []),
       ...(params.status ? [{ status: params.status as TxnStatus }] : []),
+      ...(gatewayScope
+        ? [{ request: { path: ["pgScope"], equals: gatewayScope } }]
+        : []),
       ...(params.q
         ? [{
             OR: [
@@ -662,7 +687,7 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
   const rows = list.map((r) => ({
     date: r.createdAt.toISOString(),
     refId: r.refId,
-    partner: r.partner ?? "—",
+    gateway: pgGatewayLabel(r, admin),
     service: humanize(r.service),
     customer: r.customer ?? "—",
     amount: toNumber(r.amount),
@@ -693,7 +718,7 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
     ],
     trend,
     note: total === 0
-      ? "PG collections (Chagans, Viable, Razorpay) are recorded as WALLET_TOPUP transactions. None were found for this range."
+      ? "No PG collections found for this date range."
       : null,
   };
 }
