@@ -155,6 +155,18 @@ const SETTING_SCHEMAS = {
     minAmount: z.number().nonnegative().default(50),
   }),
 
+  /**
+   * PG per-transaction caps — admin-adjustable at runtime without a deploy.
+   * Env vars (CHAGAN_COMET_MAX / CHAGAN_STAR_MAX) are still honoured as the
+   * hard-coded FALLBACK; this setting takes precedence when set.
+   */
+  "pg.limits": z.object({
+    /** Comet PG (PG-1) per-transaction cap (₹). */
+    cometMax: z.number().positive().max(10_000_000).default(100_000),
+    /** Star PG (PG-2) per-transaction cap (₹). */
+    starMax: z.number().positive().max(10_000_000).default(50_000),
+  }),
+
   /** PG acquirer settlement — instant mode (admin-toggled per user or global). */
   "settlement.pg_instant": z.object({
     /** Platform-wide default (overridden per-user by User.instantSettlement). */

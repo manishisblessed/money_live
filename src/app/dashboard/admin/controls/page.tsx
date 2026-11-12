@@ -55,6 +55,11 @@ const LABELS: Record<string, { title: string; description: string }> = {
     description:
       "When OFF, MDR is priced on Card Category (Credit/Debit/Prepaid) instead of the card tier — the tier dimension is ignored in scheme/brand rates, tier-pinned slabs go dormant, and the BIN checker stops running. 'Show in UI' controls whether the Classification column appears in POS transactions.",
   },
+  "pg.limits": {
+    title: "PG per-transaction limits",
+    description:
+      "Maximum amount a user can top up in a single PG transaction. PG-1 (Comet) and PG-2 (Star) are capped independently. Changes take effect immediately — no deploy needed.",
+  },
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -67,6 +72,8 @@ const FIELD_LABELS: Record<string, string> = {
   dailyCap: "Daily cap (₹)",
   perTxnCap: "Per-transfer cap (₹)",
   days: "Valid for (days)",
+  cometMax: "PG-1 max per txn (₹)",
+  starMax: "PG-2 max per txn (₹)",
 };
 
 const inputCls =

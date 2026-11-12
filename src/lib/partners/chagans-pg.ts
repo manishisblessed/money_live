@@ -124,13 +124,42 @@ function num(envVal: string | undefined, fallback: number): number {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+// ---------------------------------------------------------------------------
+// Admin-adjustable PG limits — cached from PlatformSetting "pg.limits".
+// Falls back to env vars, then hard-coded defaults. Changes in admin Controls
+// propagate within LIMITS_TTL_MS without a deploy.
+// ---------------------------------------------------------------------------
+type PgLimits = { cometMax: number; starMax: number };
+let _limitsCache: { at: number; value: PgLimits } | null = null;
+const LIMITS_TTL_MS = 30_000; // 30 s cache
+
+/** Read PG caps from DB (cached), falling back to env vars. */
+export async function getPgLimits(): Promise<PgLimits> {
+  const now = Date.now();
+  if (_limitsCache && now - _limitsCache.at < LIMITS_TTL_MS) return _limitsCache.value;
+  try {
+    const { getSetting } = await import("../settings");
+    const cfg = await getSetting("pg.limits");
+    _limitsCache = { at: now, value: cfg };
+    return cfg;
+  } catch {
+    // DB unavailable at import time (seed script, etc.) — fall back to env.
+    return {
+      cometMax: num(process.env.CHAGAN_COMET_MAX, 100_000),
+      starMax: num(process.env.CHAGAN_STAR_MAX, 50_000),
+    };
+  }
+}
+
 /**
- * The two live gateways. Caps default to the account limits Chagan confirmed
- * for us (Comet ₹1,00,000; Star ₹40,000 card) and are env-overridable. A
- * request over the cap is rejected locally (clearer than a Chagans HTTP 400)
- * — no money moves either way, so the cap is a UX guard, not a money rail.
+ * The two live gateways. Caps come from the admin-adjustable PlatformSetting
+ * "pg.limits" (read via getPgLimits); the synchronous version below uses env
+ * vars as a fast fallback for contexts that cannot await (channel health etc.).
+ * The REAL cap enforcement happens in collect() which calls getPgLimits().
  */
 export function chagansGateways(): ChagansGateway[] {
+  // Synchronous — uses cached DB limits if warm, else env fallback.
+  const cached = _limitsCache?.value;
   return [
     {
       id: "comet",
@@ -139,11 +168,7 @@ export function chagansGateways(): ChagansGateway[] {
       scopeKey: "CHAGANS_COMET",
       pgType: "chagans3",
       mode: "t1",
-      maxAmount: num(process.env.CHAGAN_COMET_MAX, 100000),
-      // Charge the EXACT amount the retailer entered (product decision
-      // 2026-10-14): NO silent paise nonce. If Comet rejects a duplicate amount
-      // we ask the user to change it (see collect()). Re-enable the nonce only
-      // via CHAGAN_COMET_RANDOM=true if a gateway ever hard-requires it.
+      maxAmount: cached?.cometMax ?? num(process.env.CHAGAN_COMET_MAX, 100_000),
       requiresRandom: process.env.CHAGAN_COMET_RANDOM === "true",
       primary: true,
     },
@@ -154,9 +179,7 @@ export function chagansGateways(): ChagansGateway[] {
       scopeKey: "CHAGANS_STAR",
       pgType: "chagans2",
       mode: "t0",
-      maxAmount: num(process.env.CHAGAN_STAR_MAX, 40000),
-      // Validated live with round amounts. Flip to true (or set
-      // CHAGAN_STAR_RANDOM=true) if Star starts rejecting duplicate amounts.
+      maxAmount: cached?.starMax ?? num(process.env.CHAGAN_STAR_MAX, 50_000),
       requiresRandom: process.env.CHAGAN_STAR_RANDOM === "true",
     },
   ];
@@ -286,11 +309,14 @@ export const chagansUpi: UpiProvider = {
 
   async collect(input: UpiCollectInput): Promise<PartnerResult<UpiCollectOutput>> {
     const gw = resolveChagansGateway(input.channel);
-    if (input.amount > gw.maxAmount) {
+    // Read the LIVE admin-adjustable cap (DB-backed, 30 s cache).
+    const limits = await getPgLimits();
+    const cap = gw.id === "star" ? limits.starMax : limits.cometMax;
+    if (input.amount > cap) {
       return {
         ok: false,
         code: "AMOUNT_OVER_LIMIT",
-        message: `${gw.label} supports up to ₹${gw.maxAmount.toLocaleString("en-IN")} per transaction.`,
+        message: `${gw.userLabel} supports up to ₹${cap.toLocaleString("en-IN")} per transaction.`,
       };
     }
     const webhookUrl = process.env.CHAGAN_WEBHOOK_URL || `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/api/webhooks/chagans-pg`;
