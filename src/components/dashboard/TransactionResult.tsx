@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Clock, Copy, Download, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/useAuth";
@@ -199,14 +199,33 @@ export function TransactionResult({
     if (!result) setCopied(false);
   }, [result]);
 
-  const downloadReceipt = useCallback(() => {
-    if (!result) return;
-    const w = window.open("", "_blank", "width=460,height=650");
-    if (!w) return;
-    w.document.write(buildReceiptHtml(result, userCode));
-    w.document.close();
-    w.addEventListener("afterprint", () => w.close());
-    setTimeout(() => w.print(), 300);
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadReceipt = useCallback(async () => {
+    if (!result || !receiptRef.current) return;
+    setDownloading(true);
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      await html2pdf()
+        .set({
+          margin: 0,
+          filename: `Receipt-${result.refId}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: [100, 160], orientation: "portrait" },
+        })
+        .from(receiptRef.current)
+        .save();
+    } catch {
+      const w = window.open("", "_blank", "width=460,height=650");
+      if (!w) return;
+      w.document.write(buildReceiptHtml(result, userCode));
+      w.document.close();
+      setTimeout(() => w.print(), 300);
+    } finally {
+      setDownloading(false);
+    }
   }, [result, userCode]);
 
   if (!result) return null;
@@ -359,7 +378,7 @@ export function TransactionResult({
           )}
 
           <div className="mt-4 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={downloadReceipt}>
+            <Button type="button" variant="outline" className="flex-1" onClick={downloadReceipt} disabled={downloading} isLoading={downloading}>
               <Download className="h-4 w-4" />
               Receipt
             </Button>
@@ -368,7 +387,132 @@ export function TransactionResult({
             </Button>
           </div>
         </div>
+
+        {/* Hidden receipt container for PDF rendering */}
+        <div aria-hidden className="fixed -left-[9999px] top-0 w-[400px]">
+          <ReceiptCard ref={receiptRef} result={result} userCode={userCode} />
+        </div>
       </motion.div>
     </div>
   );
 }
+
+/* ────────────────────────────────────────────────────────────────────
+   Static receipt card rendered off-screen for html2pdf capture.
+   Uses inline styles exclusively (no Tailwind) so html2pdf picks them up.
+   ──────────────────────────────────────────────────────────────────── */
+
+import { forwardRef } from "react";
+
+const ReceiptCard = forwardRef<
+  HTMLDivElement,
+  { result: NonNullable<TxnResult>; userCode?: string | null }
+>(function ReceiptCard({ result, userCode }, ref) {
+  const failed = result.status === "FAILED";
+  const pending = result.status === "PENDING";
+  const bgGrad = failed
+    ? "linear-gradient(135deg,#e11d48,#be123c)"
+    : pending
+      ? "linear-gradient(135deg,#d97706,#b45309)"
+      : "linear-gradient(135deg,#059669,#047857)";
+  const headTitle = failed
+    ? "Transaction Failed"
+    : pending
+      ? "Transaction Pending"
+      : "Transaction Successful";
+  const date = new Date().toLocaleString("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        width: 400,
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        background: "#fff",
+        borderRadius: 16,
+        overflow: "hidden",
+        border: "1px solid #e5e7eb",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          background: bgGrad,
+          color: "#fff",
+          padding: "32px 24px",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontSize: 18, fontWeight: 600, margin: "0 0 4px" }}>{headTitle}</div>
+        <div style={{ fontSize: 32, fontWeight: 700, margin: "8px 0 2px" }}>
+          ₹{result.amount.toLocaleString("en-IN")}
+        </div>
+        <div style={{ fontSize: 12, opacity: 0.85 }}>{result.service}</div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: "20px 24px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: "6px 0", color: "#666", fontSize: 13 }}>Reference ID</td>
+              <td
+                style={{
+                  padding: "6px 0",
+                  textAlign: "right",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  fontFamily: "monospace",
+                }}
+              >
+                {result.refId}
+              </td>
+            </tr>
+            {result.customer && (
+              <tr style={{ borderTop: "1px solid #f3f4f6" }}>
+                <td style={{ padding: "6px 0", color: "#666", fontSize: 13 }}>Customer</td>
+                <td style={{ padding: "6px 0", textAlign: "right", fontWeight: 600, fontSize: 13 }}>
+                  {result.customer}
+                </td>
+              </tr>
+            )}
+            {result.meta &&
+              Object.entries(result.meta).map(([k, v]) => (
+                <tr key={k} style={{ borderTop: "1px solid #f3f4f6" }}>
+                  <td style={{ padding: "6px 0", color: "#666", fontSize: 13 }}>{k}</td>
+                  <td style={{ padding: "6px 0", textAlign: "right", fontWeight: 600, fontSize: 13 }}>
+                    {v}
+                  </td>
+                </tr>
+              ))}
+            <tr style={{ borderTop: "1px solid #f3f4f6" }}>
+              <td style={{ padding: "6px 0", color: "#666", fontSize: 13 }}>Date</td>
+              <td style={{ padding: "6px 0", textAlign: "right", fontWeight: 600, fontSize: 13 }}>
+                {date}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          textAlign: "center",
+          padding: "16px 24px",
+          fontSize: 11,
+          color: "#999",
+          borderTop: "1px dashed #e5e7eb",
+        }}
+      >
+        <div style={{ fontWeight: 600, color: "#059669", marginBottom: 4 }}>
+          {payByLine(userCode)}
+        </div>
+        eMoney — Powered by BBPS
+      </div>
+    </div>
+  );
+});
