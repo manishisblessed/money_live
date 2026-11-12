@@ -299,6 +299,14 @@ export const chagansUpi: UpiProvider = {
       pgType: gw.pgType,
       txnId: input.idempotencyKey, // our alphanumeric refId — safe for Chagans
       callback: input.callbackUrl,
+      // Chagans' "close this page" button on their failure screen does NOT
+      // redirect back — it calls window.close() which browsers block. Send the
+      // return URL under every known field name so if the gateway checks any of
+      // them for the failure redirect, the user lands on our return page.
+      redirect_url: input.callbackUrl,
+      return_url: input.callbackUrl,
+      failureUrl: input.callbackUrl,
+      failure_url: input.callbackUrl,
       mode: gw.mode,
       webhook: webhookUrl,
       name: input.customerName || "eMoney Customer",

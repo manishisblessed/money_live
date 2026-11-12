@@ -1,4 +1,4 @@
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { Logo } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/Button";
 import { ReturnRedirect } from "./ReturnRedirect";
@@ -15,16 +15,28 @@ import { ReturnRedirect } from "./ReturnRedirect";
  * It never credits anything: Chagans is webhook-authoritative, so the wallet is
  * credited server-side once the (IP-authenticated) webhook arrives. The open
  * dashboard tab that started the top-up polls and updates on its own.
+ *
+ * Handles both success and failure states — Chagans may append status params.
  */
 export const dynamic = "force-dynamic";
+
+const FAILURE_TOKENS = ["failed", "failure", "cancelled", "canceled", "expired", "timeout", "declined"];
+
+function isFailureStatus(sp: Record<string, string | undefined>): boolean {
+  for (const v of Object.values(sp)) {
+    if (v && FAILURE_TOKENS.some((t) => v.toLowerCase().includes(t))) return true;
+  }
+  return false;
+}
 
 export default async function PayReturnPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string; topup?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
   const ref = sp.ref || sp.topup || "";
+  const failed = isFailureStatus(sp);
   const walletHref = ref
     ? `/dashboard/wallet?topup=${encodeURIComponent(ref)}`
     : "/dashboard/wallet";
@@ -35,34 +47,51 @@ export default async function PayReturnPage({
         <Logo />
       </div>
       <div className="w-full max-w-md rounded-2xl border border-ink-100 bg-white p-8 text-center shadow-soft">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-          <CheckCircle2 className="h-7 w-7" />
-        </div>
-        <h1 className="mt-5 font-display text-xl font-bold text-ink-900">
-          Payment received
-        </h1>
-        <p className="mt-2 text-sm text-ink-600">
-          Thanks! We&apos;re confirming your payment with the bank. Your wallet
-          is credited automatically once it&apos;s verified — this usually takes
-          a few seconds. You can safely close this tab.
-        </p>
+        {failed ? (
+          <>
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-600">
+              <XCircle className="h-7 w-7" />
+            </div>
+            <h1 className="mt-5 font-display text-xl font-bold text-ink-900">
+              Payment not completed
+            </h1>
+            <p className="mt-2 text-sm text-ink-600">
+              The payment was not completed — no amount has been deducted. You
+              can try again from your wallet.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+              <CheckCircle2 className="h-7 w-7" />
+            </div>
+            <h1 className="mt-5 font-display text-xl font-bold text-ink-900">
+              Payment received
+            </h1>
+            <p className="mt-2 text-sm text-ink-600">
+              Thanks! We&apos;re confirming your payment with the bank. Your wallet
+              is credited automatically once it&apos;s verified — this usually takes
+              a few seconds. You can safely close this tab.
+            </p>
+          </>
+        )}
         {ref && (
           <p className="mt-3 text-xs text-ink-400">
             Reference <span className="font-mono text-ink-600">{ref}</span>
           </p>
         )}
-        {ref && <ReturnRedirect to={walletHref} />}
-        {/* target="_top" breaks out of Chagans' (Star) iframe so the wallet
-            loads top-level with the session cookie, not inside the frame. */}
+        <ReturnRedirect to={walletHref} />
         <a href={walletHref} target="_top" className="mt-6 block">
           <Button size="lg" className="w-full">
-            Go to my wallet
+            {failed ? "Back to wallet" : "Go to my wallet"}
           </Button>
         </a>
-        <p className="mt-3 text-[11px] text-ink-400">
-          If the amount isn&apos;t reflected within a few minutes, contact
-          support with the reference above — no amount is ever lost.
-        </p>
+        {!failed && (
+          <p className="mt-3 text-[11px] text-ink-400">
+            If the amount isn&apos;t reflected within a few minutes, contact
+            support with the reference above — no amount is ever lost.
+          </p>
+        )}
       </div>
     </main>
   );
