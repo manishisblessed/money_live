@@ -217,27 +217,21 @@ const masterAdminMoneyOps: NavItem[] = adminMoneyOps.flatMap((item) =>
     : [item]
 );
 
-/** Onboarding / network-management tabs collapsed under a single "Onboarding"
- *  tab. Shared by master-admin, admin and sub-admin. */
-const onboardingGroup: NavItem = {
-  href: "/dashboard/admin/invites",
-  label: "Onboarding",
-  icon: PackagePlus,
-  children: [
-    { href: "/dashboard/admin/invites", label: "Onboarding Invites", icon: PackagePlus, badge: "New" },
-    { href: "/dashboard/admin/join-requests", label: "Join Requests", icon: Inbox, badge: "New" },
-    { href: "/dashboard/admin/users", label: "Users", icon: Users },
-    { href: "/dashboard/admin/network", label: "Network Manager", icon: Users, badge: "New" },
-    { href: "/dashboard/admin/kyc", label: "KYC Approvals", icon: ShieldCheck, badge: "8" },
-    { href: "/dashboard/admin/identity-exceptions", label: "Identity Exceptions", icon: Fingerprint, badge: "New" },
-  ],
-};
+/** Onboarding / network-management tabs — shown as separate top-level items. */
+const onboardingItems: NavItem[] = [
+  { href: "/dashboard/admin/invites", label: "Onboarding Invites", icon: PackagePlus, badge: "New" },
+  { href: "/dashboard/admin/join-requests", label: "Join Requests", icon: Inbox, badge: "New" },
+  { href: "/dashboard/admin/users", label: "Users", icon: Users },
+  { href: "/dashboard/admin/network", label: "Network Manager", icon: Users, badge: "New" },
+  { href: "/dashboard/admin/kyc", label: "KYC Approvals", icon: ShieldCheck, badge: "8" },
+  { href: "/dashboard/admin/identity-exceptions", label: "Identity Exceptions", icon: Fingerprint, badge: "New" },
+];
 
 /** Workspace tabs shared by admin and sub-admin. Sub-admins are scoped down
  *  through their allowedTabs; with none set they inherit the full menu. */
 const adminWorkspace: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  onboardingGroup,
+  ...onboardingItems,
   { href: "/dashboard/admin/sub-admins", label: "Sub-Admins", icon: UserCog },
   { href: "/dashboard/admin/pg", label: "Payment Gateway", icon: CreditCard, badge: "New" },
   { href: "/dashboard/admin/pos", label: "POS Fleet", icon: Monitor, badge: "New" },
@@ -251,7 +245,7 @@ const adminWorkspace: NavItem[] = [
   { href: "/dashboard/admin/slider", label: "Slider & Pop-ups", icon: Images, badge: "New" },
   { href: "/dashboard/admin/audit", label: "Audit Log", icon: ScrollText },
   { href: "/dashboard/admin/system", label: "System Health", icon: ServerCog },
-  { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+  { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
 ];
 
 export const navByRole: Record<Role, NavGroup[]> = {
@@ -261,7 +255,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
       items: [
         { href: "/dashboard", label: "Home", icon: LayoutDashboard },
         { href: "/dashboard/admin/admins", label: "Admins", icon: ShieldCheck, badge: "New" },
-        onboardingGroup,
+        ...onboardingItems,
         { href: "/dashboard/admin/sub-admins", label: "Sub-Admins", icon: UserCog },
         { href: "/dashboard/admin/pg", label: "Payment Gateway", icon: CreditCard, badge: "New" },
         { href: "/dashboard/admin/pos", label: "POS Fleet", icon: Monitor, badge: "New" },
@@ -275,7 +269,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/admin/slider", label: "Slider & Pop-ups", icon: Images, badge: "New" },
         { href: "/dashboard/admin/audit", label: "Audit Log", icon: ScrollText },
         { href: "/dashboard/admin/system", label: "System Health", icon: ServerCog },
-        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
       ]
     },
     { heading: "Money & Ops", items: masterAdminMoneyOps },
@@ -293,7 +287,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/pos-rental", label: "POS Rental", icon: ReceiptText, badge: "New" },
         { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
         { href: "/dashboard/funds-request", label: "Add Funds", icon: HandCoins },
-        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
       ]
     },
     { heading: "Services", items: retailerServices },
@@ -310,7 +304,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
         { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
         { href: "/dashboard/approvals", label: "Approvals", icon: FileSignature },
-        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }
@@ -326,7 +320,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
         { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
         { href: "/dashboard/approvals", label: "Approvals", icon: FileSignature },
-        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }
@@ -342,7 +336,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/my-scheme", label: "My Plan", icon: Layers, badge: "New" },
         { href: "/dashboard/earnings", label: "Earnings", icon: CircleDollarSign, badge: "New" },
         { href: "/dashboard/approvals", label: "Approvals", icon: FileSignature },
-        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }
@@ -369,7 +363,7 @@ export const navByRole: Record<Role, NavGroup[]> = {
         { href: "/dashboard/admin/commission-report", label: "Commission Paid", icon: HandCoins },
         { href: "/dashboard/admin/earnings", label: "Per-Txn Earnings", icon: TrendingUp },
         { href: "/dashboard/admin/analytics", label: "Analytics", icon: LineChart },
-        { href: "/dashboard/reports", label: "Insights", icon: BarChart3 }
+        { href: "/dashboard/reports", label: "Business Reports", icon: BarChart3 }
       ]
     },
     { heading: "Account", items: account }

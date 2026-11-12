@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/Badge";
 import { PinInput } from "@/components/security/PinInput";
 import { AuthAlert, AuthCard } from "@/components/auth/AuthCard";
 import { StepPanels, StepRail } from "@/components/auth/StepRail";
-import { namesMatch } from "@/lib/utils";
+import { namesMatch, namesShareAnyWord } from "@/lib/utils";
 import { extractGpsFromFile } from "@/lib/gps";
 import { LivenessVideoCapture } from "@/components/kyc/LivenessVideoCapture";
 import { SelfieCapture } from "@/components/kyc/SelfieCapture";
@@ -200,6 +200,19 @@ function OnboardContent() {
     panResult?.registered_name &&
     !namesMatch(aadhaarResult.name, panResult.registered_name)
   );
+  // Partial match: names differ but share at least one word (same person, different spelling).
+  // These users can proceed with a self-declaration instead of being hard-blocked.
+  const panAadhaarPartialMatch = panAadhaarMismatch && !!(
+    aadhaarResult?.name &&
+    panResult?.registered_name &&
+    namesShareAnyWord(aadhaarResult.name, panResult.registered_name)
+  );
+  // Hard block: names share zero words — likely a completely wrong PAN.
+  const panAadhaarHardBlock = panAadhaarMismatch && !panAadhaarPartialMatch;
+
+  // PAN-Aadhaar name mismatch declaration (when partial match allows it)
+  const [panNameDeclChecked, setPanNameDeclChecked] = useState(false);
+
   // Bank name must match Aadhaar/PAN *or* the GST company name (business accounts).
   const bankNameMismatch = !!(
     bankResult?.nameAtBank &&
@@ -869,6 +882,7 @@ function OnboardContent() {
   // ----- Edit verified steps (redo a verification with corrected details) -----
   function editPan() {
     setPanResult(null);
+    setPanNameDeclChecked(false);
     setError("");
   }
 
@@ -1109,6 +1123,7 @@ function OnboardContent() {
           msmeNumber: form.msmeNumber || undefined,
           nameMismatch,
           nameDeclarationAccepted: nameMismatch && nameDeclarationChecked,
+          panNameDeclarationAccepted: panAadhaarPartialMatch && panNameDeclChecked,
           dob: form.dob || form.aadhaarDob || undefined,
         }),
       });
@@ -1139,8 +1154,12 @@ function OnboardContent() {
       case 3:
         return aadhaarVerified;
       case 4:
-        // PAN must be verified AND names must match Aadhaar (edit PAN if mismatch).
-        return !!panResult && !panAadhaarMismatch;
+        // PAN must be verified. If names mismatch but share a word, user can
+        // self-declare; if zero words match it's a hard block (wrong PAN).
+        return !!panResult && (
+          !panAadhaarMismatch ||
+          (panAadhaarPartialMatch && panNameDeclChecked)
+        );
       case 5:
         // GST is optional, but a business / shop name is always required so the
         // self-declaration and final registration have a firm name.
@@ -1764,8 +1783,38 @@ function OnboardContent() {
                       name2={panResult.registered_name}
                     />
                   )}
-                  {/* Hard block when PAN name doesn't match Aadhaar */}
-                  {panAadhaarMismatch && (
+                  {/* Partial match: let user self-declare both names belong to them */}
+                  {panAadhaarPartialMatch && (
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
+                        <strong>Name mismatch detected.</strong> Your Aadhaar and PAN names differ.
+                        If both belong to you, please confirm below to continue.
+                        <div className="mt-3 space-y-1.5">
+                          <p className="font-medium">
+                            Aadhaar: <span className="font-semibold text-ink-900">{aadhaarResult?.name}</span>
+                          </p>
+                          <p className="font-medium">
+                            PAN: <span className="font-semibold text-ink-900">{panResult?.registered_name}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm transition hover:bg-amber-50/50">
+                        <input
+                          type="checkbox"
+                          checked={panNameDeclChecked}
+                          onChange={(e) => setPanNameDeclChecked(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                        />
+                        <span className="text-ink-800">
+                          I declare that both <strong>{aadhaarResult?.name}</strong> (Aadhaar) and{" "}
+                          <strong>{panResult?.registered_name}</strong> (PAN) belong to me and are my legal names.
+                        </span>
+                      </label>
+                    </div>
+                  )}
+                  {/* Hard block: zero words in common — likely a completely wrong PAN */}
+                  {panAadhaarHardBlock && (
                     <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
                       <AlertTriangle className="mr-1.5 inline h-4 w-4 shrink-0" />
                       <strong>Name mismatch — Continue is blocked.</strong> The PAN must belong to

@@ -146,6 +146,29 @@ export function namesMatch(a: string, b: string): boolean {
   return similarity >= 0.6;
 }
 
+/**
+ * Returns true if the two names share at least one meaningful word in common.
+ * Uses the same normalisation as namesMatch (strip honorifics, lowercase, etc.).
+ */
+export function namesShareAnyWord(a: string, b: string): boolean {
+  if (!a || !b) return false;
+
+  const normalize = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .replace(
+        /\b(mr|mrs|ms|shri|smt|dr|prof|kumari|sri|late)\b/g,
+        ""
+      )
+      .trim()
+      .replace(/\s+/g, " ");
+
+  const wordsA = normalize(a).split(" ").filter(Boolean);
+  const wordsB = new Set(normalize(b).split(" ").filter(Boolean));
+  return wordsA.some((w) => wordsB.has(w));
+}
+
 /** Generate a strong, human-friendly random password (10 chars, mixed case + digits). */
 export function generateRandomPassword(length = 10): string {
   const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
