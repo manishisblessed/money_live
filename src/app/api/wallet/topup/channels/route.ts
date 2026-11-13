@@ -72,7 +72,7 @@ export async function GET() {
     for (const c of chagansChannelHealth()) {
       channels.push({
         id: `chagans:${c.id}`,       // prefixed so resolveUpiSelection routes correctly
-        label: c.userLabel,           // user-facing neutral label ("PG-1" / "PG-2")
+        label: c.userLabel,           // user-facing label ("Comet" / "Star")
         route: c.id,
         primary: c.primary,
         healthy: c.healthy,

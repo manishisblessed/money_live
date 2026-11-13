@@ -264,8 +264,8 @@ export const REPORTS: Record<ReportType, ReportConfig> = {
       mode: {
         label: "Gateway",
         options: [
-          { value: "PG-1", label: "PG-1" },
-          { value: "PG-2", label: "PG-2" },
+          { value: "Comet", label: "Comet" },
+          { value: "Star", label: "Star" },
         ],
       },
     },

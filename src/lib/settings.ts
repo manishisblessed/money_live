@@ -161,9 +161,9 @@ const SETTING_SCHEMAS = {
    * hard-coded FALLBACK; this setting takes precedence when set.
    */
   "pg.limits": z.object({
-    /** Comet PG (PG-1) per-transaction cap (₹). */
+    /** Comet PG per-transaction cap (₹). */
     cometMax: z.number().positive().max(10_000_000).default(100_000),
-    /** Star PG (PG-2) per-transaction cap (₹). */
+    /** Star PG per-transaction cap (₹). */
     starMax: z.number().positive().max(10_000_000).default(50_000),
   }),
 

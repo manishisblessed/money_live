@@ -164,7 +164,7 @@ export function chagansGateways(): ChagansGateway[] {
     {
       id: "comet",
       label: "Comet PG",
-      userLabel: "PG-1",
+      userLabel: "Comet",
       scopeKey: "CHAGANS_COMET",
       pgType: "chagans3",
       mode: "t1",
@@ -175,7 +175,7 @@ export function chagansGateways(): ChagansGateway[] {
     {
       id: "star",
       label: "Star PG",
-      userLabel: "PG-2",
+      userLabel: "Star",
       scopeKey: "CHAGANS_STAR",
       pgType: "chagans2",
       mode: "t0",
@@ -593,7 +593,7 @@ export function isChagansWebhookIp(ip: string | null | undefined): boolean {
 export type ChagansChannelHealth = {
   id: string;
   label: string;
-  /** Neutral label for non-admin users (e.g. "PG-1"). */
+  /** User-facing label (e.g. "Comet" / "Star"). */
   userLabel: string;
   route: string; // gateway id (parallels Viable's shape for the UI)
   primary: boolean;

@@ -56,8 +56,8 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "brand">
 
 /** User-facing gateway labels — never exposes vendor names. */
 const GATEWAY_LABELS: Record<string, string> = {
-  CHAGANS_COMET: "PG-1",
-  CHAGANS_STAR: "PG-2",
+  CHAGANS_COMET: "Comet",
+  CHAGANS_STAR: "Star",
   RAZORPAY: "PG",
   VIABLE_PG: "PG",
 };
