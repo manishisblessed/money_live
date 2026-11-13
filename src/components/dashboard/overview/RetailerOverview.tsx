@@ -93,18 +93,47 @@ export function RetailerOverview({ session }: { session: Session }) {
     loadTxns();
   }, [loadTxns]);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todays = txns.filter((t) => {
-    // date is locale string; prefer counting SUCCESS from loaded set as proxy when timestamps unavailable
-    return t.status === "Success";
-  });
-  // Retailers see their own processed VOLUME (sum of txn amounts), not commission:
-  // on settlement rails the per-txn commission is the upline's, not theirs, so it
-  // would be misleading here. Their genuine earnings live on the My Earnings page.
-  const todayVolume = todays.reduce((s, t) => s + t.amount, 0);
-  const todayCount = todays.length;
-  const volume14d = txns
+  // ── Server-side today's stats (IST day bounds, SUCCESS-only volume) ──
+  type TodayStats = {
+    totalVolume: number;
+    successCount: number;
+    pendingCount: number;
+    failedCount: number;
+  };
+  const [todayStats, setTodayStats] = useState<TodayStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const loadStats = useCallback(async () => {
+    setLoadingStats(true);
+    try {
+      const res = await fetch("/api/dashboard/my-business-overview");
+      const json = await res.json();
+      if (json.summary) {
+        setTodayStats({
+          totalVolume: json.summary.totalVolume ?? 0,
+          successCount: json.summary.successCount ?? 0,
+          pendingCount: json.summary.pendingCount ?? 0,
+          failedCount: json.summary.failedCount ?? 0,
+        });
+      }
+    } catch {
+      setTodayStats(null);
+    } finally {
+      setLoadingStats(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  const todayVolume = todayStats?.totalVolume ?? 0;
+  const todayCount = todayStats?.successCount ?? 0;
+  const customersServed = todayStats?.successCount ?? 0;
+  const todayTxnCount = (todayStats?.successCount ?? 0) + (todayStats?.pendingCount ?? 0) + (todayStats?.failedCount ?? 0);
+
+  // Recent successful volume from the last fetched transactions (for sparkline display)
+  const recentVolume = txns
     .filter((t) => t.status === "Success")
     .reduce((s, t) => s + t.amount, 0);
 
@@ -121,15 +150,15 @@ export function RetailerOverview({ session }: { session: Session }) {
           </Link>
         }
         chips={[
-          { label: "Today", value: loadingTxns ? "…" : formatINR(todayVolume), tone: "accent" },
-          { label: "Txns", value: loadingTxns ? "…" : `${todayCount}`, tone: "brand" },
+          { label: "Today", value: loadingStats ? "…" : formatINR(todayVolume), tone: "accent" },
+          { label: "Txns", value: loadingStats ? "…" : `${todayTxnCount}`, tone: "brand" },
         ]}
       />
 
       <QuickActions actions={QUICK_ACTIONS} />
 
       <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {loadingTxns ? (
+        {loadingStats ? (
           <>
             <StatSkeleton />
             <StatSkeleton />
@@ -158,7 +187,7 @@ export function RetailerOverview({ session }: { session: Session }) {
             <StaggerItem>
               <StatCard
                 label="Transactions Today"
-                value={`${todayCount}`}
+                value={`${todayTxnCount}`}
                 icon={TrendingUp}
                 accent="brand"
               />
@@ -166,7 +195,7 @@ export function RetailerOverview({ session }: { session: Session }) {
             <StaggerItem>
               <StatCard
                 label="Customers Served"
-                value={`${txns.filter((t) => t.status === "Success").length}`}
+                value={`${customersServed}`}
                 icon={Users}
                 accent="violet"
               />
@@ -218,10 +247,10 @@ export function RetailerOverview({ session }: { session: Session }) {
                   Volume · recent
                 </p>
                 <p className="mt-1 font-display text-3xl font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
-                  {formatINR(volume14d)}
+                  {formatINR(recentVolume)}
                 </p>
               </div>
-              <Badge variant="brand" size="sm">Last 14 days</Badge>
+              <Badge variant="brand" size="sm">Recent</Badge>
             </div>
             <div className="mt-5">
               <Sparkline
@@ -230,7 +259,7 @@ export function RetailerOverview({ session }: { session: Session }) {
                 height={80}
               />
             </div>
-            {!loadingTxns && volume14d === 0 && (
+            {!loadingTxns && recentVolume === 0 && (
               <p className="mt-3 text-xs text-ink-500">
                 No transactions yet — your processed volume appears after successful live transactions.
               </p>
