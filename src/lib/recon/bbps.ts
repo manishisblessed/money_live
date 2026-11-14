@@ -2,17 +2,17 @@ import { type ServiceCode } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { flags } from "@/lib/env";
 import { getPartner } from "@/lib/partners";
+import { chagansCcCheckStatus } from "@/lib/partners/chagans-cc-bill";
 import { sendOpsAlert } from "@/lib/monitoring/alerts";
 import { logger } from "@/lib/logger";
 import { deriveTxnRefs } from "./refs";
 import { finalizeServiceTransaction, FINALIZABLE_TXN_SELECT } from "@/lib/services/finalize";
 import type { BbpsProvider } from "@/lib/partners/types";
 
-// The BBPS rail is served exclusively by SameDay Pay2New. Scoping recon to this
-// partner keeps us from polling RechargeKit CC-2 / RechargeKit-Direct rows
-// (also BILL_CREDIT_CARD) against the Pay2New status API, which would never
-// resolve them. RechargeKit CC-2 has its own reconciler.
+// BBPS recon sweeps both SameDay Pay2New AND Chagans CC Bill transactions.
 const PAY2NEW_PARTNER = "SAMEDAY_PAY2NEW";
+const CHAGANS_CC_PARTNER = "CHAGANS_CC_BILL";
+const RECON_PARTNERS = [PAY2NEW_PARTNER, CHAGANS_CC_PARTNER];
 
 const BBPS_SERVICES: ServiceCode[] = [
   "BILL_ELECTRICITY", "BILL_WATER", "BILL_GAS",
@@ -56,10 +56,23 @@ type BbpsStatus = "SUCCESS" | "PENDING" | "FAILED" | "REFUNDED";
  */
 async function tryResolve(
   bbps: BbpsProvider,
-  txn: { partnerTxnId: string | null; request: unknown; response: unknown }
+  txn: { partner?: string | null; partnerTxnId: string | null; request: unknown; response: unknown }
 ): Promise<{ status: BbpsStatus; payRef: string | null; raw: unknown } | null> {
-  if (!bbps.status) return null;
   const refs = deriveTxnRefs({ partnerTxnId: txn.partnerTxnId, request: txn.request, response: txn.response });
+
+  // Chagans CC Bill — use its own checkStatus (POST /bbps/checkStatus)
+  if (txn.partner === CHAGANS_CC_PARTNER) {
+    for (const ref of refs) {
+      const r = await chagansCcCheckStatus(ref);
+      if (r.ok) {
+        return { status: r.data.status, payRef: r.data.orderId || ref, raw: r.raw };
+      }
+    }
+    return null;
+  }
+
+  // Same Day Pay2New — standard BBPS status API
+  if (!bbps.status) return null;
   for (const ref of refs) {
     let r = await bbps.status({ orderId: ref });
     if (!r.ok) r = await bbps.status({ requestId: ref });
@@ -102,7 +115,7 @@ export async function runBbpsReconciliation(): Promise<BbpsReconSummary> {
     where: {
       status: { in: ["PROCESSING", "NEEDS_REVIEW"] },
       service: { in: BBPS_SERVICES },
-      partner: PAY2NEW_PARTNER,
+      partner: { in: RECON_PARTNERS },
       createdAt: { lt: new Date(now - DRAIN_AGE_MS) },
     },
     orderBy: { createdAt: "asc" },
@@ -143,7 +156,7 @@ export async function runBbpsReconciliation(): Promise<BbpsReconSummary> {
     where: {
       status: "PROCESSING",
       service: { in: BBPS_SERVICES },
-      partner: PAY2NEW_PARTNER,
+      partner: { in: RECON_PARTNERS },
       createdAt: { lt: new Date(now - STUCK_THRESHOLD_MS) },
     },
     select: { id: true, refId: true, createdAt: true },
@@ -170,7 +183,7 @@ export async function runBbpsReconciliation(): Promise<BbpsReconSummary> {
     where: {
       status: "NEEDS_REVIEW",
       service: { in: BBPS_SERVICES },
-      partner: PAY2NEW_PARTNER,
+      partner: { in: RECON_PARTNERS },
       createdAt: { lt: new Date(now - STUCK_THRESHOLD_MS) },
     },
     select: { id: true, refId: true, userId: true, createdAt: true },
@@ -213,18 +226,21 @@ export async function runBbpsReconciliation(): Promise<BbpsReconSummary> {
     where: {
       status: { in: ["SUCCESS", "FAILED"] },
       service: { in: BBPS_SERVICES },
-      partner: PAY2NEW_PARTNER,
+      partner: { in: RECON_PARTNERS },
       partnerTxnId: { not: null },
       updatedAt: { gte: new Date(now - VERIFY_WINDOW_MS) },
     },
     orderBy: { updatedAt: "desc" },
     take: 200,
-    select: { id: true, refId: true, status: true, partnerTxnId: true, userId: true },
+    select: { id: true, refId: true, status: true, partnerTxnId: true, partner: true, userId: true },
   });
 
   for (const row of recentTerminal) {
     try {
-      const r = await bbps.status({ orderId: row.partnerTxnId! });
+      // Route status check to the correct provider
+      const r = row.partner === CHAGANS_CC_PARTNER
+        ? await chagansCcCheckStatus(row.partnerTxnId!)
+        : await bbps.status({ orderId: row.partnerTxnId! });
       if (!r.ok) continue;
       verified++;
 

@@ -21,6 +21,8 @@ export const BBPS_PRICE_SCOPES = {
   BBPS_SAMEDAY: SERVICE_KEYS.BBPS_SAMEDAY,
   /** Credit Card Bill Payment (credit-card) — Same Day Pay2New. */
   BBPS_CREDIT_CARD: SERVICE_KEYS.BBPS_CREDIT_CARD,
+  /** CC Bill Payment via Chagans BBPS CC Bill API V2. */
+  BBPS_CHAGANS: SERVICE_KEYS.BBPS_CHAGANS,
 } as const;
 
 export type BbpsPriceScope = (typeof BBPS_PRICE_SCOPES)[keyof typeof BBPS_PRICE_SCOPES];
@@ -28,9 +30,10 @@ export type BbpsPriceScope = (typeof BBPS_PRICE_SCOPES)[keyof typeof BBPS_PRICE_
 const SCOPE_KEYS: readonly string[] = Object.values(BBPS_PRICE_SCOPES);
 
 /** Map each product scope to the backing partner family (for the fallback). */
-const SCOPE_FAMILY: Record<string, "SAMEDAY"> = {
+const SCOPE_FAMILY: Record<string, "SAMEDAY" | "CHAGANS"> = {
   [BBPS_PRICE_SCOPES.BBPS_SAMEDAY]: "SAMEDAY",
   [BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD]: "SAMEDAY",
+  [BBPS_PRICE_SCOPES.BBPS_CHAGANS]: "CHAGANS",
 };
 
 /** Friendly product name per scope, sourced from the service catalog. */
@@ -44,7 +47,7 @@ export function isBbpsPriceScope(v: string | null | undefined): v is BbpsPriceSc
 }
 
 /** The partner family a scope falls back to (null when not a product scope). */
-export function priceScopeFamily(scope: string | null | undefined): "SAMEDAY" | null {
+export function priceScopeFamily(scope: string | null | undefined): "SAMEDAY" | "CHAGANS" | null {
   return scope && SCOPE_FAMILY[scope] ? SCOPE_FAMILY[scope] : null;
 }
 
@@ -74,6 +77,7 @@ const CREDIT_CARD_SERVICE = "BILL_CREDIT_CARD";
  */
 const CC_ONLY_SCOPES = new Set<string>([
   BBPS_PRICE_SCOPES.BBPS_CREDIT_CARD,
+  BBPS_PRICE_SCOPES.BBPS_CHAGANS,
 ]);
 const UTILITY_ONLY_SCOPES = new Set<string>([
   BBPS_PRICE_SCOPES.BBPS_SAMEDAY,

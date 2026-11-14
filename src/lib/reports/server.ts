@@ -674,15 +674,17 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
     ],
   };
 
-  const [list, total, agg, successN] = await Promise.all([
+  const successWhere = { AND: [where, { status: "SUCCESS" as TxnStatus }] };
+
+  const [list, total, successAgg, successN] = await Promise.all([
     prisma.transaction.findMany({ where, orderBy: { createdAt: "desc" }, ...paginate(params) }),
     prisma.transaction.count({ where }),
-    prisma.transaction.aggregate({ where, _sum: { amount: true, fee: true } }),
-    prisma.transaction.count({ where: { AND: [where, { status: "SUCCESS" }] } }),
+    prisma.transaction.aggregate({ where: successWhere, _sum: { amount: true, fee: true } }),
+    prisma.transaction.count({ where: successWhere }),
   ]);
 
-  const volume = dec(agg._sum.amount ?? 0);
-  const fees = dec(agg._sum.fee ?? 0);
+  const volume = dec(successAgg._sum.amount ?? 0);
+  const fees = dec(successAgg._sum.fee ?? 0);
 
   const rows = list.map((r) => ({
     date: r.createdAt.toISOString(),
@@ -699,7 +701,7 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
   const trend = trendToSeries(
     await dailyTrend({
       table: "Transaction", dateCol: "createdAt", valueExpr: `"amount"`, userCol: "userId",
-      ids, from, to, extra: Prisma.sql`AND ("partner" IN ('RAZORPAY','CHAGANS_PG','VIABLE_PG','BULKPE_PG') OR "service" = 'UPI_COLLECT')`,
+      ids, from, to, extra: Prisma.sql`AND ("partner" IN ('RAZORPAY','CHAGANS_PG','VIABLE_PG','BULKPE_PG') OR "service" = 'UPI_COLLECT') AND "status" = 'SUCCESS'`,
     }),
     "Daily collections", "#185df5"
   );
@@ -1577,10 +1579,21 @@ async function reportAccount(user: SessionUser, params: ReportParams): Promise<R
  */
 async function reportDailyUser(user: SessionUser, params: ReportParams): Promise<ReportResult> {
   const ids = await allowedUserIds(user);
-  const dateAnchor = params.to ?? params.from ?? new Date();
+
+  // The daily report is a single-IST-day snapshot.  `params.to` is a Date
+  // whose end-of-day offset was applied in the server's process TZ
+  // (parseDate's setHours), which can cross IST midnight when the server
+  // runs in UTC — shifting the snapshot to the next calendar day.
+  //
+  // Extract the user's intended calendar date via server-local getters
+  // (getFullYear/Month/Date always equal the date the user picked, because
+  // parseDate preserves the local date through setHours), then pass a
+  // YYYY-MM-DD string so istDayBounds takes its explicit +05:30 path.
+  const raw = params.to ?? params.from ?? new Date();
+  const ymd = `${raw.getFullYear()}-${String(raw.getMonth() + 1).padStart(2, "0")}-${String(raw.getDate()).padStart(2, "0")}`;
 
   const report = await getDailyUserReport({
-    date: dateAnchor,
+    date: ymd,
     userIds: ids,
     role: params.status,
     service: params.service,

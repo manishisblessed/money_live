@@ -1,6 +1,7 @@
 import { type ServiceCode, type TxnStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getPartner } from "@/lib/partners";
+import { chagansCcCheckStatus } from "@/lib/partners/chagans-cc-bill";
 import {
   finalizeServiceTransaction,
   correctTerminalToSuccess,
@@ -29,19 +30,37 @@ const BBPS_SERVICES: ServiceCode[] = [
   "RECHARGE_BROADBAND",
 ];
 
-type Rail = "bbps";
+type Rail = "bbps" | "chagans_cc";
 type ProviderStatus = "SUCCESS" | "PENDING" | "FAILED" | "REFUNDED";
 
 function railFor(partner: string | null, service: ServiceCode): Rail | null {
+  if (partner === "CHAGANS_CC_BILL") return "chagans_cc";
   if ((partner === "SAMEDAY_PAY2NEW" || partner === null) && BBPS_SERVICES.includes(service)) return "bbps";
   return null;
 }
 
-/** Try every candidate ref against the BBPS status API; first hit wins. */
+/** Try every candidate ref against the rail's status API; first hit wins. */
 async function resolveProviderStatus(
   rail: Rail,
   refs: string[]
 ): Promise<{ status: ProviderStatus; matchedRef: string; payRef: string | null; amount: number | null; raw: unknown } | null> {
+  // Chagans CC Bill — POST /bbps/checkStatus { orderId }
+  if (rail === "chagans_cc") {
+    for (const ref of refs) {
+      const r = await chagansCcCheckStatus(ref);
+      if (r.ok)
+        return {
+          status: r.data.status,
+          matchedRef: ref,
+          payRef: r.data.orderId || null,
+          amount: r.data.amount ?? null,
+          raw: r.raw,
+        };
+    }
+    return null;
+  }
+
+  // BBPS / Pay2New — Same Day status API
   const bbps = getPartner("bbps");
   if (!bbps.status) return null;
   for (const ref of refs) {

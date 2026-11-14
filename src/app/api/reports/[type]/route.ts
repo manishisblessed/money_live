@@ -26,13 +26,25 @@ const QuerySchema = z.object({
   export: z.enum(["1", "true"]).optional(),
 });
 
-/** Parse a YYYY-MM-DD or ISO string into a Date (null if absent/invalid). */
+/**
+ * Parse a YYYY-MM-DD or ISO string into a Date (null if absent/invalid).
+ *
+ * Date-only strings are anchored to the platform's operating timezone (IST,
+ * UTC+05:30) so that range boundaries align with IST calendar days — even
+ * when the server process runs in UTC (e.g. EC2 / PM2 without a TZ env var).
+ * Without this, `setHours(23, …)` would use the server's local TZ, and the
+ * resulting end-of-day Date could land on the *next* IST calendar day.
+ */
 function parseDate(value: string | undefined, endOfDay = false): Date | null {
   if (!value) return null;
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  // Date-only strings should cover the whole day on the upper bound.
-  if (endOfDay && /^\d{4}-\d{2}-\d{2}$/.test(value)) d.setHours(23, 59, 59, 999);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    // Use an explicit IST offset so the boundary is always IST-aligned.
+    return endOfDay
+      ? new Date(`${value}T23:59:59.999+05:30`)
+      : new Date(`${value}T00:00:00.000+05:30`);
+  }
   return d;
 }
 

@@ -157,6 +157,7 @@ export function normalizeProviderTag(provider?: string | null): string | null {
   const p = provider.trim().toUpperCase();
   if (!p) return null;
   if (p.startsWith("SAMEDAY")) return "SAMEDAY";
+  if (p.startsWith("CHAGANS")) return "CHAGANS";
   if (p.startsWith("RAZORPAY")) return "RAZORPAY";
   if (p.startsWith("PAYSPRINT")) return "PAYSPRINT";
   if (p.startsWith("NPCI")) return "NPCI";

@@ -55,6 +55,7 @@ export const SERVICE_KEYS = {
   TRAVEL: "travel_booking",
   VERIFICATION: "verify_ekychub",
   VIRTUAL_ACCOUNT: "virtual_account",
+  BBPS_CHAGANS: "bbps_chagan",
 } as const;
 
 export type ServiceKey = (typeof SERVICE_KEYS)[keyof typeof SERVICE_KEYS];
@@ -88,6 +89,7 @@ export const SERVICE_KEY_TO_HREF: Record<string, string> = {
   [SERVICE_KEYS.BBPS]: "/dashboard/bill-pay/electricity",
   [SERVICE_KEYS.BBPS_SAMEDAY]: "/dashboard/bill-pay/bbps-1",
   [SERVICE_KEYS.BBPS_CREDIT_CARD]: "/dashboard/bill-pay/credit-card",
+  [SERVICE_KEYS.BBPS_CHAGANS]: "/dashboard/bill-pay/cc-bill-pay",
   [SERVICE_KEYS.DMT]: "/dashboard/money-transfer",
   [SERVICE_KEYS.TRAVEL]: "/dashboard/travel/flight",
   [SERVICE_KEYS.VIRTUAL_ACCOUNT]: "/dashboard/virtual-account",
@@ -108,6 +110,7 @@ const SERVICE_HREF_PREFIXES: Array<[prefix: string, key: string]> = [
   ["/dashboard/upi", SERVICE_KEYS.UPI],
   ["/dashboard/recharge", SERVICE_KEYS.RECHARGE],
   ["/dashboard/bill-pay/bbps-1", SERVICE_KEYS.BBPS_SAMEDAY],
+  ["/dashboard/bill-pay/cc-bill-pay", SERVICE_KEYS.BBPS_CHAGANS],
   ["/dashboard/bill-pay/credit-card", SERVICE_KEYS.BBPS_CREDIT_CARD],
   ["/dashboard/bill-pay", SERVICE_KEYS.BBPS],
   ["/dashboard/money-transfer", SERVICE_KEYS.DMT],
@@ -271,6 +274,16 @@ export const KNOWN_SERVICE_ROUTES: ServiceRouteSeed[] = [
     enabled: true,
     note: "Dedicated credit card bill payment tab — Same Day Pay2New rail. Separate sidebar entry for credit card only.",
     sortOrder: 91,
+  },
+  {
+    key: SERVICE_KEYS.BBPS_CHAGANS,
+    name: "CC Bill Payment (BBPS)",
+    type: "SERVICE",
+    kind: "BBPS",
+    provider: "CHAGANS",
+    enabled: true,
+    note: "Credit card bill payment via BBPS CC Bill API. Per-user merchant onboarding (KYC). Supports all major card issuers.",
+    sortOrder: 92,
   },
   {
     key: SERVICE_KEYS.TRAVEL,

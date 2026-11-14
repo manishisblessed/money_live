@@ -30,6 +30,7 @@ function railSupportsHoldAndRecon(partner: string, service: ServiceCode): boolea
   // reconciliation sweep — only that rail can safely HOLD an INDETERMINATE
   // outcome (NEEDS_REVIEW) and resolve out-of-band.
   if (partner === "SAMEDAY_PAY2NEW") return RECON_CAPABLE_BBPS_SERVICES.includes(service);
+  if (partner === "CHAGANS_CC_BILL") return service === "BILL_CREDIT_CARD";
   return false;
 }
 
