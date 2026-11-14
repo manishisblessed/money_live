@@ -620,15 +620,15 @@ async function reportPushPull(user: SessionUser, params: ReportParams): Promise<
 /* --------------------------------------------------------------------- */
 
 /** Map a PG transaction to a user-friendly gateway label.
- *  All roles now see "Comet" / "Star". */
+ *  All roles now see "Comet PG" / "Star PG". */
 function pgGatewayLabel(r: { partner: string | null; request: Prisma.JsonValue }, admin: boolean): string {
   const req =
     r.request && typeof r.request === "object" && !Array.isArray(r.request)
       ? (r.request as Record<string, unknown>)
       : {};
   const scope = typeof req.pgScope === "string" ? req.pgScope : "";
-  if (scope === "CHAGANS_COMET") return "Comet";
-  if (scope === "CHAGANS_STAR") return "Star";
+  if (scope === "CHAGANS_COMET") return "Comet PG";
+  if (scope === "CHAGANS_STAR") return "Star PG";
   if (r.partner === "CHAGANS_PG") return admin ? "Chagans" : "PG";
   if (r.partner === "VIABLE_PG") return admin ? "Viable" : "PG";
   if (r.partner === "RAZORPAY") return admin ? "Razorpay" : "PG";
@@ -636,7 +636,7 @@ function pgGatewayLabel(r: { partner: string | null; request: Prisma.JsonValue }
 }
 
 /** Reverse-map the user-facing gateway filter value to a pgScope. */
-const GATEWAY_FILTER_MAP: Record<string, string> = { "Comet": "CHAGANS_COMET", "Star": "CHAGANS_STAR" };
+const GATEWAY_FILTER_MAP: Record<string, string> = { "Comet PG": "CHAGANS_COMET", "Star PG": "CHAGANS_STAR" };
 
 async function reportPg(user: SessionUser, params: ReportParams): Promise<ReportResult> {
   const admin = isAdminRole(user.role);
@@ -650,7 +650,7 @@ async function reportPg(user: SessionUser, params: ReportParams): Promise<Report
     ],
   };
 
-  // Gateway filter — "Comet" maps to pgScope CHAGANS_COMET in the request JSON.
+  // Gateway filter — "Comet PG" maps to pgScope CHAGANS_COMET in the request JSON.
   const gatewayScope = params.mode ? GATEWAY_FILTER_MAP[params.mode] : null;
 
   const where: Prisma.TransactionWhereInput = {

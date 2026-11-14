@@ -58,7 +58,7 @@ const LABELS: Record<string, { title: string; description: string }> = {
   "pg.limits": {
     title: "PG per-transaction limits",
     description:
-      "Maximum amount a user can top up in a single PG transaction. Comet and Star are capped independently. Changes take effect immediately — no deploy needed.",
+      "Maximum amount a user can top up in a single PG transaction. Comet PG and Star PG are capped independently. Changes take effect immediately — no deploy needed.",
   },
 };
 
@@ -72,8 +72,8 @@ const FIELD_LABELS: Record<string, string> = {
   dailyCap: "Daily cap (₹)",
   perTxnCap: "Per-transfer cap (₹)",
   days: "Valid for (days)",
-  cometMax: "Comet max per txn (₹)",
-  starMax: "Star max per txn (₹)",
+  cometMax: "Comet PG max per txn (₹)",
+  starMax: "Star PG max per txn (₹)",
 };
 
 const inputCls =
