@@ -55,7 +55,7 @@ export async function GET() {
       }),
       withTimeout(probeChagans(), {
         key: "chagans",
-        name: "CC Bill Pay float",
+        name: "Chagans BBPS",
         provider: "CHAGANS",
         configured: chagansCcBaseConfigured(),
         balance: null,
@@ -145,7 +145,7 @@ async function probeEkychub(): Promise<ProviderBalance> {
 async function probeChagans(): Promise<ProviderBalance> {
   const base: ProviderBalance = {
     key: "chagans",
-    name: "CC Bill Pay float",
+    name: "Chagans BBPS",
     provider: "CHAGANS",
     configured: chagansCcBaseConfigured(),
     balance: null,
