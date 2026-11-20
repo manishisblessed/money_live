@@ -47,6 +47,28 @@ fi
 
 mkdir -p "$LOG_DIR"
 
+# ── Pre-flight: Database connectivity check ──────────────────────────
+# Fail early (before npm ci / build) if the database is unreachable.
+# A paused Supabase project wastes ~3 min before dying at migrate deploy.
+# Skip with: SKIP_DB_CHECK=1 ./deploy.sh
+if [ "${SKIP_DB_CHECK:-0}" != "1" ]; then
+  echo -e "\n${CYAN}[pre]${NC} Checking database connectivity..."
+  _db_host=$(grep -E '^[[:space:]]*DATABASE_URL=' "$ENV_SOURCE" | tail -n1 \
+    | sed 's|.*@||; s|/.*||; s|:.*||')
+  _db_port=$(grep -E '^[[:space:]]*DATABASE_URL=' "$ENV_SOURCE" | tail -n1 \
+    | sed 's|.*@||; s|/.*||; s|^[^:]*:||')
+  _db_port="${_db_port:-6543}"
+  if [ -n "$_db_host" ]; then
+    if timeout 5 bash -c "echo > /dev/tcp/$_db_host/$_db_port" 2>/dev/null; then
+      echo -e "  ${GREEN}✔ DB host reachable: ${_db_host}:${_db_port}${NC}"
+    else
+      fail "Database is unreachable at ${_db_host}:${_db_port}.\n\n   The Supabase project may be PAUSED (auto-pause after ~7 days on free tier).\n\n   ➜ Unpause it at: https://supabase.com/dashboard/project/rtklzszlhoiftpkfoera\n     Then wait ~2 min for it to come back up and re-run: bash deploy.sh\n\n   To skip this check (not recommended): SKIP_DB_CHECK=1 ./deploy.sh"
+    fi
+  else
+    warn "Could not parse DB host from DATABASE_URL — skipping connectivity check."
+  fi
+fi
+
 # ── Step 1: Pull latest code ─────────────────────────────────────────
 
 log "Pulling latest code from origin/main..."
@@ -101,9 +123,14 @@ log "Generating Prisma client..."
 npx prisma generate
 
 # ── Step 5: Sync database schema ─────────────────────────────────────
+# Skip with: SKIP_MIGRATIONS=1 ./deploy.sh  (safe only when no schema changes)
 
 log "Applying database migrations..."
-npx prisma migrate deploy
+if [ "${SKIP_MIGRATIONS:-0}" = "1" ]; then
+  warn "SKIP_MIGRATIONS=1 — skipping migrate deploy. Only safe if this commit has no schema changes."
+else
+  npx prisma migrate deploy
+fi
 
 # ── Step 6: Build ─────────────────────────────────────────────────────
 # `next build` is memory-hungry. On a small instance it aborts with a V8
